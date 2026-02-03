@@ -100,6 +100,8 @@ graph TD
 ## 🎯 Status do Projeto
 ✅ Dashboard Web - Concluído
 
+⚠️ Tela de Relatório - Em desenvolvimento
+
 ✅ Fluxos n8n - Concluídos
 
 ✅ Banco de Dados - Concluído
