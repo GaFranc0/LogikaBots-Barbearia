@@ -7,6 +7,18 @@ Este projeto é uma **solução completa de automação e gestão** desenvolvida
 
 ---
 
+## 🎮 Demonstração Online
+
+Você pode testar a interface do Dashboard Administrativo através do link abaixo:
+
+👉 **[Acessar BarberManager Demo](https://gafranc0.github.io/LogikaBots-Barbearia/)**
+
+**Credenciais de Acesso:**
+* **Login:** `teste@gmail.com`
+* **Senha:** `123`
+
+---
+
 ## 🛠️ Stack Tecnológica
 
 A arquitetura foi desenhada para ser **escalável e robusta**, utilizando as melhores tecnologias do mercado:
