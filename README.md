@@ -67,26 +67,21 @@ graph TD
 
 | PROCESSO | DESCRIÇÃO TÉCNICA | PREVIEW |
 | :--- | :---: | ---: |
-| **Entrada de mensagem** | Triagem inteligente e direcionamento de fluxos via Webhooks. | <img src=""> |
-| **Cadastro de Leads** | Verificação de existência e registro automático no **MySQL**. | <img src=""> |
-| **Gestão de Agenda** | Lógica de consulta (SELECT) e cancelamento (UPDATE) de horários. | <img src=""> |
-| **Agendamento** | Processamento de transações e escrita no banco de dados. | <img src=""> |
+| **Entrada de mensagem** | Triagem inteligente e direcionamento de fluxos via Webhooks. | <img src="img/Entrada-n8n.PNG" width="250"> |
+| **Cadastro de Leads** | Verificação de existência e registro automático no **MySQL**. | <img src="img/Cadastro-n8n.PNG" width="250"> |
+| **Gestão de Agenda** | Lógica de consulta (SELECT) e cancelamento (UPDATE) de horários. | <img src="img/GestaoAgendamentos-n8n.PNG" width="250"> |
+| **Agendamento** | Processamento de transações e escrita no banco de dados. | <img src="img/Agendamentos-n8n.PNG" width="250"> |
 
 ## 🗂️ Estrutura do Repositório
 ```text
-├── /dashboard-web/            # Painel administrativo da barbearia
-│   ├── index.html
-│   ├── css/
-│   └── js/
-├── /sql-schema/               # Estrutura das tabelas MySQL
-│   ├── database.sql
-│   └── sample-data.sql
+├── /Tela Admin/               # Painel administrativo da barbearia
+│   ├── CSS/                   # Arquivos .css
+│   ├── DataBase/              # Arquivos Backend
+│   └── JavaScript/            # Front End
+|   └── All HTML               
+├── /Banco de dados/           # Schema MySQL
 ├── /img/                      # Galeria de capturas de tela e fluxos
-│   ├── fluxo-agendamento.png
-│   ├── fluxo-confirmacao.png
-│   ├── fluxo-clientes.png
-│   └── fluxo-relatorios.png
-├── /n8n-flows/                # Export dos fluxos do n8n (JSON)
+├── .glitnore                  
 └── README.md
 ```
 
