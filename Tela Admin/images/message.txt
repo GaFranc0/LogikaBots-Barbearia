@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="theme-color" content="#0f172a">
+    <link rel="icon" type="image/png" href="images/logika logos ampliado.png">
+    <title>Configuração Geral | Logika Bots</title>
+
+    <link rel="stylesheet" type="text/css" href="CSS/CSS - Index.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+    tailwind.config = {
+        darkMode: 'class',
+        theme: {
+            extend: {
+                fontFamily: { 
+                    sans: ['Inter', 'sans-serif'],
+                    mono: ['JetBrains Mono', 'monospace']
+                },
+                colors: {
+                    slate: { 850: '#151e2e', 900: '#0f172a', 950: '#020617' },
+                    emerald: { 450: '#10b981', 550: '#059669' },
+                    purple: { 450: '#a78bfa' }
+                },
+                animation: {
+                    'fade-in-up': 'fadeInUp 0.5s ease-out forwards',
+                    'slide-in': 'slideIn 0.3s ease-out forwards',
+                },
+                keyframes: {
+                    fadeInUp: {
+                        '0%': { opacity: '0', transform: 'translateY(20px)' },
+                        '100%': { opacity: '1', transform: 'translateY(0)' },
+                    },
+                    slideIn: {
+                        '0%': { transform: 'translateX(-100%)' },
+                        '100%': { transform: 'translateX(0)' },
+                    }
+                }
+            }
+        }
+    }
+    </script>
+</head>
+<body class="antialiased h-screen flex overflow-hidden selection:bg-emerald-500/30 selection:text-emerald-200 bg-slate-950">
+
+    <!-- Mobile Menu Toggle Button -->
+    <button id="mobile-menu-button" 
+            onclick="toggleMobileMenu()" 
+            class="md:hidden fixed top-4 right-4 z-[60] p-2.5 bg-slate-800/90 backdrop-blur-sm text-emerald-500 rounded-xl border border-slate-700 shadow-2xl active:scale-95 transition-all touch-manipulation"
+            aria-label="Menu de navegação">
+        <i data-lucide="menu" class="w-6 h-6"></i>
+    </button>
+
+    <!-- Sidebar Overlay (Mobile) -->
+    <div id="sidebar-overlay" 
+         onclick="closeMobileMenu()" 
+         class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-40 hidden md:hidden transition-opacity duration-300"></div>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-slate-900 border-r border-slate-800 flex flex-col transition-transform duration-300 -translate-x-full md:translate-x-0 md:static md:flex-shrink-0">
+        
+        <!-- Logo Header -->
+        <div class="h-20 sm:h-24 flex items-center px-6 sm:px-8 border-b border-slate-800/50">
+            <div class="flex items-center gap-3 text-emerald-500 group">
+                <div class="relative">
+                    <div class="absolute inset-0 bg-emerald-500 blur-lg opacity-20"></div>
+                    <img src="images/Logo.png" 
+                         onerror="this.src='https://lucide.dev/api/icons/bot?color=%2310b981'" 
+                         class="w-8 h-8 sm:w-9 sm:h-9 object-contain relative z-10"
+                         alt="Logika Logo">
+                </div>
+                <div class="flex flex-col">
+                    <span class="font-extrabold text-base sm:text-lg tracking-wide text-white">LOGIKA</span>
+                    <span class="text-[9px] sm:text-[10px] text-emerald-500 font-mono tracking-widest uppercase">Admin Panel</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Menu -->
+        <nav class="flex-1 px-3 sm:px-4 py-6 sm:py-8 space-y-2 overflow-y-auto overscroll-contain">
+            <p class="px-4 text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Geral</p>
+            
+            <a href="index.html" class="nav-link active">
+                <i data-lucide="settings-2" class="w-5 h-5 group-hover:rotate-90 transition-transform"></i> 
+                <span class="font-medium">Configurações</span>
+            </a>
+            
+            <a href="Agendamentos.html" class="nav-link">
+                <i data-lucide="calendar-clock" class="w-5 h-5"></i> 
+                <span>Agendamentos</span>
+            </a>
+
+            <a href="Relatorios.html" class="nav-link">
+                <i data-lucide="bar-chart-3" class="w-5 h-5"></i> 
+                <span>Relatórios</span>
+            </a>
+
+            <div class="mt-6 sm:mt-8 pt-6 border-t border-slate-800/50">
+                <p class="px-4 text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Suporte</p>
+                <a target="_blank" 
+                   href="https://api.whatsapp.com/send/?phone=5519997920862" 
+                   class="nav-link hover:text-blue-400 hover:bg-blue-500/5">
+                    <i data-lucide="help-circle" class="w-5 h-5"></i> 
+                    <span>Central de Ajuda</span>
+                </a>
+            </div>
+        </nav>
+
+        <!-- User Profile Section -->
+        <div class="p-3 sm:p-4 border-t border-slate-800/50">
+            <div onclick="togglePerfilModal()" 
+                 id="Perfil" 
+                 class="profile-card">
+                <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full overflow-hidden bg-slate-700 flex-shrink-0">
+                    <img class="w-full h-full object-cover" 
+                         src="images/Usuario.png" 
+                         onerror="this.src='https://lucide.dev/api/icons/user?color=white'"
+                         alt="Avatar do usuário">
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-white truncate" id="user-name-display">Carregando...</p>
+                    <p class="text-xs text-slate-500 truncate" id="user-email-display">Carregando...</p>
+                </div>
+            </div>
+            <button onclick="logout()" 
+                    class="logout-btn">
+                <i data-lucide="log-out" class="w-4 h-4"></i> Sair
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 overflow-y-auto overflow-x-hidden bg-slate-950 relative scroll-smooth w-full" id="main-scroll">
+        
+        <!-- Background Gradient Effects -->
+        <div class="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+            <div class="gradient-blob gradient-blob-1"></div>
+            <div class="gradient-blob gradient-blob-2"></div>
+        </div>
+
+        <!-- Content Container -->
+        <div class="relative z-10 w-full max-w-5xl mx-auto pb-24 sm:pb-32 px-4 sm:px-6 lg:px-8">
+            
+            <!-- Page Header -->
+            <header class="pt-20 sm:pt-16 md:pt-10 mb-6 sm:mb-8 flex flex-col gap-4 sm:gap-6 animate-fade-in-up">
+                <div>
+                    <!-- Breadcrumb -->
+                    <div class="flex items-center gap-2 text-xs sm:text-sm text-emerald-500 font-mono mb-2">
+                        <span>Admin</span>
+                        <i data-lucide="chevron-right" class="w-3 h-3"></i>
+                        <span>Configurações</span>
+                    </div>
+                    
+                    <!-- Title -->
+                    <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-white tracking-tight flex items-center gap-3">
+                        Configurar Barbearia
+                    </h1>
+                    <p class="text-slate-400 mt-2 max-w-lg leading-relaxed text-sm sm:text-base">
+                        Gerencie todos os aspectos do seu atendimento.
+                    </p>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+                    <button onclick="discardChanges()" 
+                            class="action-btn action-btn-secondary order-2 sm:order-1">
+                        Descartar
+                    </button>
+                    <button onclick="saveConfig()" 
+                            class="action-btn action-btn-primary order-1 sm:order-2">
+                        <i data-lucide="save" class="w-4 h-4 group-hover:scale-110 transition-transform"></i> 
+                        Salvar Tudo
+                    </button>
+                </div>
+            </header>
+
+            <!-- Quick Navigation Pills -->
+            <div class="shortcut-nav">
+                <div class="nav-pills-container">
+                    <a href="#section-geral" class="nav-pill active" onclick="setActivePill(this)">
+                        <i data-lucide="sliders" class="w-4 h-4"></i>
+                        <span>Geral</span>
+                    </a>
+                    <a href="#section-servicos" class="nav-pill" onclick="setActivePill(this)">
+                        <i data-lucide="scissors" class="w-4 h-4"></i>
+                        <span>Serviços</span>
+                    </a>
+                    <a href="#section-equipe" class="nav-pill" onclick="setActivePill(this)">
+                        <i data-lucide="users" class="w-4 h-4"></i>
+                        <span>Equipe</span>
+                    </a>
+                    <a href="#section-bloqueios" class="nav-pill" onclick="setActivePill(this)">
+                        <i data-lucide="calendar-off" class="w-4 h-4"></i>
+                        <span>Bloqueios</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Configuration Form -->
+            <form id="configForm" onsubmit="event.preventDefault();" class="space-y-6 sm:space-y-8">
+
+                <!-- General Settings Section -->
+                <section id="section-geral" class="section-card scroll-mt-32 sm:scroll-mt-40">
+                    <div class="section-header">
+                        <div class="section-icon bg-blue-500/10 border-blue-500/20">
+                            <i data-lucide="clock" class="text-blue-400 w-5 h-5 sm:w-6 sm:h-6"></i>
+                        </div>
+                        <div>
+                            <h2 class="section-title">Funcionamento Geral</h2>
+                            <p class="section-subtitle">Regras da agenda.</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-6 sm:gap-8">
+                        <div class="form-group">
+                            <label class="form-label">
+                                Intervalo entre Cortes
+                            </label>
+                            <div class="input-wrapper">
+                                <i data-lucide="hourglass" class="input-icon"></i>
+                                <select id="intervalo-cortes" name="config[intervalo]" class="input-dark">
+                                    <option value="15">15 Minutos</option>
+                                    <option value="20">20 Minutos</option>
+                                    <option value="30" selected>30 Minutos (Padrão)</option>
+                                    <option value="40">40 Minutos</option>
+                                    <option value="45">45 Minutos</option>
+                                    <option value="60">1 Hora</option>
+                                </select>
+                                <i data-lucide="chevron-down" class="select-arrow"></i>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Operating Hours Section -->
+                <section id="section-horario" class="section-card scroll-mt-32 sm:scroll-mt-40">
+                    <div class="section-header">
+                        <div class="section-icon bg-cyan-500/10 border-cyan-500/20">
+                            <i data-lucide="clock-8" class="text-cyan-400 w-5 h-5 sm:w-6 sm:h-6"></i>
+                        </div>
+                        <div>
+                            <h2 class="section-title">Horário de Funcionamento</h2>
+                            <p class="section-subtitle">Abertura e fechamento global.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                        <div class="form-group">
+                            <label class="form-label">Abertura</label>
+                            <input type="time" id="horario-abertura" class="input-dark">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Fechamento</label>
+                            <input type="time" id="horario-fechamento" class="input-dark">
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Services Section -->
+                <section id="section-servicos" class="section-card scroll-mt-32 sm:scroll-mt-40">
+                    <div class="section-header-with-action">
+                        <div class="section-header">
+                            <div class="section-icon bg-emerald-500/10 border-emerald-500/20">
+                                <i data-lucide="scissors" class="text-emerald-400 w-5 h-5 sm:w-6 sm:h-6"></i>
+                            </div>
+                            <div>
+                                <h2 class="section-title">Catálogo</h2>
+                                <p class="section-subtitle">Serviços oferecidos.</p>
+                            </div>
+                        </div>
+                        <button type="button" onclick="addService()" class="add-btn">
+                            <i data-lucide="plus-circle" class="w-4 h-4"></i> 
+                            <span>Novo Serviço</span>
+                        </button>
+                    </div>
+                    
+                    <div class="space-y-4" id="services-list">
+                        <!-- Services will be dynamically inserted here -->
+                    </div>
+                </section>
+
+                <!-- Team Section -->
+                <section id="section-equipe" class="section-card border-t-4 border-t-purple-500 scroll-mt-32 sm:scroll-mt-40">
+                    <div class="section-header-with-action">
+                        <div class="section-header">
+                            <div class="section-icon bg-purple-500/10 border-purple-500/20">
+                                <i data-lucide="users" class="text-purple-400 w-5 h-5 sm:w-6 sm:h-6"></i>
+                            </div>
+                            <div>
+                                <h2 class="section-title">Profissionais</h2>
+                                <p class="section-subtitle">Equipe e horários.</p>
+                            </div>
+                        </div>
+
+                        <div class="team-actions">
+                            <div class="search-wrapper">
+                                <i data-lucide="search" class="search-icon"></i>
+                                <input type="text" 
+                                       id="search-barber" 
+                                       placeholder="Buscar profissional..." 
+                                       class="search-input"
+                                       onkeyup="filterBarbers()">
+                            </div>
+
+                            <button type="button" onclick="addBarber()" class="add-btn add-btn-purple">
+                                <i data-lucide="user-plus" class="w-4 h-4"></i>
+                                <span>Adicionar</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="barbers-list" class="space-y-6 sm:space-y-8">
+                        <!-- Barbers will be dynamically inserted here -->
+                    </div>
+                </section>
+
+                <!-- Blocks Section -->
+                <section id="section-bloqueios" class="section-card border-t-4 border-t-red-500 scroll-mt-32 sm:scroll-mt-40 mb-8 sm:mb-12">
+                    <div class="section-header-with-action">
+                        <div class="section-header">
+                            <div class="section-icon bg-red-500/10 border-red-500/20">
+                                <i data-lucide="calendar-off" class="text-red-400 w-5 h-5 sm:w-6 sm:h-6"></i>
+                            </div>
+                            <div>
+                                <h2 class="section-title">Bloqueios</h2>
+                                <p class="section-subtitle">Folgas e Feriados.</p>
+                            </div>
+                        </div>
+                        <button type="button" onclick="addBlock()" class="add-btn add-btn-red">
+                            <i data-lucide="plus" class="w-4 h-4"></i> 
+                            <span>Novo Bloqueio</span>
+                        </button>
+                    </div>
+
+                    <div class="space-y-4" id="blocks-list">
+                        <div class="empty-state" id="no-blocks-msg">
+                            <div class="empty-state-icon">
+                                <i data-lucide="calendar-check" class="w-6 h-6"></i>
+                            </div>
+                            <p class="empty-state-text">Agenda 100% aberta.</p>
+                        </div>
+                    </div>
+                </section>
+
+            </form>
+        </div>
+        
+        <!-- Footer -->
+        <footer class="footer">
+            <p>Logika Bots &copy; 2026. Todos os direitos reservados.</p>
+        </footer>
+    </main>
+
+    <!-- Toast Notifications Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Floating Action Button (Mobile) -->
+    <button onclick="saveConfig()" 
+            class="fab"
+            aria-label="Salvar configurações">
+        <i data-lucide="save" class="w-6 h-6"></i>
+    </button>
+
+    <!-- Profile Modal -->
+    <div id="modal-perfil" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">
+                    <i data-lucide="user-cog" class="w-5 h-5 text-emerald-400"></i> 
+                    Meu Perfil
+                </h3>
+                <button onclick="togglePerfilModal()" class="modal-close">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label-modal">Nome Completo</label>
+                    <div class="input-wrapper">
+                        <i data-lucide="user" class="input-icon"></i>
+                        <input type="text" 
+                               id="edit-profile-name" 
+                               class="input-dark" 
+                               placeholder="Seu nome">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label-modal">E-mail</label>
+                    <div class="input-wrapper">
+                        <i data-lucide="mail" class="input-icon"></i>
+                        <input type="email" 
+                               id="edit-profile-email" 
+                               class="input-dark" 
+                               placeholder="seu@email.com">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label-modal">Nova Senha</label>
+                    <div class="input-wrapper">
+                        <i data-lucide="lock" class="input-icon"></i>
+                        <input type="password" 
+                               id="edit-profile-pass" 
+                               class="input-dark" 
+                               placeholder="Deixe em branco para manter">
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button onclick="togglePerfilModal()" class="modal-btn modal-btn-secondary">
+                    Cancelar
+                </button>
+                <button onclick="updateUserProfile()" 
+                        id="btn-save-profile" 
+                        class="modal-btn modal-btn-primary">
+                    Salvar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="JavaScript/JS-index.js"></script>
+    <script>
+        lucide.createIcons();
+        
+        // Mobile menu functions
+        function toggleMobileMenu() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        }
+        
+        function closeMobileMenu() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            sidebar.classList.add('-translate-x-full');
+            overlay.classList.add('hidden');
+        }
+        
+        // Close mobile menu when clicking on a nav link
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', closeMobileMenu);
+        });
+    </script>
+
+</body>
+</html>

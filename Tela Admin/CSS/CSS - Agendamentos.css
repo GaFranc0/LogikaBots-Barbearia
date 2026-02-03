@@ -1,0 +1,664 @@
+/* ==========================================
+   ESTILOS GERAIS
+   ========================================== */
+body {
+    background-color: #020617;
+    color: #e2e8f0;
+    font-family: 'Inter', sans-serif;
+    font-feature-settings: "cv02", "cv03", "cv04";
+    overflow-x: hidden;
+}
+
+main {
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.fundo-ativar-desativar-tema {
+    background-color: #070629;
+    box-shadow: 1px 2px 1px rgb(71, 71, 71);
+}
+
+.icon-animation {
+    display: inline-block;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Anima o ícone quando o link pai recebe hover */
+.nav-item:hover .icon-animation {
+    transform: rotateZ(45deg); /* 180 fica bem legal para ícones */
+}
+
+/* Opcional: Adiciona profundidade ao link */
+.nav-item {
+    perspective: 1000px;
+}
+
+/* ==========================================
+   INPUTS E FORMULÁRIOS
+   ========================================== */
+.input-dark,
+select.input-dark {
+    background: #0f172a;
+    border: 1px solid #334155;
+    color: white;
+    padding: 0.7rem 1rem;
+    border-radius: 0.75rem;
+    width: 100%;
+    outline: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 0.95rem;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.relative .input-dark {
+    padding-left: 2.8rem;
+}
+
+.input-dark:focus {
+    border-color: #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+    background: #1e293b;
+}
+
+.input-dark:hover:not(:focus) {
+    border-color: #475569;
+    background: #162032;
+}
+
+/* ==========================================
+   SCROLLBAR
+   ========================================== */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #020617;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 99px;
+    border: 2px solid #020617;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #475569;
+}
+
+/* ==========================================
+   CARDS E SEÇÕES
+   ========================================== */
+.section-card {
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(51, 65, 85, 0.5);
+    border-radius: 1.25rem;
+    padding: 2rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.section-card:hover {
+    border-color: rgba(51, 65, 85, 0.8);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* ==========================================
+   TABELA DE AGENDAMENTOS
+   ========================================== */
+.table-row-hover {
+    transition: background-color 0.2s ease;
+}
+
+.table-row-hover:hover {
+    background-color: rgba(30, 41, 59, 0.4);
+}
+
+.status-badge {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+/* ==========================================
+   FILTROS
+   ========================================== */
+.filter-btn {
+    background: transparent;
+    color: #94a3b8;
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.filter-btn:hover {
+    color: #f1f5f9;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.filter-btn.active {
+    background: #1e293b;
+    color: white;
+    border: 1px solid #334155;
+}
+
+/* ==========================================
+   TOAST NOTIFICATIONS
+   ========================================== */
+.toast-container {
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    max-width: 90%;
+}
+
+@media (min-width: 768px) {
+    .toast-container {
+        bottom: 2rem;
+        right: 2rem;
+        max-width: 28rem;
+    }
+}
+
+/* ==========================================
+   ANIMAÇÕES
+   ========================================== */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.nav-item {
+    animation: slideIn 0.4s ease forwards;
+    opacity: 0;
+}
+
+.nav-item:nth-child(1) { animation-delay: 0.1s; }
+.nav-item:nth-child(2) { animation-delay: 0.15s; }
+.nav-item:nth-child(3) { animation-delay: 0.2s; }
+.nav-item:nth-child(4) { animation-delay: 0.25s; }
+
+/* ==========================================
+   PERFIL
+   ========================================== */
+.perfil {
+    transition: transform 0.2s;
+}
+
+.perfil:hover {
+    transform: scale(1.02);
+    background-color: rgba(30, 41, 59, 0.5);
+    cursor: pointer;
+}
+
+/* ==========================================
+   LOGO
+   ========================================== */
+.bg-contrast-logo {
+    background-color: rgba(30, 41, 59, 0.5);
+}
+
+/* Logo Pulsante (Sutil) */
+.group:hover img {
+    transform: scale(1.05);
+    transition: transform 0.3s ease;
+}
+
+/* ==========================================
+   MODO CLARO - IGUAL AO INDEX.HTML
+   ========================================== */
+.light body,
+.light main,
+.light #main-scroll {
+    background-color: #f8fafc !important;
+}
+
+.light aside {
+    background-color: #ffffff !important;
+    border-color: #e2e8f0 !important;
+    box-shadow: rgb(82, 82, 82) 2px 0px 20px;
+}
+
+.light .text-white {
+    color: #1e293b !important;
+}
+
+.light .text-slate-300,
+.light .text-slate-400 {
+    color: #475569 !important;
+}
+
+.light .text-slate-500 {
+    color: #334155 !important;
+}
+
+.light h1, .light h2, .light h3 {
+    color: #0f172a !important;
+}
+
+.light .section-card {
+    background-color: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: rgb(82, 82, 82) 2px 3px 4px !important;
+    transition: all 0.3s ease;
+}
+
+.light .section-card:hover {
+    box-shadow: rgb(82, 82, 82) 2px 3px 4px !important;
+    transform: translateY(-2px);
+}
+
+.light .bg-slate-700 {
+    background-color: #ffffff !important;
+}
+
+.light .border-slate-700,
+.light .border-slate-800 {
+    border-color: #e2e8f0 !important;
+}
+
+.light .bg-slate-900,
+.light .bg-slate-800,
+.light .bg-slate-950 {
+    background-color: #f8fafc !important;
+}
+
+.light .bg-slate-900\/40,
+.light .bg-slate-900\/80 {
+    background-color: #f8fafc !important;
+}
+
+.light .input-dark,
+.light #search-input {
+    background-color: #e6e9ec !important;
+    border: 1px solid #e2e8f0 !important;
+    color: #1e293b !important;
+    box-shadow: 1px 2px 3px black;
+}
+
+.light .input-dark:focus,
+.light #search-input:focus {
+    background-color: #ffffff !important;
+    border-color: #10b981 !important;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1) !important;
+}
+
+.light .input-dark:hover:not(:focus),
+.light #search-input:hover:not(:focus) {
+    border-color: #94a3b8 !important;
+    background-color: #ffffff !important;
+}
+
+.light .input-dark::placeholder,
+.light #search-input::placeholder {
+    color: #94a3b8 !important;
+}
+
+.light .filter-btn {
+    color: #64748b !important;
+    border: 1px solid transparent;
+}
+
+.light .filter-btn:hover {
+    color: #1f2937 !important;
+    background: rgba(0, 0, 0, 0.05) !important;
+}
+
+.light .filter-btn.active {
+    background: rgba(16, 185, 129, 0.1) !important;
+    color: #059669 !important;
+    border: 1px solid rgba(16, 185, 129, 0.2) !important;
+}
+
+.light .table-row-hover:hover {
+    background-color: #f8fafc !important;
+}
+
+.light .bg-contrast-logo {
+    background-color: #afb7be !important;
+    box-shadow: #343638 1px 1px 10px;
+}
+
+.light .fundo-ativar-desativar-tema {
+    background-color: #d1d4d6 !important;
+    box-shadow: 1px 2px 1px rgb(71, 71, 71);
+}
+
+.light .ativar-desativar-tema {
+    background-color: black;
+}
+
+/* Botões modo claro */
+.light .btn-tema {
+    box-shadow: rgb(82, 82, 82) 2px 3px 4px;
+}
+
+/* Perfil no modo claro - IGUAL AO INDEX */
+.light aside .perfil,
+.light .perfil {
+    background-color: oklch(87.1% 0.006 286.286) !important;
+    border: 1px solid #818181 !important;
+    box-shadow: 1px 2px 3px black !important;
+    transition: all 0.3s ease !important;
+}
+
+.light aside .perfil:hover,
+.light .perfil:hover {
+    background-color: #dce0e4 !important;
+    border-color: #10b981 !important;
+    transform: translateY(-2px) scale(1.02);
+}
+
+.light .perfil #user-name-display {
+    color: #1e293b !important;
+}
+
+.light .perfil #user-email-display {
+    color: #64748b !important;
+}
+
+/* Status badges no modo claro */
+.light .status-badge.bg-emerald-500\/10 {
+    background-color: #d1fae5 !important;
+    border-color: #a7f3d0 !important;
+}
+
+.light .status-badge.text-emerald-400 {
+    color: #059669 !important;
+}
+
+.light .status-badge.bg-blue-500\/10 {
+    background-color: #dbeafe !important;
+    border-color: #bfdbfe !important;
+}
+
+.light .status-badge.text-blue-400 {
+    color: #2563eb !important;
+}
+
+.light .status-badge.bg-red-500\/10 {
+    background-color: #fee2e2 !important;
+    border-color: #fecaca !important;
+}
+
+.light .status-badge.text-red-400 {
+    color: #dc2626 !important;
+}
+
+.light .status-badge.bg-slate-800\/30 {
+    background-color: #e2e8f0 !important;
+    border-color: #cbd5e1 !important;
+}
+
+/* Cards de estatísticas no modo claro */
+.light .text-emerald-400 {
+    color: #059669 !important;
+}
+
+.light .text-blue-400 {
+    color: #2563eb !important;
+}
+
+.light .text-purple-400 {
+    color: #9333ea !important;
+}
+
+.light .bg-blue-500\/10 {
+    background-color: #dbeafe !important;
+}
+
+.light .border-blue-500\/20 {
+    border-color: #bfdbfe !important;
+}
+
+.light .bg-emerald-500\/10 {
+    background-color: #d1fae5 !important;
+}
+
+.light .border-emerald-500\/20 {
+    border-color: #a7f3d0 !important;
+}
+
+.light .bg-purple-500\/10 {
+    background-color: #f3e8ff !important;
+}
+
+.light .border-purple-500\/20 {
+    border-color: #e9d5ff !important;
+}
+
+.light .bg-red-500\/10 {
+    background-color: #fee2e2 !important;
+}
+
+.light .border-red-500\/20 {
+    border-color: #fecaca !important;
+}
+
+/* Modais no modo claro */
+.light #modal-perfil .bg-slate-900,
+.light #modal-detalhes .bg-slate-900 {
+    background-color: #ffffff !important;
+    border-color: #e2e8f0 !important;
+}
+
+.light #modal-perfil .bg-slate-950\/50,
+.light #modal-detalhes .bg-slate-950\/50 {
+    background-color: #f8fafc !important;
+    border-color: #e2e8f0 !important;
+}
+
+/* Scrollbar no modo claro */
+.light ::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+
+.light ::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border: 2px solid #f1f5f9;
+}
+
+.light ::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Textos de ícones no modo claro */
+.light .text-slate-500 i,
+.light .text-slate-400 i {
+    color: inherit !important;
+}
+
+.light i[data-lucide] {
+    opacity: 0.8 !important;
+}
+
+/* Background decorativo no modo claro */
+.light .bg-emerald-500\/5 {
+    background-color: rgba(16, 185, 129, 0.03) !important;
+}
+
+.light .bg-purple-500\/5 {
+    background-color: rgba(147, 51, 234, 0.03) !important;
+}
+
+/* Navegação no modo claro */
+.light .nav-item:hover {
+    background-color: rgba(16, 185, 129, 0.08) !important;
+    color: #059669 !important;
+    transform: translateX(4px);
+}
+
+.light .group\/rel:hover {
+    background-color: #f1f5f9 !important;
+}
+
+.light .group\/help:hover {
+    background-color: #eff6ff !important;
+}
+
+.light .group\/logout:hover {
+    background-color: #fef2f2 !important;
+    color: #ef4444 !important;
+}
+
+.light .group\/logout:hover i {
+    color: #ef4444 !important;
+}
+
+/* Toast no modo claro */
+.light .toast-container,
+.light #toast-container {
+    background-color: transparent !important;
+}
+
+/* Botões no header da tabela */
+.light #btn-toggle-free-slots {
+    background-color: #dbeafe !important;
+    color: #2563eb !important;
+    border-color: #bfdbfe !important;
+}
+
+.light #btn-toggle-free-slots:hover {
+    background-color: #bfdbfe !important;
+}
+
+/* Cor do texto dos status */
+.light .text-slate-600 {
+    color: #334155 !important;
+}
+
+/* Bordas dos cards de estatísticas */
+.light .border-t-blue-500 {
+    border-top-color: #3b82f6 !important;
+}
+
+.light .border-t-emerald-500 {
+    border-top-color: #10b981 !important;
+}
+
+.light .border-t-purple-500 {
+    border-top-color: #a855f7 !important;
+}
+
+.light .live {
+    background-color: oklch(87.1% 0.006 286.286);
+}
+
+
+/* Ajuste do header da tabela */
+.light thead {
+    background-color: #f8fafc !important;
+    border-color: #e2e8f0 !important;
+}
+
+.light .divide-slate-800\/50 > * + * {
+    border-color: #f1f5f9 !important;
+}
+
+/* ==========================================
+   TABELA DE AGENDAMENTOS - RESPONSIVIDADE
+   ========================================== */
+@media (min-width: 1024px) {
+    .section-card.table-container {
+        height: calc(100vh - 20rem) !important;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+    .section-card.table-container {
+        height: calc(100vh - 25rem) !important;
+    }
+    
+    table {
+        font-size: 0.8rem;
+    }
+    
+    table thead th {
+        font-size: 0.7rem;
+        padding: 0.75rem 0.5rem !important;
+    }
+    
+    table tbody td {
+        padding: 0.75rem 0.5rem !important;
+    }
+}
+
+@media (max-width: 767px) {
+    .section-card.table-container {
+        height: auto !important;
+        max-height: 70vh;
+        overflow-y: auto;
+    }
+    
+    table {
+        font-size: 0.75rem;
+    }
+    
+    table thead th {
+        font-size: 0.65rem;
+        padding: 0.5rem 0.25rem !important;
+    }
+    
+    table tbody td {
+        padding: 0.5rem 0.25rem !important;
+    }
+    
+    .status-badge {
+        font-size: 0.55rem;
+        padding: 0.15rem 0.35rem;
+    }
+    
+    .text-truncate {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 120px;
+    }
+    
+    .table-row-hover {
+        min-height: 50px;
+    }
+}
+
+@media (max-width: 375px) {
+    .section-card {
+        padding: 0.5rem !important;
+        margin: 0.25rem !important;
+    }
+    
+    .filter-btn {
+        font-size: 0.6rem;
+        padding: 0.25rem 0.5rem;
+    }
+    
+    #search-input {
+        font-size: 0.75rem;
+        padding: 0.5rem 0.5rem 0.5rem 2rem;
+    }
+}
+
+.section-card.table-container > div:last-child {
+    height: 100%;
+    overflow-y: auto;
+}

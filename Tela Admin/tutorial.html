@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="images/logika logos ampliado.png">
+    <title>Tutorial Completo | Logika Bots</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link  rel="stylesheet" type="text/css" href="CSS/CSS - tutorial.css">
+
+</head>
+<body class="antialiased overflow-x-hidden">
+    <!-- Background Effects -->
+    <div class="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+        <div class="absolute top-[-10%] right-[-5%] w-[600px] h-[600px] bg-emerald-500/5 rounded-full blur-[120px]"></div>
+        <div class="absolute bottom-[20%] left-[-10%] w-[500px] h-[500px] bg-purple-500/5 rounded-full blur-[100px]"></div>
+    </div>
+
+    <!-- Header -->
+    <header class="relative z-50 bg-slate-900 border-b border-slate-800 sticky top-0 shadow-lg">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="relative w-10 h-10 flex items-center justify-center">
+                    <div class="absolute inset-0 rounded-full bg-contrast-logo"></div>
+                    
+                    <img src="images/Logo.png" 
+                        onerror="this.src='https://lucide.dev/api/icons/bot?color=%2310b981'" 
+                        class="w-12 h-12 object-contain relative z-10" 
+                        alt="Logo">
+                </div>
+
+                <div>
+                    <h1 class="text-xl font-bold text-white">LOGIKA BOTS</h1>
+                    <p class="text-xs text-emerald-500 font-mono">Tutorial Completo</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <button onclick="toggleTheme()" id="theme-toggle-btn" class="p-2.5 rounded-lg bg-slate-800 text-slate-400 hover:text-emerald-400 hover:bg-slate-700 transition-all" aria-label="Alternar tema">
+                    <i data-lucide="sun" id="theme-icon-light" class="w-5 h-5 hidden"></i>
+                    <i data-lucide="moon" id="theme-icon-dark" class="w-5 h-5"></i>
+                </button>
+                <a href="index.html" class="go-config px-4 py-2 bg-emerald-500 hover:bg-emerald-500 text-white rounded-lg font-medium transition-all flex items-center gap-2">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                    Voltar
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="relative z-10 max-w-5xl mx-auto px-6 lg:pl-60 py-12 pb-32 lg:pb-12">
+        <!-- Intro Section -->
+        <section class="text-center mb-16 animate-fade-in-up">
+            <div class="texto-destaque2 inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-emerald-400 text-sm font-medium mb-6 shadow-emerald-950 shadow-md">
+                <i data-lucide="graduation-cap" class="w-4 h-4"></i>
+                Guia Completo
+            </div>
+            <h1 class="text-5xl md:text-6xl font-extrabold text-white mb-6 leading-tight">
+                Como Usar o <span class="text-emerald-400 texto-destaque">Painel Admin</span>
+            </h1>
+            <p class="text-xl text-slate-400 max-w-3xl mx-auto leading-relaxed">
+                Aprenda passo a passo como configurar sua barbearia, gerenciar profissionais, serviços e muito mais. Simples, rápido e direto ao ponto.
+            </p>
+        </section>
+
+        <!-- Side Navigation - Desktop -->
+        <nav class="hidden lg:flex fixed left-6 top-1/2 -translate-y-1/2 z-40" aria-label="Navegação lateral">
+            <div class="side-nav bg-slate-900/98 backdrop-blur-md border border-slate-800 rounded-2xl p-3 shadow-2xl w-[200px]">
+                <div class="space-y-1">
+                    <a href="#intro" class="side-nav-link active" onclick="setActiveSideNav(this)" data-section="intro">
+                        <div class="side-nav-indicator"></div>
+                        <span class="side-nav-text">Introdução</span>
+                    </a>
+                    <a href="#intervalo" class="side-nav-link" onclick="setActiveSideNav(this)" data-section="intervalo">
+                        <div class="side-nav-indicator"></div>
+                        <span class="side-nav-text">Intervalo</span>
+                    </a>
+                    <a href="#horarios" class="side-nav-link" onclick="setActiveSideNav(this)" data-section="horarios">
+                        <div class="side-nav-indicator"></div>
+                        <span class="side-nav-text">Horários</span>
+                    </a>
+                    <a href="#servicos" class="side-nav-link" onclick="setActiveSideNav(this)" data-section="servicos">
+                        <div class="side-nav-indicator"></div>
+                        <span class="side-nav-text">Serviços</span>
+                    </a>
+                    <a href="#profissionais" class="side-nav-link" onclick="setActiveSideNav(this)" data-section="profissionais">
+                        <div class="side-nav-indicator"></div>
+                        <span class="side-nav-text">Profissionais</span>
+                    </a>
+                    <a href="#bloqueios" class="side-nav-link" onclick="setActiveSideNav(this)" data-section="bloqueios">
+                        <div class="side-nav-indicator"></div>
+                        <span class="side-nav-text">Bloqueios</span>
+                    </a>
+                    <a href="#dicas" class="side-nav-link" onclick="setActiveSideNav(this)" data-section="dicas">
+                        <div class="side-nav-indicator"></div>
+                        <span class="side-nav-text">Dicas</span>
+                    </a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Navegação inferior mobile - CORRIGIDA -->
+        <nav class="lg:hidden mobile-nav-container" aria-label="Navegação mobile">
+            <div class="max-w-screen-xl mx-auto px-2 sm:px-4">
+                <div class="flex items-center justify-around py-2.5">
+                    <a href="#intro" class="mobile-nav-item active" data-section="intro">
+                        <i data-lucide="rocket" class="w-6 h-6"></i>
+                        <span>Intro</span>
+                    </a>
+                    <a href="#intervalo" class="mobile-nav-item" data-section="intervalo">
+                        <i data-lucide="hourglass" class="w-6 h-6"></i>
+                        <span>Intervalo</span>
+                    </a>
+                    <a href="#horarios" class="mobile-nav-item" data-section="horarios">
+                        <i data-lucide="clock" class="w-6 h-6"></i>
+                        <span>Horários</span>
+                    </a>
+                    <a href="#servicos" class="mobile-nav-item" data-section="servicos">
+                        <i data-lucide="scissors" class="w-6 h-6"></i>
+                        <span>Serviços</span>
+                    </a>
+                    <a href="#profissionais" class="mobile-nav-item" data-section="profissionais">
+                        <i data-lucide="users" class="w-6 h-6"></i>
+                        <span>Equipe</span>
+                    </a>
+                    <a href="#bloqueios" class="mobile-nav-item" data-section="bloqueios">
+                        <i data-lucide="calendar-off" class="w-6 h-6"></i>
+                        <span>Bloqueios</span>
+                    </a>
+                    <a href="#dicas" class="mobile-nav-item" data-section="dicas">
+                        <i data-lucide="lightbulb" class="w-6 h-6"></i>
+                        <span>Dicas</span>
+                    </a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Seção 1: Introdução -->
+        <section id="intro" class="mb-20 scroll-mt-24">
+            <div class="flex items-center gap-3 mb-8">
+                <div class="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center shadow-blue-950 shadow-md">
+                    <i data-lucide="rocket" class="w-6 h-6 text-blue-400"></i>
+                </div>
+                <div>
+                    <h2 class="text-3xl font-bold text-white">1. Primeiros Passos</h2>
+                    <p class="text-slate-400">Entenda a estrutura do painel</p>
+                </div>
+            </div>
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="tutorial-card step-card">
+                    <div class="flex items-start gap-4 mb-4">
+                        <div class="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
+                            <i data-lucide="layout-dashboard" class="w-5 h-5 text-emerald-400"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-white mb-2">Visão Geral</h3>
+                            <p class="text-slate-400 text-sm leading-relaxed">
+                                O painel está dividido em 5 seções principais: Intervalo entre Cortes, Horário de Funcionamento, Serviços, Profissionais e Bloqueios de Agenda.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="tutorial-card step-card">
+                    <div class="flex items-start gap-4 mb-4">
+                        <div class="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center flex-shrink-0">
+                            <i data-lucide="save" class="w-5 h-5 text-purple-400"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-white mb-2">Salvando Alterações</h3>
+                            <p class="text-slate-400 text-sm leading-relaxed">
+                                Sempre clique no botão "Salvar Tudo" no topo ou no botão flutuante verde após fazer mudanças. Nada será perdido!
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="tutorial-card step-card">
+                    <div class="flex items-start gap-4 mb-4">
+                        <div class="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center flex-shrink-0">
+                            <i data-lucide="navigation" class="w-5 h-5 text-orange-400"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-white mb-2">Navegação</h3>
+                            <p class="text-slate-400 text-sm leading-relaxed">
+                                Use a barra de navegação rápida (logo abaixo do cabeçalho) para pular entre as seções rapidamente.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="tutorial-card step-card">
+                    <div class="flex items-start gap-4 mb-4">
+                        <div class="w-10 h-10 rounded-lg bg-red-500/10 flex items-center justify-center flex-shrink-0">
+                            <i data-lucide="smartphone" class="w-5 h-5 text-red-400"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-white mb-2">Responsivo</h3>
+                            <p class="text-slate-400 text-sm leading-relaxed">
+                                O painel funciona perfeitamente no celular! Use o menu hambúrguer para abrir a sidebar no mobile.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção 2: Intervalo Entre Cortes -->
+        <section id="intervalo" class="mb-20 scroll-mt-24">
+            <div class="flex items-center gap-3 mb-8">
+                <div class="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center shadow-cyan-950 shadow-md">
+                    <i data-lucide="hourglass" class="w-6 h-6 text-cyan-400"></i>
+                </div>
+                <div>
+                    <h2 class="text-3xl font-bold text-white">2. Intervalo Entre Cortes</h2>
+                    <p class="text-slate-400">Define a cada quanto tempo um novo horário será criado</p>
+                </div>
+            </div>
+            <div class="tutorial-card">
+                <div class="grid md:grid-cols-2 gap-8 items-center">
+                    <div>
+                        <h3 class="text-xl font-bold text-white mb-4">O que é?</h3>
+                        <p class="text-slate-400 mb-6 leading-relaxed">
+                            O intervalo entre cortes define de quantos em quantos minutos um novo horário ficará disponível na agenda. Por exemplo, se você escolher <span class="text-emerald-400 font-semibold">30 minutos</span>, os horários disponíveis serão: 09:00, 09:30, 10:00, 10:30...
+                        </p>
+                        <div class="bg-slate-950/50 border border-slate-800 rounded-lg p-4 mb-4">
+                            <h4 class="text-sm font-bold text-emerald-400 mb-2 flex items-center gap-2">
+                                <i data-lucide="lightbulb" class="w-4 h-4"></i>
+                                Dica Importante
+                            </h4>
+                            <p class="text-slate-400 text-sm">
+                                Escolha um intervalo que combine com a duração média dos seus serviços. Se a maioria dos cortes leva 30-40 minutos, não faz sentido usar 15 minutos.
+                            </p>
+                        </div>
+                        <div class="flex items-start gap-3 text-sm text-slate-400">
+                            <i data-lucide="check-circle" class="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5"></i>
+                            <span>Opções disponíveis: 15, 20, 30, 40, 45 minutos ou 1 hora</span>
+                        </div>
+                    </div>
+                    <div class="bg-slate-950/80 border border-emerald-500/20 rounded-xl p-6">
+                        <h4 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Exemplo Visual</h4>
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between p-3 bg-slate-900 rounded-lg border border-slate-800">
+                                <span class="text-slate-300 font-mono">09:00</span>
+                                <span class="text-emerald-400 text-xs">← 30min →</span>
+                            </div>
+                            <div class="flex items-center justify-between p-3 bg-slate-900 rounded-lg border border-slate-800">
+                                <span class="text-slate-300 font-mono">09:30</span>
+                                <span class="text-emerald-400 text-xs">← 30min →</span>
+                            </div>
+                            <div class="flex items-center justify-between p-3 bg-slate-900 rounded-lg border border-slate-800">
+                                <span class="text-slate-300 font-mono">10:00</span>
+                                <span class="text-emerald-400 text-xs">← 30min →</span>
+                            </div>
+                            <div class="flex items-center justify-between p-3 bg-slate-900 rounded-lg border border-slate-800">
+                                <span class="text-slate-300 font-mono">10:30</span>
+                                <span class="text-slate-400 text-xs">...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção 3: Horário de Funcionamento -->
+        <section id="horarios" class="mb-20 scroll-mt-24">
+            <div class="flex items-center gap-3 mb-8">
+                <div class="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center shadow-indigo-950 shadow-md">
+                    <i data-lucide="clock" class="w-6 h-6 text-indigo-400"></i>
+                </div>
+                <div>
+                    <h2 class="text-3xl font-bold text-white">3. Horário de Funcionamento</h2>
+                    <p class="text-slate-400">Define quando a barbearia abre e fecha</p>
+                </div>
+            </div>
+            <div class="tutorial-card">
+                <div class="mb-6">
+                    <h3 class="text-xl font-bold text-white mb-3">Como Configurar?</h3>
+                    <p class="text-slate-400 leading-relaxed">
+                        Aqui você define o horário geral da barbearia. Este será o horário padrão para todos os profissionais (mas cada um pode ter seu próprio horário personalizado na seção de Profissionais).
+                    </p>
+                </div>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="bg-slate-950/50 border border-slate-800 rounded-lg p-5">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center">
+                                <i data-lucide="sunrise" class="w-4 h-4 text-green-400"></i>
+                            </div>
+                            <h4 class="font-bold text-white">Abertura</h4>
+                        </div>
+                        <p class="text-slate-400 text-sm mb-3">Horário que a barbearia começa a atender</p>
+                        <div class="bg-slate-900 border border-slate-700 rounded-lg p-3">
+                            <span class="text-emerald-400 font-mono text-lg">09:00</span>
+                            <span class="text-slate-500 text-xs ml-2">Exemplo</span>
+                        </div>
+                    </div>
+                    <div class="bg-slate-950/50 border border-slate-800 rounded-lg p-5">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center">
+                                <i data-lucide="sunset" class="w-4 h-4 text-orange-400"></i>
+                            </div>
+                            <h4 class="font-bold text-white">Fechamento</h4>
+                        </div>
+                        <p class="text-slate-400 text-sm mb-3">Horário do último atendimento</p>
+                        <div class="bg-slate-900 border border-slate-700 rounded-lg p-3">
+                            <span class="text-emerald-400 font-mono text-lg">19:00</span>
+                            <span class="text-slate-500 text-xs ml-2">Exemplo</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-6 bg-blue-500/5 border border-blue-500/20 rounded-lg p-4">
+                    <div class="flex items-start gap-3">
+                        <i data-lucide="info" class="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5"></i>
+                        <div>
+                            <h4 class="font-bold text-blue-400 mb-1">Importante</h4>
+                            <p class="text-slate-400 text-sm">
+                                Os horários individuais de cada profissional sempre têm prioridade sobre o horário geral da barbearia.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção 4: Serviços -->
+        <section id="servicos" class="mb-20 scroll-mt-24">
+            <div class="flex items-center gap-3 mb-8">
+                <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shadow-emerald-950 shadow-md">
+                    <i data-lucide="scissors" class="w-6 h-6 text-emerald-400"></i>
+                </div>
+                <div>
+                    <h2 class="text-3xl font-bold text-white">4. Catálogo de Serviços</h2>
+                    <p class="text-slate-400">Cadastre todos os serviços que você oferece</p>
+                </div>
+            </div>
+            <div class="space-y-6">
+                <div class="tutorial-card">
+                    <h3 class="text-xl font-bold text-white mb-4">Como Adicionar um Serviço?</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-start gap-4">
+                            <div class="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center flex-shrink-0 text-white font-bold shadow-emerald-950 shadow-lg ring-1 ring-emerald-950">1</div>
+                            <div>
+                                <h4 class="font-semibold text-white mb-1">Clique em "Novo Serviço"</h4>
+                                <p class="text-slate-400 text-sm">Você verá um novo card aparecer na lista</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <div class="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center flex-shrink-0 text-white font-bold shadow-emerald-950 shadow-lg ring-1 ring-emerald-950">2</div>
+                            <div>
+                                <h4 class="font-semibold text-white mb-1">Preencha o Nome do Serviço</h4>
+                                <p class="text-slate-400 text-sm mb-2">Ex: Corte Degradê, Barba Completa, Nevou, etc.</p>
+                                <div class="bg-slate-950/50 border border-slate-800 rounded-lg p-3 inline-block">
+                                    <code class="text-emerald-400 text-sm">Corte Degradê</code>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <div class="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center flex-shrink-0 text-white font-bold shadow-emerald-950 shadow-lg ring-1 ring-emerald-950">3</div>
+                            <div>
+                                <h4 class="font-semibold text-white mb-1">Defina o Valor (R$)</h4>
+                                <p class="text-slate-400 text-sm mb-2">Quanto você cobra por esse serviço?</p>
+                                <div class="bg-slate-950/50 border border-slate-800 rounded-lg p-3 inline-block">
+                                    <code class="text-emerald-400 text-sm">R$ 35,00</code>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <div class="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center flex-shrink-0 text-white font-bold shadow-emerald-950 shadow-lg ring-1 ring-emerald-950">4</div>
+                            <div>
+                                <h4 class="font-semibold text-white mb-1">Informe a Duração (Minutos)</h4>
+                                <p class="text-slate-400 text-sm mb-2">Quanto tempo leva em média?</p>
+                                <div class="bg-slate-950/50 border border-slate-800 rounded-lg p-3 inline-block">
+                                    <code class="text-blue-400 text-sm">40 minutos</code>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tutorial-card">
+                    <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                        <i data-lucide="trash-2" class="w-5 h-5 text-red-400"></i>
+                        Como Remover um Serviço?
+                    </h3>
+                    <p class="text-slate-400 mb-4">
+                        Basta clicar no ícone de lixeira no canto direito do card do serviço. Não esqueça de salvar depois!
+                    </p>
+                    <div class="bg-red-500/5 border border-red-500/20 rounded-lg p-4">
+                        <p class="text-red-400 text-sm flex items-start gap-2">
+                            <i data-lucide="alert-triangle" class="w-4 h-4 flex-shrink-0 mt-0.5"></i>
+                            <span>Atenção: Ao remover um serviço e salvar, ele será deletado permanentemente do sistema.</span>
+                        </p>
+                    </div>
+                </div>
+                <div class="bg-gradient-to-br from-emerald-500/10 to-blue-500/10 border border-emerald-500/20 rounded-xl p-6 shadow-emerald-950 shadow-lg">
+                    <h4 class="font-bold text-emerald-400 mb-3 flex items-center gap-2">
+                        <i data-lucide="sparkles" class="w-5 h-5"></i>
+                        Dica Pro
+                    </h4>
+                    <p class="text-slate-300 text-sm leading-relaxed">
+                        Cadastre todos os serviços que você oferece! Quanto mais completo o catálogo, melhor a experiência do seu cliente ao agendar pelo chatbot.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção 5: Profissionais -->
+        <section id="profissionais" class="mb-20 scroll-mt-24">
+            <div class="flex items-center gap-3 mb-8">
+                <div class="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center shadow-purple-950 shadow-md">
+                    <i data-lucide="users" class="w-6 h-6 text-purple-400"></i>
+                </div>
+                <div>
+                    <h2 class="text-3xl font-bold text-white">5. Gerenciar Profissionais</h2>
+                    <p class="text-slate-400">Configure sua equipe e seus horários</p>
+                </div>
+            </div>
+            <div class="space-y-6">
+                <div class="tutorial-card">
+                    <h3 class="text-xl font-bold text-white mb-6">Passo a Passo</h3>
+                    <div class="space-y-6">
+                        <div class="flex items-start gap-4">
+                            <div class="w-10 h-10 rounded-full bg-purple-500 flex items-center justify-center flex-shrink-0 text-white font-bold shadow-purple-950 shadow-lg ring-1 ring-purple-950">1</div>
+                            <div class="flex-1">
+                                <h4 class="font-semibold text-white mb-2">Adicionar Profissional</h4>
+                                <p class="text-slate-400 text-sm mb-3">
+                                    Clique no botão "Adicionar" no canto superior direito da seção de Profissionais.
+                                </p>
+                                <div class="bg-slate-950/50 border border-purple-500/20 rounded-lg p-4">
+                                    <p class="text-sm text-slate-400 mb-2">Digite o nome do barbeiro:</p>
+                                    <div class="bg-slate-900 border border-slate-700 rounded-lg p-2 inline-block">
+                                        <code class="text-purple-400">João Silva</code>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <div class="w-10 h-10 rounded-full bg-purple-500 flex items-center justify-center flex-shrink-0 text-white font-bold shadow-purple-950 shadow-lg ring-1 ring-purple-950">2</div>
+                            <div class="flex-1">
+                                <h4 class="font-semibold text-white mb-2">Configurar Jornada de Trabalho</h4>
+                                <p class="text-slate-400 text-sm mb-3">
+                                    Selecione os dias que o profissional trabalha e defina os horários de cada dia.
+                                </p>
+                                <div class="bg-slate-950/50 border border-slate-800 rounded-lg overflow-hidden">
+                                    <div class="p-3 bg-slate-900/50 border-b border-slate-800">
+                                        <span class="text-xs font-bold text-slate-500 uppercase">Exemplo de Configuração</span>
+                                    </div>
+                                    <div class="p-4 space-y-3">
+                                        <div class="flex items-center justify-between">
+                                            <div class="flex items-center gap-2">
+                                                <div class="w-4 h-4 rounded bg-emerald-500 flex items-center justify-center">
+                                                    <i data-lucide="check" class="w-3 h-3 text-white"></i>
+                                                </div>
+                                                <span class="text-white font-medium">Segunda</span>
+                                            </div>
+                                            <span class="text-slate-400 font-mono text-sm">09:00 - 18:00</span>
+                                        </div>
+                                        <div class="flex items-center justify-between">
+                                            <div class="flex items-center gap-2">
+                                                <div class="w-4 h-4 rounded bg-emerald-500 flex items-center justify-center">
+                                                    <i data-lucide="check" class="w-3 h-3 text-white"></i>
+                                                </div>
+                                                <span class="text-white font-medium">Terça</span>
+                                            </div>
+                                            <span class="text-slate-400 font-mono text-sm">09:00 - 18:00</span>
+                                        </div>
+                                        <div class="flex items-center justify-between opacity-50">
+                                            <div class="flex items-center gap-2">
+                                                <div class="w-4 h-4 rounded border-2 border-slate-700"></div>
+                                                <span class="text-slate-400 font-medium">Domingo</span>
+                                            </div>
+                                            <span class="text-slate-600 font-mono text-sm">Folga</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mt-3 flex items-start gap-2 text-sm text-slate-400">
+                                    <i data-lucide="info" class="w-4 h-4 text-blue-400 flex-shrink-0 mt-0.5"></i>
+                                    <span>Marque apenas os dias que o profissional trabalha. Dias desmarcados aparecerão como folga.</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <div class="w-10 h-10 rounded-full bg-purple-500 flex items-center justify-center flex-shrink-0 text-white font-bold shadow-purple-950 shadow-lg ring-1 ring-purple-950">3</div>
+                            <div class="flex-1">
+                                <h4 class="font-semibold text-white mb-2">Horário de Almoço</h4>
+                                <p class="text-slate-400 text-sm mb-3">
+                                    Defina o intervalo de almoço do profissional. Esse horário será bloqueado automaticamente todos os dias.
+                                </p>
+                                <div class="bg-orange-500/5 border border-orange-500/20 rounded-lg p-4">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <i data-lucide="coffee" class="w-4 h-4 text-orange-400"></i>
+                                        <span class="text-sm font-bold text-orange-400">Exemplo</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <div class="bg-slate-900 border border-slate-700 rounded px-3 py-2">
+                                            <code class="text-orange-400">12:00</code>
+                                        </div>
+                                        <span class="text-slate-500">até</span>
+                                        <div class="bg-slate-900 border border-slate-700 rounded px-3 py-2">
+                                            <code class="text-orange-400">13:00</code>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tutorial-card">
+                    <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                        <i data-lucide="search" class="w-5 h-5 text-purple-400"></i>
+                        Buscar Profissional
+                    </h3>
+                    <p class="text-slate-400 mb-4">
+                        Use a barra de busca para encontrar rapidamente um profissional específico quando você tiver muitos cadastrados.
+                    </p>
+                    <div class="bg-slate-950/50 border border-slate-800 rounded-lg p-3 inline-flex items-center gap-2">
+                        <i data-lucide="search" class="w-4 h-4 text-slate-500"></i>
+                        <span class="text-slate-400 text-sm">Digite o nome e a lista filtra automaticamente</span>
+                    </div>
+                </div>
+                <div class="bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/20 rounded-xl p-6 shadow-purple-950 shadow-md">
+                    <h4 class="font-bold text-purple-400 mb-3 flex items-center gap-2">
+                        <i data-lucide="zap" class="w-5 h-5"></i>
+                        Atenção
+                    </h4>
+                    <p class="text-slate-300 text-sm leading-relaxed">
+                        Os horários individuais dos profissionais sempre têm prioridade sobre o horário geral da barbearia. Se a barbearia abre às 09:00, mas um barbeiro só começa às 10:00, o sistema respeitará o horário do profissional.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção 6: Bloqueios -->
+        <section id="bloqueios" class="mb-20 scroll-mt-24">
+            <div class="flex items-center gap-3 mb-8">
+                <div class="w-12 h-12 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center shadow-red-950 shadow-md">
+                    <i data-lucide="calendar-off" class="w-6 h-6 text-red-400"></i>
+                </div>
+                <div>
+                    <h2 class="text-3xl font-bold text-white">6. Bloqueios de Agenda</h2>
+                    <p class="text-slate-400">Bloqueie datas específicas (feriados, eventos, etc)</p>
+                </div>
+            </div>
+            <div class="space-y-6">
+                <div class="tutorial-card">
+                    <h3 class="text-xl font-bold text-white mb-6">Como Criar um Bloqueio?</h3>
+                    <div class="space-y-6">
+                        <div class="flex items-start gap-4">
+                            <div class="w-10 h-10 rounded-full bg-red-500 flex items-center justify-center flex-shrink-0 text-white font-bold shadow-red-950 shadow-lg ring-1 ring-red-950">1</div>
+                            <div class="flex-1">
+                                <h4 class="font-semibold text-white mb-2">Clique em "Novo Bloqueio"</h4>
+                                <p class="text-slate-400 text-sm">
+                                    Um novo card de bloqueio aparecerá na lista.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <div class="w-10 h-10 rounded-full bg-red-500 flex items-center justify-center flex-shrink-0 text-white font-bold shadow-red-950 shadow-lg ring-1 ring-red-950">2</div>
+                            <div class="flex-1">
+                                <h4 class="font-semibold text-white mb-2">Escolha Quem Será Bloqueado</h4>
+                                <p class="text-slate-400 text-sm mb-3">
+                                    Você pode bloquear um profissional específico ou todos ao mesmo tempo.
+                                </p>
+                                <div class="bg-slate-950/50 border border-slate-800 rounded-lg p-4">
+                                    <div class="space-y-2">
+                                        <div class="flex items-center gap-2">
+                                            <i data-lucide="users" class="w-4 h-4 text-red-400"></i>
+                                            <span class="text-white font-medium">Todos os Profissionais</span>
+                                            <span class="text-slate-500 text-xs">(Bloqueio geral)</span>
+                                        </div>
+                                        <div class="text-slate-600 text-sm">ou</div>
+                                        <div class="flex items-center gap-2">
+                                            <i data-lucide="user" class="w-4 h-4 text-purple-400"></i>
+                                            <span class="text-slate-300">João Silva</span>
+                                            <span class="text-slate-500 text-xs">(Bloqueio individual)</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <div class="w-10 h-10 rounded-full bg-red-500 flex items-center justify-center flex-shrink-0 text-white font-bold shadow-red-950 shadow-lg ring-1 ring-red-950">3</div>
+                            <div class="flex-1">
+                                <h4 class="font-semibold text-white mb-2">Defina Data e Horário de Início</h4>
+                                <p class="text-slate-400 text-sm mb-3">
+                                    Quando o bloqueio começa?
+                                </p>
+                                <div class="flex flex-wrap gap-2">
+                                    <div class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2">
+                                        <span class="text-slate-500 text-xs">Data: </span>
+                                        <code class="text-red-400">25/12/2024</code>
+                                    </div>
+                                    <div class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2">
+                                        <span class="text-slate-500 text-xs">Hora: </span>
+                                        <code class="text-red-400">00:00</code>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <div class="w-10 h-10 rounded-full bg-red-500 flex items-center justify-center flex-shrink-0 text-white font-bold shadow-red-950 shadow-lg ring-1 ring-red-950">4</div>
+                            <div class="flex-1">
+                                <h4 class="font-semibold text-white mb-2">Defina Data e Horário de Fim</h4>
+                                <p class="text-slate-400 text-sm mb-3">
+                                    Quando o bloqueio termina?
+                                </p>
+                                <div class="flex flex-wrap gap-2">
+                                    <div class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2">
+                                        <span class="text-slate-500 text-xs">Data: </span>
+                                        <code class="text-red-400">25/12/2024</code>
+                                    </div>
+                                    <div class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2">
+                                        <span class="text-slate-500 text-xs">Hora: </span>
+                                        <code class="text-red-400">23:59</code>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <div class="w-10 h-10 rounded-full bg-red-500 flex items-center justify-center flex-shrink-0 text-white font-bold shadow-red-950 shadow-lg ring-1 ring-red-950">5</div>
+                            <div class="flex-1">
+                                <h4 class="font-semibold text-white mb-2">Informe o Motivo (Opcional)</h4>
+                                <p class="text-slate-400 text-sm mb-3">
+                                    Descreva brevemente o motivo do bloqueio para referência futura.
+                                </p>
+                                <div class="bg-slate-950/50 border border-slate-800 rounded-lg p-3">
+                                    <code class="text-slate-300 text-sm">Natal - Barbearia Fechada</code>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="tutorial-card">
+                        <h3 class="text-lg font-bold text-white mb-3 flex items-center gap-2">
+                            <i data-lucide="calendar" class="w-5 h-5 text-emerald-400"></i>
+                            Bloqueio de Dia Inteiro
+                        </h3>
+                        <p class="text-slate-400 text-sm mb-4">
+                            Para bloquear um dia completo, use:
+                        </p>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between items-center">
+                                <span class="text-slate-500">Início:</span>
+                                <code class="text-emerald-400">00:00</code>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-slate-500">Fim:</span>
+                                <code class="text-emerald-400">23:59</code>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tutorial-card">
+                        <h3 class="text-lg font-bold text-white mb-3 flex items-center gap-2">
+                            <i data-lucide="clock" class="w-5 h-5 text-orange-400"></i>
+                            Bloqueio Parcial
+                        </h3>
+                        <p class="text-slate-400 text-sm mb-4">
+                            Para bloquear apenas algumas horas:
+                        </p>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between items-center">
+                                <span class="text-slate-500">Início:</span>
+                                <code class="text-orange-400">14:00</code>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-slate-500">Fim:</span>
+                                <code class="text-orange-400">17:00</code>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-red-500/5 border border-red-500/20 rounded-xl p-6 shadow-red-950 shadow-lg">
+                    <h4 class="font-bold text-red-400 mb-3 flex items-center gap-2">
+                        <i data-lucide="alert-circle" class="w-5 h-5"></i>
+                        Importante
+                    </h4>
+                    <p class="text-slate-300 text-sm leading-relaxed">
+                        Durante o período bloqueado, os clientes não conseguirão agendar horários com os profissionais bloqueados. Use isso para feriados, eventos, reformas ou qualquer outra situação que impeça o atendimento.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção 7: Dicas e Boas Práticas -->
+        <section id="dicas" class="mb-20 scroll-mt-24">
+            <div class="flex items-center gap-3 mb-8">
+                <div class="w-12 h-12 rounded-xl bg-yellow-500/10 border border-yellow-500/20 flex items-center justify-center shadow-yellow-950 shadow-md">
+                    <i data-lucide="lightbulb" class="w-6 h-6 text-yellow-400"></i>
+                </div>
+                <div>
+                    <h2 class="text-3xl font-bold text-white">7. Dicas e Boas Práticas</h2>
+                    <p class="text-slate-400">Tire o máximo proveito do sistema</p>
+                </div>
+            </div>
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="tutorial-card">
+                    <div class="flex items-start gap-4">
+                        <div class="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
+                            <i data-lucide="check-circle" class="w-5 h-5 text-emerald-400"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-white mb-2">Mantenha Atualizado</h3>
+                            <p class="text-slate-400 text-sm leading-relaxed">
+                                Sempre que houver mudanças nos horários, serviços ou profissionais, atualize o painel imediatamente para evitar confusão nos agendamentos.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="tutorial-card">
+                    <div class="flex items-start gap-4">
+                        <div class="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center flex-shrink-0">
+                            <i data-lucide="clock" class="w-5 h-5 text-blue-400"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-white mb-2">Intervalo Realista</h3>
+                            <p class="text-slate-400 text-sm leading-relaxed">
+                                Escolha um intervalo entre cortes que seja compatível com a duração real dos seus serviços. Isso evita overbooking.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="tutorial-card">
+                    <div class="flex items-start gap-4">
+                        <div class="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center flex-shrink-0">
+                            <i data-lucide="coffee" class="w-5 h-5 text-purple-400"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-white mb-2">Configure o Almoço</h3>
+                            <p class="text-slate-400 text-sm leading-relaxed">
+                                Sempre configure o horário de almoço dos profissionais para garantir que eles tenham tempo de descanso sem compromissos marcados.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="tutorial-card">
+                    <div class="flex items-start gap-4">
+                        <div class="w-10 h-10 rounded-lg bg-red-500/10 flex items-center justify-center flex-shrink-0">
+                            <i data-lucide="calendar-off" class="w-5 h-5 text-red-400"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-white mb-2">Bloqueios Antecipados</h3>
+                            <p class="text-slate-400 text-sm leading-relaxed">
+                                Cadastre bloqueios de feriados e eventos com antecedência. Isso evita que clientes marquem em datas que você não estará disponível.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="tutorial-card">
+                    <div class="flex items-start gap-4">
+                        <div class="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center flex-shrink-0">
+                            <i data-lucide="save" class="w-5 h-5 text-orange-400"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-white mb-2">Salve Sempre</h3>
+                            <p class="text-slate-400 text-sm leading-relaxed">
+                                Não esqueça de clicar em "Salvar Tudo" após fazer qualquer alteração. As mudanças só entram em vigor depois de salvar.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="tutorial-card">
+                    <div class="flex items-start gap-4">
+                        <div class="w-10 h-10 rounded-lg bg-pink-500/10 flex items-center justify-center flex-shrink-0">
+                            <i data-lucide="smartphone" class="w-5 h-5 text-pink-400"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-white mb-2">Use no Celular</h3>
+                            <p class="text-slate-400 text-sm leading-relaxed">
+                                O painel funciona perfeitamente no celular! Você pode fazer ajustes rápidos de qualquer lugar.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ Section -->
+        <section class="mb-20">
+            <div class="flex items-center gap-3 mb-8">
+                <div class="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center shadow-cyan-950 shadow-md">
+                    <i data-lucide="help-circle" class="w-6 h-6 text-cyan-400"></i>
+                </div>
+                <div>
+                    <h2 class="text-3xl font-bold text-white">Perguntas Frequentes</h2>
+                    <p class="text-slate-400">Dúvidas comuns respondidas</p>
+                </div>
+            </div>
+            <div class="space-y-4">
+                <div class="tutorial-card cursor-pointer" onclick="toggleFAQ(this)">
+                    <div class="flex items-start justify-between gap-4">
+                        <div class="flex items-start gap-3 flex-1">
+                            <i data-lucide="circle-help" class="w-5 h-5 text-emerald-400 flex-shrink-0 mt-1"></i>
+                            <div>
+                                <h3 class="font-bold text-white mb-2">As alterações são aplicadas imediatamente?</h3>
+                                <div class="collapsible-content">
+                                    <p class="text-slate-400 text-sm leading-relaxed pt-2">
+                                        Sim! Assim que você clicar em "Salvar Tudo" e a operação for concluída com sucesso, todas as alterações são aplicadas instantaneamente no sistema e ficam disponíveis para os clientes.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <i data-lucide="chevron-down" class="w-5 h-5 text-slate-500 transition-transform faq-icon"></i>
+                    </div>
+                </div>
+                <div class="tutorial-card cursor-pointer" onclick="toggleFAQ(this)">
+                    <div class="flex items-start justify-between gap-4">
+                        <div class="flex items-start gap-3 flex-1">
+                            <i data-lucide="circle-help" class="w-5 h-5 text-blue-400 flex-shrink-0 mt-1"></i>
+                            <div>
+                                <h3 class="font-bold text-white mb-2">Posso ter horários diferentes para cada profissional?</h3>
+                                <div class="collapsible-content">
+                                    <p class="text-slate-400 text-sm leading-relaxed pt-2">
+                                        Sim! Cada profissional pode ter seus próprios horários de trabalho, inclusive em dias diferentes. O horário de funcionamento geral serve apenas como padrão, mas os horários individuais sempre têm prioridade.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <i data-lucide="chevron-down" class="w-5 h-5 text-slate-500 transition-transform faq-icon"></i>
+                    </div>
+                </div>
+                <div class="tutorial-card cursor-pointer" onclick="toggleFAQ(this)">
+                    <div class="flex items-start justify-between gap-4">
+                        <div class="flex items-start gap-3 flex-1">
+                            <i data-lucide="circle-help" class="w-5 h-5 text-purple-400 flex-shrink-0 mt-1"></i>
+                            <div>
+                                <h3 class="font-bold text-white mb-2">O que acontece se eu remover um serviço que já tem agendamentos?</h3>
+                                <div class="collapsible-content">
+                                    <p class="text-slate-400 text-sm leading-relaxed pt-2">
+                                        Os agendamentos já existentes não são afetados. Apenas novos agendamentos desse serviço não poderão mais ser feitos. Sempre revise bem antes de remover serviços.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <i data-lucide="chevron-down" class="w-5 h-5 text-slate-500 transition-transform faq-icon"></i>
+                    </div>
+                </div>
+                <div class="tutorial-card cursor-pointer" onclick="toggleFAQ(this)">
+                    <div class="flex items-start justify-between gap-4">
+                        <div class="flex items-start gap-3 flex-1">
+                            <i data-lucide="circle-help" class="w-5 h-5 text-red-400 flex-shrink-0 mt-1"></i>
+                            <div>
+                                <h3 class="font-bold text-white mb-2">Posso desfazer alterações depois de salvar?</h3>
+                                <div class="collapsible-content">
+                                    <p class="text-slate-400 text-sm leading-relaxed pt-2">
+                                        Não há um botão de "desfazer" após salvar. Por isso, sempre revise suas alterações antes de clicar em "Salvar Tudo". Você pode usar o botão "Descartar" antes de salvar para cancelar mudanças não salvas.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <i data-lucide="chevron-down" class="w-5 h-5 text-slate-500 transition-transform faq-icon"></i>
+                    </div>
+                </div>
+                <div class="tutorial-card cursor-pointer" onclick="toggleFAQ(this)">
+                    <div class="flex items-start justify-between gap-4">
+                        <div class="flex items-start gap-3 flex-1">
+                            <i data-lucide="circle-help" class="w-5 h-5 text-orange-400 flex-shrink-0 mt-1"></i>
+                            <div>
+                                <h3 class="font-bold text-white mb-2">Como faço se precisar de ajuda ou suporte?</h3>
+                                <div class="collapsible-content">
+                                    <p class="text-slate-400 text-sm leading-relaxed pt-2">
+                                        Você pode acessar a Central de Ajuda através do menu lateral ou clicar no botão abaixo para falar diretamente conosco via WhatsApp. Estamos sempre disponíveis para ajudar!
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <i data-lucide="chevron-down" class="w-5 h-5 text-slate-500 transition-transform faq-icon"></i>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA Final -->
+        <section class="text-center">
+            <div class="bg-gradient-to-br from-emerald-500/20 to-blue-500/20 border border-emerald-500/30 rounded-2xl p-12 shadow-emerald-950 shadow-lg">
+                <div class="w-16 h-16 rounded-full bg-emerald-500/20 flex items-center justify-center mx-auto mb-6">
+                    <i data-lucide="rocket" class="w-8 h-8 text-emerald-400"></i>
+                </div>
+                <h2 class="text-3xl font-bold text-white mb-4">Pronto para Começar?</h2>
+                <p class="text-slate-300 text-lg mb-8 max-w-2xl mx-auto">
+                    Agora que você sabe como usar o painel, está na hora de configurar sua barbearia e começar a receber agendamentos!
+                </p>
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                    <a href="index.html" class="go-config px-8 py-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold transition-all shadow-lg shadow-emerald-900/30 flex items-center gap-2">
+                        <i data-lucide="settings" class="w-5 h-5"></i>
+                        Ir para Configurações
+                    </a>
+                    <a href="LINK_WHATSAPP" target="_blank" rel="noopener noreferrer" class="go-suport px-8 py-4 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold transition-all flex items-center gap-2">
+                        <i data-lucide="message-circle" class="w-5 h-5"></i>
+                        Falar com Suporte
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="relative z-10 text-center py-8 border-t border-slate-800">
+        <p class="text-slate-500 text-sm">Logika Bots © 2026. Todos os direitos reservados.</p>
+    </footer>
+
+    <script src="JavaScript/JS-tutorial.js"></script>
+
+</body>
+</html>
