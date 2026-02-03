@@ -11,7 +11,7 @@ Este projeto é uma **solução completa de automação e gestão** desenvolvida
 
 Você pode testar a interface do Dashboard Administrativo através do link abaixo:
 
-👉 **[Acessar BarberManager Demo](https://gafranc0.github.io/LogikaBots-Barbearia/)**
+👉 **[Acessar BarberManager Demo](https://gafranc0.github.io/LogikaBots-Barbearia/Tela%20Admin)**
 
 **Credenciais de Acesso:**
 * **Login:** `teste@gmail.com`
