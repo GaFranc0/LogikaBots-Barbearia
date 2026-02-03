@@ -40,14 +40,28 @@ O diagrama abaixo detalha o fluxo de dados entre as ferramentas hospedadas na VP
 
 ```mermaid
 graph TD
-  A[WhatsApp Cliente] <--> B(Evolution API)
-  B <--> C{n8n - Workflow}
-  C <--> D[Typebot]
-  C <--> E[(MySQL Database)]
-  F[Dashboard Web] <--> E
-  G[VPS Hosting] --- B
-  G --- C
-  G --- E
+    subgraph "Infraestrutura VPS"
+        G[VPS Hosting]
+    end
+    
+    subgraph "Serviços Hospedados"
+        B(Evolution API)
+        C{n8n - Workflow}
+        D[Typebot]
+        E[(MySQL Database)]
+    end
+    
+    A[WhatsApp Cliente] <--> B
+    B <--> C
+    C <--> D
+    C <--> E
+    E <--> F[Dashboard Web]
+    
+    %% Conexões da VPS
+    G --> B
+    G --> C
+    G --> D
+    G --> E
 ```
 ## 📊 Fluxos de Automação (Visualização n8n)
 
