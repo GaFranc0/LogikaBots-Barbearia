@@ -2,7 +2,7 @@
 
 Este projeto é uma **solução completa de automação e gestão** desenvolvida para a **Logikabots**. O ecossistema integra um **chatbot inteligente via WhatsApp** a um **painel web administrativo**, permitindo que barbearias operem de forma 100% autônoma no atendimento inicial e agendamento.
 
-> [!IMPORTANTE]
+> [!IMPORTANT]
 > **Status do Desenvolvimento:** Atualmente, a gestão de serviços e barbeiros é realizada via **Dashboard Web**. O **aplicativo mobile nativo** já está em fase de desenvolvimento para oferecer ainda mais mobilidade e notificações em tempo real aos proprietários.
 
 ---
