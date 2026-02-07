@@ -76,6 +76,7 @@ graph TD
     G --> E
 ```
 ## 📊 Fluxos de Automação (Visualização n8n)
+#### ⚠️ Aviso de Propriedade Intelectual: As capturas de tela a seguir representam a estrutura dos fluxos no n8n. Por questões de segurança e proteção do projeto, os fluxos completos não foram disponibilizados na versão atualizada deste repositório.
 
 | PROCESSO | DESCRIÇÃO TÉCNICA | PREVIEW |
 | :--- | :---: | ---: |
