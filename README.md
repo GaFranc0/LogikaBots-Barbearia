@@ -105,13 +105,13 @@ graph TD
 - **Robustez:** Tratamento de erros no n8n para evitar travamentos em respostas inesperadas do usuário.
 
 ## 🎯 Status do Projeto
-✅ Dashboard Web - Concluído
+✅ Dashboard Web - Concluído - Versão 1.2.0
+
+✅ Fluxos n8n - Concluídos - Versão 1.2.0
+
+✅ Banco de Dados - Concluído - Versão 1.2.0
 
 ⚠️ Tela de Relatório - Em desenvolvimento
-
-✅ Fluxos n8n - Concluídos
-
-✅ Banco de Dados - Concluído
 
 ⚠️ App Mobile - Em desenvolvimento
 
