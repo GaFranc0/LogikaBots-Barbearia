@@ -122,8 +122,13 @@ graph TD
 
 ## 👤 Contato
 
-**Desenvolvido por:** Gabriel Franco. 🚀
+### Projeto desenvolvido por:
 
-- **LinkedIn:** https://www.linkedin.com/in/gabriel-franc0/.
+**Gabriel Franco**
+* Email: gafranco.contato@gmail.com
+* Linkedin: https://www.linkedin.com/in/gabriel-franc0
 
-- **E-mail:** gafranco.contato@gmail.com
+**Lucas Granusso**
+* Email: lucasgranuss@gmail.com
+* Linkedin: https://www.linkedin.com/in/lucas-granusso/
+* GitHub: https://github.com/lucasgranusso
