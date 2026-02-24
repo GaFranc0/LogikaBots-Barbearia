@@ -1,0 +1,1021 @@
+/* ============================================
+   TUTORIAL AGENDAMENTOS - CSS COMPLETO
+   Responsividade: 360px | 480px | 640px | 736px | 768px | 1024px+
+   ============================================ */
+
+/* ============================================
+   BASE
+   ============================================ */
+
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+html {
+    overflow-x: hidden;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #020617;
+    color: #e2e8f0;
+    overflow-x: hidden;
+}
+
+/* ============================================
+   MODO CLARO - BASE
+   ============================================ */
+
+.light body {
+    background-color: #f8fafc !important;
+    color: #0f172a !important;
+}
+
+.light header {
+    background-color: #ffffff !important;
+    border-color: #e2e8f0 !important;
+}
+
+.light .bg-slate-900:not(header) {
+    background-color: #ffffff !important;
+}
+.light .bg-slate-950 {
+    background-color: #ffffff !important;
+}
+.light .bg-slate-800 {
+    background-color: #f1f5f9 !important;
+}
+.light .bg-slate-800\/50 {
+    background-color: #e2e8f0 !important;
+}
+.light .bg-slate-900\/50,
+.light .bg-slate-900\/60 {
+    background-color: #f1f5f9 !important;
+}
+.light .bg-slate-950\/50,
+.light .bg-slate-950\/80,
+.light .bg-slate-900\/95,
+.light .bg-slate-900\/98 {
+    background-color: #ffffff !important;
+}
+
+/* ============================================
+   MODO CLARO - TEXTOS
+   ============================================ */
+
+.light .text-white {
+    color: #0f172a !important;
+}
+.light .text-slate-300 {
+    color: #334155 !important;
+}
+.light .text-slate-400 {
+    color: #64748b !important;
+}
+.light .text-slate-500 {
+    color: #64748b !important;
+}
+.light .text-slate-600 {
+    color: #475569 !important;
+}
+.light p {
+    color: #475569 !important;
+}
+.light h2,
+.light h3,
+.light h4 {
+    color: #0f172a !important;
+}
+.light strong {
+    color: inherit !important;
+    font-weight: 700 !important;
+}
+.light ul li span {
+    color: #334155 !important;
+}
+.light ::placeholder {
+    color: #94a3b8 !important;
+}
+
+/* Textos coloridos - modo claro */
+.light .text-blue-400       { color: #2563eb !important; }
+.light .text-blue-200\/90   { color: #1e293b !important; }
+.light .text-emerald-400    { color: #059669 !important; }
+.light .text-emerald-200\/90{ color: #065f46 !important; }
+.light .text-green-400      { color: #059669 !important; }
+.light .text-green-200\/90  { color: #065f46 !important; }
+.light .text-cyan-400       { color: #0891b2 !important; }
+.light .text-cyan-200\/90   { color: #164e63 !important; }
+.light .text-purple-400     { color: #7c3aed !important; }
+.light .text-purple-200\/90 { color: #4c1d95 !important; }
+.light .text-yellow-400     { color: #ca8a04 !important; }
+.light .text-yellow-200\/90 { color: #713f12 !important; }
+.light .text-orange-400     { color: #ea580c !important; }
+.light .text-red-400        { color: #dc2626 !important; }
+.light .text-red-200\/90    { color: #991b1b !important; }
+.light .text-indigo-400     { color: #4338ca !important; }
+.light .text-pink-400       { color: #db2777 !important; }
+
+/* ============================================
+   MODO CLARO - BORDAS
+   ============================================ */
+
+.light .border-slate-700    { border-color: #94a3b8 !important; }
+.light .border-slate-800    { border-color: #cbd5e1 !important; }
+.light .border-blue-500\/20 { border-color: #93c5fd !important; }
+.light .border-blue-500\/30 { border-color: #60a5fa !important; }
+.light .border-emerald-500\/20 { border-color: #6ee7b7 !important; }
+.light .border-emerald-500\/30 { border-color: #34d399 !important; }
+.light .border-green-500\/20   { border-color: #6ee7b7 !important; }
+.light .border-cyan-500\/20    { border-color: #67e8f9 !important; }
+.light .border-purple-500\/20  { border-color: #d8b4fe !important; }
+.light .border-orange-500\/20  { border-color: #fdba74 !important; }
+.light .border-red-500\/20     { border-color: #fca5a5 !important; }
+.light .border-yellow-500\/20  { border-color: #fde047 !important; }
+.light .divide-slate-800\/50 > * + * { border-color: #e2e8f0 !important; }
+
+/* ============================================
+   MODO CLARO - BACKGROUNDS COLORIDOS
+   ============================================ */
+
+.light .bg-blue-500\/5      { background-color: #eff6ff !important; }
+.light .bg-blue-500\/10     { background-color: #dbeafe !important; }
+.light .bg-emerald-500\/5   { background-color: #ecfdf5 !important; }
+.light .bg-emerald-500\/10  { background-color: #d1fae5 !important; }
+.light .bg-emerald-500\/20  { background-color: #a7f3d0 !important; }
+.light .bg-green-500\/5     { background-color: #f0fdf4 !important; }
+.light .bg-green-500\/10    { background-color: #d1fae5 !important; }
+.light .bg-cyan-500\/5      { background-color: #ecfeff !important; }
+.light .bg-cyan-500\/10     { background-color: #cffafe !important; }
+.light .bg-purple-500\/5    { background-color: #f5f3ff !important; }
+.light .bg-purple-500\/10   { background-color: #e9d5ff !important; }
+.light .bg-orange-500\/5    { background-color: #fff7ed !important; }
+.light .bg-orange-500\/10   { background-color: #fed7aa !important; }
+.light .bg-red-500\/5       { background-color: #fef2f2 !important; }
+.light .bg-red-500\/10      { background-color: #fecaca !important; }
+.light .bg-yellow-500\/5    { background-color: #fefce8 !important; }
+.light .bg-yellow-500\/10   { background-color: #fef3c7 !important; }
+.light .bg-pink-500\/10     { background-color: #fce7f3 !important; }
+.light .bg-indigo-500\/10   { background-color: #e0e7ff !important; }
+
+/* ============================================
+   MODO CLARO - GRADIENTES E ESPECIAIS
+   ============================================ */
+
+.light .bg-gradient-to-br {
+    background: linear-gradient(to bottom right, #f0fdf4, #dbeafe) !important;
+}
+
+.light input:disabled {
+    background-color: #f1f5f9 !important;
+    color: #475569 !important;
+    opacity: 1 !important;
+}
+
+.light i[data-lucide] {
+    opacity: 1 !important;
+}
+
+.light .bg-slate-900 thead,
+.light .bg-slate-900\/80 {
+    background-color: #f1f5f9 !important;
+}
+
+/* ============================================
+   LOGO CONTRAST
+   ============================================ */
+
+.bg-contrast-logo {
+    background-color: rgba(30, 41, 59, 0.5);
+}
+
+.light .bg-contrast-logo {
+    background-color: #e2e8f0 !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border: 1px solid #cbd5e1;
+}
+
+/* ============================================
+   DESTAQUES DE TEXTO
+   ============================================ */
+
+.texto-destaque {
+    text-shadow: -2px 3px 5px oklch(43.2% 0.095 166.913);
+}
+
+.texto-destaque2 {
+    text-shadow: -1px 1px 0px oklch(43.2% 0.095 166.913);
+}
+
+/* ============================================
+   BOTÕES
+   ============================================ */
+
+.go-config {
+    background-color: oklch(59.6% 0.145 163.225);
+    transition: transform 0.2s;
+    box-shadow: -1px 2px 3px black;
+}
+
+.go-config:hover {
+    background-color: oklch(69.6% 0.17 162.48);
+    transform: scale(1.05);
+}
+
+.light .go-config {
+    background-color: oklch(76.5% 0.177 163.223);
+    transition: transform 0.2s;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.light .go-config:hover {
+    background-color: oklch(80.1% 0.16 158.449);
+    transform: scale(1.05);
+}
+
+.light .go-suport {
+    background-color: #e2e8f0 !important;
+    color: #0f172a !important;
+    border-color: #cbd5e1 !important;
+    transition: transform 0.2s;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.light .go-suport:hover {
+    background-color: #cbd5e1 !important;
+    transform: scale(1.05);
+}
+
+/* ============================================
+   THEME TOGGLE
+   ============================================ */
+
+.light #theme-toggle-btn {
+    background-color: #f1f5f9 !important;
+    color: #64748b !important;
+}
+
+.light #theme-toggle-btn:hover {
+    background-color: #e2e8f0 !important;
+    color: #10b981 !important;
+}
+
+/* ============================================
+   TUTORIAL CARDS
+   ============================================ */
+
+.tutorial-card {
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(51, 65, 85, 0.5);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.tutorial-card:hover {
+    border-color: rgba(16, 185, 129, 0.5);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(16, 185, 129, 0.1);
+}
+
+.light .tutorial-card {
+    background-color: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+}
+
+.light .tutorial-card:hover {
+    border-color: #10b981 !important;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15) !important;
+}
+
+/* ============================================
+   NAVEGAÇÃO LATERAL - DESKTOP
+   ============================================ */
+
+.side-nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.625rem 0.875rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    position: relative;
+}
+
+.side-nav-link:hover {
+    background-color: rgba(51, 65, 85, 0.4);
+}
+
+.side-nav-link.active {
+    background-color: rgba(16, 185, 129, 0.12);
+}
+
+.side-nav-indicator {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: #64748b;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.side-nav-link:hover .side-nav-indicator {
+    background-color: #94a3b8;
+}
+
+.side-nav-link.active .side-nav-indicator {
+    background-color: #10b981;
+    width: 8px;
+    height: 8px;
+    box-shadow: 0 0 12px rgba(16, 185, 129, 0.6);
+}
+
+.side-nav-text {
+    font-size: 0.875rem;
+    color: #94a3b8;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.side-nav-link:hover .side-nav-text {
+    color: #cbd5e1;
+}
+
+.side-nav-link.active .side-nav-text {
+    color: #10b981;
+    font-weight: 600;
+}
+
+/* Light mode - nav lateral */
+.light .side-nav {
+    background-color: #ffffff !important;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
+    border-color: #cbd5e1 !important;
+}
+
+.light .side-nav-link:hover {
+    background-color: #f1f5f9 !important;
+}
+
+.light .side-nav-link.active {
+    background-color: rgba(16, 185, 129, 0.1) !important;
+}
+
+.light .side-nav-indicator {
+    background-color: #94a3b8 !important;
+}
+
+.light .side-nav-link:hover .side-nav-indicator {
+    background-color: #475569 !important;
+}
+
+.light .side-nav-link.active .side-nav-indicator {
+    background-color: #10b981 !important;
+}
+
+.light .side-nav-text {
+    color: #64748b !important;
+}
+
+.light .side-nav-link:hover .side-nav-text {
+    color: #334155 !important;
+}
+
+.light .side-nav-link.active .side-nav-text {
+    color: #059669 !important;
+}
+
+/* ============================================
+   NAVEGAÇÃO MOBILE - INFERIOR
+   ============================================ */
+
+.mobile-nav-container {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 90;
+    background-color: rgba(15, 23, 42, 0.97);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid #334155;
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.3);
+    padding-bottom: max(0.25rem, env(safe-area-inset-bottom));
+    overflow: hidden; /* CRÍTICO: evita scroll horizontal na página */
+    width: 100%;
+}
+
+.light .mobile-nav-container {
+    background-color: rgba(255, 255, 255, 0.98) !important;
+    border-top-color: #cbd5e1 !important;
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Wrapper interno que faz o scroll horizontal real */
+.mobile-nav-scroll {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.mobile-nav-scroll::-webkit-scrollbar {
+    display: none;
+}
+
+/* Track de itens */
+.mobile-nav-track {
+    display: flex;
+    align-items: center;
+    justify-content: center; /* centraliza quando cabe na tela */
+    padding: 0.375rem 0.5rem;
+    gap: 0.125rem;
+    min-width: min-content;
+    width: 100%;
+}
+
+/* Em telas muito pequenas (360px), permitir scroll se não couber */
+@media (max-width: 420px) {
+    .mobile-nav-track {
+        justify-content: flex-start;
+    }
+}
+
+.mobile-nav-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 0.75rem;
+    color: #64748b;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.mobile-nav-item:hover {
+    color: #cbd5e1;
+    background: rgba(51, 65, 85, 0.4);
+}
+
+.mobile-nav-item.active {
+    color: #10b981;
+    background: rgba(16, 185, 129, 0.12);
+}
+
+.mobile-nav-item i {
+    width: 1.35rem;
+    height: 1.35rem;
+    stroke-width: 2;
+    pointer-events: none;
+}
+
+/* Light mode - nav mobile */
+.light .mobile-nav-item {
+    color: #64748b !important;
+}
+
+.light .mobile-nav-item:hover {
+    color: #0f172a !important;
+    background-color: #f1f5f9 !important;
+}
+
+.light .mobile-nav-item.active {
+    color: #059669 !important;
+    background-color: rgba(5, 150, 105, 0.1) !important;
+}
+
+/* ============================================
+   SCROLLBAR - OCULTAR (legado/compatibilidade)
+   ============================================ */
+
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+
+/* ============================================
+   SCROLLBAR - ESTILO GLOBAL
+   ============================================ */
+
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #020617;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 99px;
+}
+
+.light ::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+
+.light ::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+}
+
+/* ============================================
+   ANIMAÇÕES
+   ============================================ */
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-in-up {
+    animation: fadeInUp 0.6s ease-out forwards;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.step-card {
+    animation: slideIn 0.5s ease-out forwards;
+    opacity: 0;
+}
+
+.step-card:nth-child(1) { animation-delay: 0.1s; }
+.step-card:nth-child(2) { animation-delay: 0.2s; }
+.step-card:nth-child(3) { animation-delay: 0.3s; }
+.step-card:nth-child(4) { animation-delay: 0.4s; }
+.step-card:nth-child(5) { animation-delay: 0.5s; }
+
+/* ============================================
+   COLLAPSIBLE / FAQ
+   ============================================ */
+
+.collapsible-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+}
+
+.collapsible-content.active {
+    max-height: 2000px;
+}
+
+/* ============================================
+   RESPONSIVIDADE - SISTEMA COMPLETO
+   
+   Breakpoints:
+   - Base (mobile-first): < 360px
+   - xs: 360px  → celulares pequenos
+   - sm: 480px  → celulares médios
+   - md: 640px  → celulares grandes / paisagem
+   - ml: 736px  → iPhone Plus / paisagem média  ← NOVO
+   - lg: 768px  → tablets pequenos
+   - xl: 1024px → tablets grandes / desktop
+   ============================================ */
+
+/* ─── BASE (telas menores que 360px) ──────── */
+@media (max-width: 359px) {
+    main {
+        padding-left: 0.75rem !important;
+        padding-right: 0.75rem !important;
+        padding-bottom: 5.5rem !important;
+        padding-top: 1.5rem !important;
+    }
+
+    header .max-w-7xl {
+        padding-left: 0.875rem;
+        padding-right: 0.875rem;
+    }
+
+    header h1 {
+        font-size: 1rem !important;
+    }
+
+    header p {
+        font-size: 0.65rem !important;
+    }
+
+    /* Botão voltar: só ícone */
+    .go-config span {
+        display: none;
+    }
+
+    /* Intro hero */
+    section.text-center h1 {
+        font-size: 1.75rem !important;
+        line-height: 1.2 !important;
+    }
+
+    section.text-center p {
+        font-size: 0.875rem !important;
+    }
+
+    /* Section headers */
+    h2.text-3xl {
+        font-size: 1.25rem !important;
+    }
+
+    .tutorial-card {
+        padding: 1rem;
+    }
+
+    /* Tabela: ocultar colunas menos importantes */
+    table th:nth-child(3),
+    table td:nth-child(3),
+    table th:nth-child(5),
+    table td:nth-child(5) {
+        display: none;
+    }
+
+    /* Cards de estatísticas: empilhar */
+    .grid.md\:grid-cols-3 {
+        grid-template-columns: 1fr !important;
+    }
+
+    .grid.md\:grid-cols-2 {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* Nav mobile compacta */
+    .mobile-nav-item {
+        width: 2.25rem;
+        height: 2.25rem;
+        border-radius: 0.5rem;
+    }
+
+    .mobile-nav-item i {
+        width: 1.1rem;
+        height: 1.1rem;
+    }
+
+    .mobile-nav-track {
+        gap: 0;
+        padding: 0.25rem 0.25rem;
+        justify-content: space-between;
+    }
+}
+
+/* ─── XS: 360px → 479px ─────────────────── */
+@media (min-width: 360px) and (max-width: 479px) {
+    main {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+        padding-bottom: 5.5rem !important;
+        padding-top: 2rem !important;
+    }
+
+    header .max-w-7xl {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
+    header h1 {
+        font-size: 1.1rem !important;
+    }
+
+    /* Intro hero */
+    section.text-center h1 {
+        font-size: 2rem !important;
+        line-height: 1.25 !important;
+    }
+
+    section.text-center p {
+        font-size: 0.9rem !important;
+    }
+
+    /* Section titles */
+    h2.text-3xl {
+        font-size: 1.5rem !important;
+    }
+
+    .tutorial-card {
+        padding: 1.125rem;
+    }
+
+    /* Grids: sempre 1 coluna em mobile */
+    .grid.md\:grid-cols-3,
+    .grid.md\:grid-cols-2 {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* Tabela: ocultar coluna profissional e valor em telas minúsculas */
+    table th:nth-child(3),
+    table td:nth-child(3) {
+        display: none;
+    }
+
+    /* Nav mobile */
+    .mobile-nav-item {
+        width: 2.5rem;
+        height: 2.5rem;
+    }
+
+    .mobile-nav-item i {
+        width: 1.2rem;
+        height: 1.2rem;
+    }
+
+    .mobile-nav-track {
+        gap: 0;
+        justify-content: space-between;
+        padding: 0.3rem 0.5rem;
+    }
+}
+
+/* ─── SM: 480px → 639px ─────────────────── */
+@media (min-width: 480px) and (max-width: 639px) {
+    main {
+        padding-left: 1.25rem !important;
+        padding-right: 1.25rem !important;
+        padding-bottom: 5.5rem !important;
+        padding-top: 2.5rem !important;
+    }
+
+    section.text-center h1 {
+        font-size: 2.25rem !important;
+        line-height: 1.2 !important;
+    }
+
+    h2.text-3xl {
+        font-size: 1.625rem !important;
+    }
+
+    /* Grids: ainda 1 coluna */
+    .grid.md\:grid-cols-3,
+    .grid.md\:grid-cols-2 {
+        grid-template-columns: 1fr !important;
+    }
+
+    .tutorial-card {
+        padding: 1.25rem;
+    }
+
+    /* Nav: itens com tamanho padrão, centralizados */
+    .mobile-nav-track {
+        justify-content: center;
+        gap: 0.125rem;
+    }
+}
+
+/* ─── MD: 640px → 735px ─────────────────── */
+@media (min-width: 640px) and (max-width: 735px) {
+    main {
+        padding-left: 1.5rem !important;
+        padding-right: 1.5rem !important;
+        padding-bottom: 5.5rem !important;
+        padding-top: 2.5rem !important;
+    }
+
+    section.text-center h1 {
+        font-size: 2.75rem !important;
+        line-height: 1.2 !important;
+    }
+
+    h2.text-3xl {
+        font-size: 1.875rem !important;
+    }
+
+    /* Grid 2 colunas disponível aqui */
+    .grid.md\:grid-cols-2 {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+
+    .grid.md\:grid-cols-3 {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+
+    .mobile-nav-track {
+        justify-content: center;
+        gap: 0.25rem;
+    }
+}
+
+/* ─── ML: 736px → 767px (NOVO — iPhone Plus, paisagem média) ─── */
+@media (min-width: 736px) and (max-width: 767px) {
+    main {
+        padding-left: 2rem !important;
+        padding-right: 2rem !important;
+        padding-bottom: 5.5rem !important;
+        padding-top: 3rem !important;
+    }
+
+    section.text-center h1 {
+        font-size: 3rem !important;
+        line-height: 1.2 !important;
+    }
+
+    h2.text-3xl {
+        font-size: 2rem !important;
+    }
+
+    /* Grid: 2 colunas confortáveis */
+    .grid.md\:grid-cols-2 {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+
+    .grid.md\:grid-cols-3 {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+
+    .tutorial-card {
+        padding: 1.375rem;
+    }
+
+    /* CTA Final: botões em linha */
+    .flex.flex-col.sm\:flex-row {
+        flex-direction: row !important;
+    }
+
+    .mobile-nav-track {
+        justify-content: center;
+        gap: 0.35rem;
+    }
+}
+
+/* ─── LG: 768px → 1023px (Tablets) ─────── */
+@media (min-width: 768px) and (max-width: 1023px) {
+    main {
+        padding-left: 2.5rem !important;
+        padding-right: 2.5rem !important;
+        padding-bottom: 5.5rem !important;
+        padding-top: 3rem !important;
+    }
+
+    section.text-center h1 {
+        font-size: 3.25rem !important;
+    }
+
+    h2.text-3xl {
+        font-size: 2rem !important;
+    }
+
+    /* Grid 2 colunas pleno */
+    .grid.md\:grid-cols-2 {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+
+    /* Grid 3 colunas → 2 em tablets */
+    .grid.md\:grid-cols-3 {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+
+    .tutorial-card {
+        padding: 1.5rem;
+    }
+
+    /* Nav mobile: esconde no tablet se quiser, ou mantém */
+    .mobile-nav-track {
+        justify-content: center;
+        gap: 0.5rem;
+    }
+}
+
+/* ─── XL: 1024px+ (Desktop) ─────────────── */
+@media (min-width: 1024px) {
+    body {
+        /* Remove padding-bottom no desktop, side-nav lateral cuida da nav */
+        padding-bottom: 0;
+    }
+
+    main {
+        padding-left: 15rem !important; /* espaço para side nav */
+        padding-right: 2rem !important;
+        padding-bottom: 3rem !important;
+        padding-top: 3rem !important;
+    }
+
+    /* Grid 3 colunas no desktop */
+    .grid.md\:grid-cols-3 {
+        grid-template-columns: repeat(3, 1fr) !important;
+    }
+
+    .grid.md\:grid-cols-2 {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+
+    /* Ocultar nav mobile no desktop */
+    .mobile-nav-container {
+        display: none !important;
+    }
+}
+
+/* ─── Regras gerais para TODOS os mobile (< 1024px) ─── */
+@media (max-width: 1023px) {
+    /* Garante que body não tenha scroll horizontal */
+    body {
+        overflow-x: hidden;
+        padding-bottom: 0 !important;
+    }
+
+    /* Espaço inferior para não sobrepor a nav fixa */
+    main {
+        padding-bottom: 5.5rem !important;
+    }
+
+    /* Side nav lateral: oculta */
+    nav[aria-label="Navegação lateral"] {
+        display: none !important;
+    }
+
+    /* Main sem padding lateral fixo do desktop */
+    main.lg\:pl-60 {
+        padding-left: 1rem !important;
+    }
+
+    /* Tabela com scroll horizontal interno, não vaza */
+    .overflow-x-auto {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        max-width: 100%;
+    }
+
+    /* Evita que qualquer elemento quebre o layout horizontal */
+    section, .tutorial-card, .grid {
+        max-width: 100%;
+        overflow-wrap: break-word;
+        word-break: break-word;
+    }
+
+    /* CTA final: botões empilhados em mobile */
+    .flex.flex-col.sm\:flex-row {
+        flex-direction: column !important;
+        align-items: center !important;
+    }
+
+    .flex.flex-col.sm\:flex-row a {
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* Tabela demo: esconde colunas menos críticas em telas médias */
+    table {
+        font-size: 0.8125rem;
+    }
+}
+
+/* ─── Ajustes finos de tipografia por faixa ─── */
+
+/* Hero title responsivo */
+@media (max-width: 1023px) {
+    .text-5xl {
+        font-size: clamp(1.75rem, 7vw, 3.5rem) !important;
+    }
+
+    .text-6xl {
+        font-size: clamp(1.75rem, 8vw, 3.5rem) !important;
+    }
+}
+
+/* Títulos de seção responsivos */
+@media (max-width: 767px) {
+    .text-3xl {
+        font-size: clamp(1.25rem, 5vw, 1.875rem) !important;
+    }
+
+    .text-xl {
+        font-size: clamp(1rem, 4vw, 1.25rem) !important;
+    }
+}
+
+/* Descrições de seção */
+@media (max-width: 479px) {
+    .text-xl.text-slate-400 {
+        font-size: 0.9375rem !important;
+    }
+}
+
+/* ─── Altura mínima da nav mobile por tamanho ─── */
+@media (max-width: 1023px) {
+    .mobile-nav-container {
+        min-height: 3.5rem;
+    }
+}
+
+@media (max-width: 359px) {
+    .mobile-nav-container {
+        min-height: 3.25rem;
+    }
+}
