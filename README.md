@@ -1,9 +1,9 @@
-# 💈 BarberManager — Automação de Agendamentos & Dashboard Administrativo
+# 💈 SalonManager — Automação de Agendamentos & Dashboard Administrativo
 
-Este projeto é uma **solução completa de automação e gestão** desenvolvida para a **Logikabots**. O ecossistema integra um **chatbot inteligente via WhatsApp** a um **painel web administrativo**, permitindo que barbearias operem de forma 100% autônoma no atendimento inicial e agendamento.
+Este projeto é uma **solução completa de automação e gestão** desenvolvida para a **Logikabots**. O ecossistema integra um **chatbot inteligente via WhatsApp** a um **painel web administrativo**, permitindo que estabelecimentos de beleza e estética operem de forma 100% autônoma no atendimento inicial e agendamento.
 
 > [!IMPORTANT]
-> **Status do Desenvolvimento:** Atualmente, a gestão de serviços e barbeiros é realizada via **Dashboard Web**. O **aplicativo mobile nativo** já está em fase de desenvolvimento para oferecer ainda mais mobilidade e notificações em tempo real aos proprietários.
+> **Status do Desenvolvimento:** Atualmente, a gestão de serviços e profissionais é realizada via **Dashboard Web**. O **aplicativo mobile nativo** já está em fase de desenvolvimento para oferecer ainda mais mobilidade e notificações em tempo real aos proprietários.
 
 ---
 
@@ -11,7 +11,7 @@ Este projeto é uma **solução completa de automação e gestão** desenvolvida
 
 Você pode testar a interface do Dashboard Administrativo através do link abaixo:
 
-👉 **[Acessar BarberManager Demo](https://gafranc0.github.io/LogikaBots-Barbearia/Tela%20Admin)**
+👉 **[Acessar SalonManager Demo](https://gafranc0.github.io/LogikaBots-Barbearia/Tela%20Admin)**
 
 **Credenciais de Acesso:**
 * **Usuário:** `joao`
@@ -35,14 +35,14 @@ A arquitetura foi desenhada para ser **escalável e robusta**, utilizando as mel
 ## 🚀 O que a Solução Resolve?
 
 ### 🤖 Automação de Agendamentos (O Bot)
-O chatbot atua como uma **secretária virtual 24h**. O cliente pode consultar serviços, escolher o barbeiro e verificar horários disponíveis sem qualquer intervenção humana. Todo o processo é validado em **tempo real** contra o banco de dados.
+O chatbot atua como uma **secretária virtual 24h**. O cliente pode consultar serviços (corte, manicure, coloração, tratamentos, etc.), escolher o **profissional** e verificar horários disponíveis sem qualquer intervenção humana. Todo o processo é validado em **tempo real** contra o banco de dados.
 
 ### 📊 Gestão do Proprietário (O Dashboard)
 O painel administrativo oferece **controle total** sobre a operação com foco em gestão baseada em dados:
 * **Visualização em Tempo Real:** Tela dedicada para acompanhar agendamentos filtrados por **Hoje, Amanhã e Semana**.
-* **Previsão de Faturamento:** Cálculo automático de **estimativa de caixa diário**, permitindo que o dono saiba exatamente o valor projetado (ex: R$ 1.000,00 previstos para o dia atual).
+* **Previsão de Faturamento:** Cálculo automático de **estimativa de caixa diário**, permitindo que o gestor saiba exatamente o valor projetado (ex: R$ 1.000,00 previstos para o dia atual).
 * **Configuração Dinâmica:** Edição imediata de horários, serviços e valores que refletem no bot instantaneamente.
-* **Gestão de Equipe:** Cadastro e gerenciamento de barbeiros e suas agendas individuais.
+* **Gestão de Equipe:** Cadastro e gerenciamento de profissionais e suas agendas individuais.
 
 ---
 
@@ -87,7 +87,7 @@ graph TD
 
 ## 🗂️ Estrutura do Repositório
 ```text
-├── /Tela Admin/               # Painel administrativo da barbearia
+├── /Tela Admin/               # Painel administrativo do salão
 │   ├── CSS/                   # Arquivos .css
 │   ├── DataBase/              # Arquivos Backend
 │   └── JavaScript/            # Front End
@@ -106,11 +106,11 @@ graph TD
 - **Robustez:** Tratamento de erros no n8n para evitar travamentos em respostas inesperadas do usuário.
 
 ## 🎯 Status do Projeto
-✅ Dashboard Web - Concluído - Versão 1.2.0
+✅ Dashboard Web - Concluído - Versão 1.1.3
 
-✅ Fluxos n8n - Concluídos - Versão 1.2.0
+✅ Fluxos n8n - Concluídos - Versão 1.1.3
 
-✅ Banco de Dados - Concluído - Versão 1.2.0
+✅ Banco de Dados - Concluído - Versão 1.1.3
 
 ⚠️ Tela de Relatório - Em desenvolvimento
 
