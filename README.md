@@ -14,8 +14,8 @@ Você pode testar a interface do Dashboard Administrativo através do link abaix
 👉 **[Acessar BarberManager Demo](https://gafranc0.github.io/LogikaBots-Barbearia/Tela%20Admin)**
 
 **Credenciais de Acesso:**
-* **Login:** `teste@gmail.com`
-* **Senha:** `123`
+* **Usuário:** `joao`
+* **Senha:** `456`
 
 ---
 
