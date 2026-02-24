@@ -21,5 +21,14 @@ async function handleLogin(e) {
     errorMsg.classList.add('hidden');
     lucide.createIcons();
 
-    window.location.href = 'index.html';
+    localStorage.setItem('user_data', JSON.stringify(data.user));
+            
+            // Feedback visual
+            btn.classList.remove('bg-emerald-600', 'hover:bg-emerald-500');
+            btn.classList.add('bg-green-500');
+            btn.innerHTML = `<i data-lucide="check" class="w-5 h-5"></i> Sucesso!`;
+
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 800);
 }
