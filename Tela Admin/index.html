@@ -41,10 +41,10 @@
         }
     </script>
 </head>
-<body class="antialiased h-screen flex overflow-hidden selection:bg-emerald-500/30 selection:text-emerald-200 bg-slate-950">
+<body class="antialiased h-screen flex overflow-hidden selection:bg-emerald-500/30 selection:text-emerald-200 bg-slate-950 dark:bg-slate-950">
     <!-- Botão Menu Mobile -->
     <button id="mobile-menu-button" 
-        class="md:hidden fixed top-4 right-4 z-[60] p-2.5 bg-slate-800 text-emerald-500 rounded-xl border border-slate-700 shadow-2xl active:scale-95 transition-all">
+        class="md:hidden fixed top-4 right-4 z-[60] p-2.5 bg-slate-800 dark:bg-slate-800 text-emerald-500 rounded-xl border border-slate-700 dark:border-slate-700 shadow-2xl active:scale-95 transition-all">
         <i data-lucide="menu" class="w-6 h-6"></i>
     </button>
 
@@ -54,12 +54,12 @@
          class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-40 hidden md:hidden transition-opacity"></div>
 
     <!-- Sidebar -->
-    <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-slate-900 border-r border-slate-800 flex flex-col transition-transform duration-300 -translate-x-full md:translate-x-0 md:static md:flex-shrink-0">
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-slate-900 dark:bg-slate-900 border-r border-slate-800 dark:border-slate-800 flex flex-col transition-transform duration-300 -translate-x-full md:translate-x-0 md:static md:flex-shrink-0">
         
         <!-- Botão Tema -->
         <div class="px-4 mb-4 mt-4">
             <button onclick="toggleTheme()" 
-                    class="btn-tema flex items-center justify-between w-full px-4 py-3 text-slate-400 hover:text-emerald-400 hover:bg-slate-800/50 rounded-xl transition-all border border-slate-800">
+                    class="btn-tema flex items-center justify-between w-full px-4 py-3 text-slate-400 hover:text-emerald-400 hover:bg-slate-800/50 dark:hover:bg-slate-800/50 rounded-xl transition-all border border-slate-800 dark:border-slate-800">
                 <div class="flex items-center gap-3">
                     <i data-lucide="sun" id="theme-icon-light" class="w-5 h-5 hidden"></i>
                     <i data-lucide="moon" id="theme-icon-dark" class="w-5 h-5"></i>
@@ -72,7 +72,7 @@
         </div>
 
         <!-- Logo -->
-        <div class="h-24 flex items-center px-8 border-b border-slate-800/50">
+        <div class="h-24 flex items-center px-8 border-b border-slate-800/50 dark:border-slate-800/50">
             <div class="flex items-center gap-3 text-emerald-500 group">
                 <div class="relative w-12 h-12 flex items-center justify-center">
                     <div class="absolute inset-0 rounded-full bg-contrast-logo"></div>
@@ -98,13 +98,13 @@
             </a>
 
             <a href="Agendamentos.html" 
-               class="nav-item flex items-center gap-3 px-4 py-3.5 text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-xl transition-all duration-300 hover:translate-x-1">
+               class="nav-item flex items-center gap-3 px-4 py-3.5 text-slate-400 hover:text-white hover:bg-slate-800/50 dark:hover:bg-slate-800/50 rounded-xl transition-all duration-300 hover:translate-x-1">
                 <i data-lucide="calendar-clock" class="w-5 h-5 icon-animation"></i>
                 <span>Agendamentos</span>
             </a>
             
             <!-- Seção Suporte -->
-            <div class="mt-8 pt-6 border-t border-slate-800/50">
+            <div class="mt-8 pt-6 border-t border-slate-800/50 dark:border-slate-800/50">
                 <p class="px-4 text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Suporte</p>
                 
                 <a href="tutorial.html" 
@@ -114,7 +114,7 @@
                 </a>
 
                 <a target="_blank" 
-                   href="LINK_WHATSAPP" 
+                   href="https://api.whatsapp.com/send/?phone=5519997920862" 
                    class="nav-item flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-blue-400 hover:bg-blue-500/5 rounded-xl transition-all group/help">
                     <i data-lucide="help-circle" class="w-5 h-5 icon-animation"></i>
                     <span>Central de Ajuda</span>
@@ -123,10 +123,10 @@
         </nav>
 
         <!-- Perfil e Logout -->
-        <div class="p-4 border-t border-slate-800/50">
+        <div class="p-4 border-t border-slate-800/50 dark:border-slate-800/50">
             <div onclick="togglePerfilModal()" 
                  id="Perfil" 
-                 class="perfil flex items-center gap-3 p-3 rounded-xl border border-slate-800 mb-3 cursor-pointer hover:bg-slate-800 transition-colors">
+                 class="perfil flex items-center gap-3 p-3 rounded-xl border border-slate-800 dark:border-slate-800 mb-3 cursor-pointer hover:bg-slate-800 dark:hover:bg-slate-800 transition-colors">
                 <div class="w-8 h-8 rounded-full overflow-hidden bg-slate-700 flex-shrink-0">
                     <img class="w-full h-full object-cover" 
                          src="images/Usuario.png" 
@@ -147,7 +147,7 @@
     </aside>
 
     <!-- Conteúdo Principal -->
-    <main class="flex-1 overflow-y-auto bg-slate-950 relative scroll-smooth w-full" id="main-scroll">
+    <main class="flex-1 overflow-y-auto bg-slate-950 dark:bg-slate-950 relative scroll-smooth w-full" id="main-scroll">
         
         <!-- Background Decorativo -->
         <div class="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
@@ -177,7 +177,7 @@
                 <!-- Botões de Ação -->
                 <div class="flex flex-col-reverse md:flex-row items-center gap-3 w-full md:w-auto">
                     <button onclick="discardChanges()" 
-                            class="btn-descartar w-full md:w-auto justify-center px-5 py-3 text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl transition-all text-sm font-medium border border-transparent hover:border-slate-700">
+                            class="btn-descartar w-full md:w-auto justify-center px-5 py-3 text-slate-400 hover:text-white hover:bg-slate-800 dark:hover:bg-slate-800 rounded-xl transition-all text-sm font-medium border border-transparent hover:border-slate-700 dark:hover:border-slate-700">
                         Descartar
                     </button>
                     <button onclick="saveConfig()" 
@@ -189,28 +189,36 @@
             </header>
 
             <!-- Navegação Rápida -->
-            <div class="shortcut-nav sticky top-0 z-30 bg-slate-950/80 backdrop-blur-md border-b border-slate-800/50 mb-6 pr-7">
+            <div class="shortcut-nav sticky top-0 z-30 bg-slate-950/80 dark:bg-slate-950/80 backdrop-blur-md border-b border-slate-800/50 dark:border-slate-800/50 mb-6 pr-7">
                 <div class="flex items-center gap-2 overflow-x-auto no-scrollbar mask-gradient px-4 py-3">
                     <a href="#section-geral" class="nav-pill active" onclick="setActivePill(this)">
-                    <i data-lucide="hourglass" class="icon mr-1.5"></i>
-                    <span class="pill-text">Intervalo Entre Cortes</span>
-                </a>
-                    <a href="#section-horario" class="nav-pill flex-shrink-0" onclick="setActivePill(this)">
-                        <i data-lucide="clapperboard" class="icon mr-1.5"></i>
-                        <span class="pill-text">Funcionamento</span> 
+                        <i data-lucide="hourglass" class="icon"></i>
+                        <span class="pill-text"> Geral</span>
                     </a>
+    
                     <a href="#section-servicos" class="nav-pill flex-shrink-0" onclick="setActivePill(this)">
-                        <i data-lucide="scissors" class="icon mr-1.5"></i>
-                        <span class="pill-text">Serviços</span>
+                        <i data-lucide="scissors" class="icon"></i>
+                        <span class="pill-text"> Serviços</span>
                     </a>
                     <a href="#section-equipe" class="nav-pill flex-shrink-0" onclick="setActivePill(this)">
-                        <i data-lucide="users" class="icon mr-1.5"></i>
-                        <span class="pill-text">Equipe</span>
+                        <i data-lucide="users" class="icon"></i>
+                        <span class="pill-text"> Equipe</span>
                     </a>
                     <a href="#section-bloqueios" class="nav-pill flex-shrink-0" onclick="setActivePill(this)">
-                        <i data-lucide="calendar-off" class="icon mr-1.5"></i>
-                        <span class="pill-text">Bloqueios</span>
+                        <i data-lucide="calendar-off" class="icon"></i>
+                        <span class="pill-text"> Bloqueios</span>
                     </a>
+
+                    <a href="#section-localizacao" class="nav-pill" onclick="setActivePill(this)">
+                        <i data-lucide="map-pin" class="icon"></i>
+                        <span class="pill-text"> Localização</span>
+                    </a>
+
+                    <a href="#section-duvidas" class="nav-pill" onclick="setActivePill(this)">
+                        <i data-lucide="help-circle" class="icon"></i>
+                        <span class="pill-text"> Dúvidas</span>
+                    </a>
+
                 </div>
             </div>
 
@@ -219,64 +227,89 @@
                 
                 <!-- Seção: Intervalo Entre Cortes -->
                 <section id="section-geral" class="section-card scroll-mt-40 border-t-4 border-t-blue-500">
-                    <div class="flex items-center gap-4 mb-6 pb-4 border-b border-slate-700/50">
-                        <div class="p-3 bg-blue-500/10 rounded-xl border border-blue-500/20">
-                            <i data-lucide="clock" class="text-blue-400 w-6 h-6"></i>
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="p-3 bg-blue-500/10 rounded-xl border border-blue-500/20 shadow-lg shadow-blue-900 dark:shadow-blue-900">
+                            <i data-lucide="settings" class="text-blue-400 w-6 h-6"></i>
                         </div>
                         <div>
-                            <h2 class="text-xl font-bold text-white">Intervalo Entre Cortes</h2>
-                            <p class="text-sm text-slate-500">Escolha a cada quanto tempo será marcado um novo horario.</p>
+                            <h2 class="text-2xl font-bold text-white">Geral</h2>
+                            <p class="text-slate-400 text-sm">Configure os horários e dias de atendimento</p>
                         </div>
                     </div>
-                    <div class="grid grid-cols-1 gap-8">
-                        <div class="space-y-3">
-                            <label class="text-sm font-medium text-slate-300 flex items-center gap-2">
-                                Intervalo entre Cortes
-                            </label>
-                            <div class="relative">
-                                <i data-lucide="hourglass" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 z-10 pointer-events-none"></i>
-                                <select id="intervalo-cortes" name="config[intervalo]" class="input-dark pl-12 cursor-pointer appearance-none">
-                                    <option value="15">15 Minutos</option>
-                                    <option value="20">20 Minutos</option>
-                                    <option value="30" selected>30 Minutos (Padrão)</option>
-                                    <option value="40">40 Minutos</option>
-                                    <option value="45">45 Minutos</option>
-                                    <option value="60">1 Hora</option>
-                                </select>
-                                <i data-lucide="chevron-down" class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none"></i>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-slate-300 mb-2">Horário de Abertura</label>
+                                <div class="relative">
+                                    <i data-lucide="clock" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none"></i>
+                                    <input type="time" id="horario-abertura" class="input-dark pl-10 w-full">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-300 mb-2">Horário de Fechamento</label>
+                                <div class="relative">
+                                    <i data-lucide="clock-check" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none"></i>
+                                    <input type="time" id="horario-fechamento" class="input-dark pl-10 w-full">
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </section>
 
-                <!-- Seção: Horário de Funcionamento -->
-                <section id="section-horario" class="section-card scroll-mt-40 border-t-4 border-t-cyan-500">
-                    <div class="flex items-center gap-4 mb-6 pb-4 border-b border-slate-700/50">
-                        <div class="p-3 bg-cyan-500/10 rounded-xl border border-cyan-500/20">
-                            <i data-lucide="clock-8" class="text-cyan-400 w-6 h-6"></i>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-slate-300 mb-2">Primeiro Dia de Atendimento</label>
+                                <div class="relative">
+                                    <i data-lucide="calendar" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none"></i>
+                                    <select id="dia-inicio" class="input-dark pl-10 w-full">
+                                        <option value="1">Domingo</option>
+                                        <option value="2" selected>Segunda-feira</option>
+                                        <option value="3">Terça-feira</option>
+                                        <option value="4">Quarta-feira</option>
+                                        <option value="5">Quinta-feira</option>
+                                        <option value="6">Sexta-feira</option>
+                                        <option value="7">Sábado</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-300 mb-2">Último Dia de Atendimento</label>
+                                <div class="relative">
+                                    <i data-lucide="calendar-check" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none"></i>
+                                    <select id="dia-fim" class="input-dark pl-10 w-full">
+                                        <option value="1">Domingo</option>
+                                        <option value="2">Segunda-feira</option>
+                                        <option value="3">Terça-feira</option>
+                                        <option value="4">Quarta-feira</option>
+                                        <option value="5">Quinta-feira</option>
+                                        <option value="6" selected>Sexta-feira</option>
+                                        <option value="7">Sábado</option>
+                                    </select>
+                                </div>
+                            </div>
                         </div>
-                        <div>
-                            <h2 class="text-xl font-bold text-white">Horário de Funcionamento</h2>
-                            <p class="text-sm text-slate-500">Abertura e fechamento global.</p>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="space-y-2">
-                            <label class="text-sm font-medium text-slate-300">Abertura</label>
-                            <input type="time" id="horario-abertura" class="input-dark w-full">
-                        </div>
-                        <div class="space-y-2">
-                            <label class="text-sm font-medium text-slate-300">Fechamento</label>
-                            <input type="time" id="horario-fechamento" class="input-dark w-full">
+
+                        <div class="lg:col-span-2">
+                            <label class="block text-sm font-medium text-slate-300 mb-2">Intervalo entre Agendamentos</label>
+                            <div class="relative">
+                                <i data-lucide="timer" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none"></i>
+                                <select id="intervalo-cortes" class="input-dark pl-10 w-full">
+                                    <option value="15">15 minutos</option>
+                                    <option value="20">20 minutos</option>
+                                    <option value="30" selected>30 minutos</option>
+                                    <option value="40" selected>40 minutos</option>
+                                    <option value="45">45 minutos</option>
+                                    <option value="60">1 hora</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
                 </section>
 
                 <!-- Seção: Catálogo de Serviços -->
                 <section id="section-servicos" class="section-card scroll-mt-40 border-t-4 border-t-emerald-500">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 border-b border-slate-700/50 pb-4">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 border-b border-slate-700/50 dark:border-slate-700/50 pb-4">
                         <div class="flex items-center gap-4">
-                            <div class="p-3 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
+                            <div class="p-3 bg-emerald-500/10 rounded-xl border border-emerald-500/20 shadow-lg shadow-emerald-900 dark:shadow-emerald-900">
                                 <i data-lucide="scissors" class="text-emerald-400 w-6 h-6"></i>
                             </div>
                             <div>
@@ -286,7 +319,7 @@
                         </div>
                         <button type="button" 
                                 onclick="addService()" 
-                                class="w-full sm:w-auto group flex items-center justify-center gap-2 bg-slate-800 hover:bg-emerald-600 hover:text-white hover:scale-105 text-emerald-400 px-4 py-2.5 rounded-lg border border-emerald-500/30 transition-all shadow-lg active:scale-95">
+                                class="w-full sm:w-auto group flex items-center justify-center gap-2 bg-slate-800 dark:bg-slate-800 hover:bg-emerald-600 hover:text-white hover:scale-105 text-emerald-400 px-4 py-2.5 rounded-lg border border-emerald-500/30 transition-all shadow-lg active:scale-95">
                             <i data-lucide="plus-circle" class="w-4 h-4"></i>
                             <span class="font-medium">Novo Serviço</span>
                         </button>
@@ -298,7 +331,7 @@
                 <section id="section-equipe" class="section-card border-t-4 border-t-purple-500 scroll-mt-40">
                     <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-8">
                         <div class="flex items-center gap-4">
-                            <div class="p-3 bg-purple-500/10 rounded-xl border border-purple-500/20">
+                            <div class="p-3 bg-purple-500/10 rounded-xl border border-purple-500/20 shadow-lg shadow-purple-900 dark:shadow-purple-900">
                                 <i data-lucide="users" class="text-purple-400 w-6 h-6"></i>
                             </div>
                             <div>
@@ -314,12 +347,12 @@
                                 <input type="text" 
                                        id="search-barber" 
                                        placeholder="Buscar..." 
-                                       class="w-full bg-slate-900/50 border border-slate-700 text-white text-sm rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 block pl-10 p-2.5 transition-all outline-none" 
+                                       class="w-full bg-slate-900/50 dark:bg-slate-900/50 border border-slate-700 dark:border-slate-700 text-white text-sm rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 block pl-10 p-2.5 transition-all outline-none" 
                                        onkeyup="filterBarbers()">
                             </div>
                             <button type="button" 
                                     onclick="addBarber()" 
-                                    class="w-full sm:w-auto group flex items-center justify-center gap-2 bg-slate-800 hover:bg-emerald-600 hover:text-white hover:scale-105 text-emerald-400 px-4 py-2.5 rounded-lg border border-emerald-500/30 transition-all shadow-lg active:scale-95">
+                                    class="w-full sm:w-auto group flex items-center justify-center gap-2 bg-slate-800 dark:bg-slate-800 hover:bg-purple-600 hover:text-white hover:scale-105 text-purple-400 px-4 py-2.5 rounded-lg border border-purple-500/30 transition-all shadow-lg active:scale-95">
                                 <i data-lucide="user-plus" class="w-4 h-4"></i>
                                 Adicionar
                             </button>
@@ -332,34 +365,122 @@
                 <section id="section-bloqueios" class="section-card border-t-4 border-t-red-500 scroll-mt-40 mb-12">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
                         <div class="flex items-center gap-4">
-                            <div class="p-3 bg-red-500/10 rounded-xl border border-red-500/20">
+                            <div class="p-3 bg-red-500/10 rounded-xl border border-red-500/20 shadow-lg shadow-red-900 dark:shadow-red-900">
                                 <i data-lucide="calendar-off" class="text-red-400 w-6 h-6"></i>
                             </div>
                             <div>
                                 <h2 class="text-xl font-bold text-white">Bloqueios de Agenda</h2>
-                                <p class="text-sm text-slate-500">Escolha datas onde a barbearia nao vai funcionar</p>
+                                <p class="text-sm text-slate-500">Escolha datas onde a barbearia não vai funcionar</p>
                             </div>
                         </div>
                         <button type="button" 
                                 onclick="addBlock()" 
-                                class="w-full sm:w-auto group flex items-center justify-center gap-2 bg-slate-800 hover:bg-emerald-600 hover:text-white hover:scale-105 text-emerald-400 px-4 py-2.5 rounded-lg border border-emerald-500/30 transition-all shadow-lg active:scale-95">
+                                class="w-full sm:w-auto group flex items-center justify-center gap-2 bg-slate-800 dark:bg-slate-800 hover:bg-red-600 hover:text-white hover:scale-105 text-red-400 px-4 py-2.5 rounded-lg border border-red-500/30 transition-all shadow-lg active:scale-95">
                             <i data-lucide="plus" class="w-4 h-4"></i> Novo Bloqueio
                         </button>
                     </div>
                     <div class="space-y-4" id="blocks-list">
-                        <div class="p-8 bg-slate-950/30 border border-dashed border-slate-800 rounded-xl text-center flex flex-col items-center justify-center gap-3" id="no-blocks-msg">
-                            <div class="w-12 h-12 rounded-full bg-slate-900 flex items-center justify-center text-slate-600">
+                        <div class="p-8 bg-slate-950/30 dark:bg-slate-950/30 border border-dashed border-slate-800 dark:border-slate-800 rounded-xl text-center flex flex-col items-center justify-center gap-3" id="no-blocks-msg">
+                            <div class="w-12 h-12 rounded-full bg-slate-900 dark:bg-slate-900 flex items-center justify-center text-slate-600">
                                 <i data-lucide="calendar-check" class="w-6 h-6"></i>
                             </div>
                             <p class="text-slate-500 text-sm italic">Agenda 100% aberta.</p>
                         </div>
                     </div>
                 </section>
+
+                <!-- Seção: Localização -->
+                <section id="section-localizacao" class="section-card border-t-4 border-t-cyan-500 scroll-mt-40">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-12 h-12 rounded-xl bg-cyan-500/20 flex items-center justify-center shadow-lg shadow-cyan-900 dark:shadow-cyan-900">
+                            <i data-lucide="map-pin" class="w-6 h-6 text-blue-400"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-bold text-white">Localização</h2>
+                            <p class="text-slate-400 text-sm">Configure a mensagem de localização para seus clientes</p>
+                        </div>
+                    </div>
+
+                    <div class="aviso bg-yellow-400/10 border border-yellow-500/30 rounded-xl p-4 mb-6">
+                        <div class="flex gap-3">
+                            <i data-lucide="alert-circle" class="icone-aviso w-5 h-5 text-yellow-500 flex-shrink-0 mt-0.5"></i>
+                            <div>
+                                <h4 class="text-yellow-500 font-semibold mb-1">Atenção Importante</h4>
+                                <p class="text-yellow-200/90 text-sm">
+                                    A mensagem que você escrever aqui será enviada <strong>exatamente como digitada</strong> 
+                                    para o cliente quando ele solicitar a localização.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-slate-300 mb-3">
+                            Mensagem de Localização
+                            <span class="text-slate-500 font-normal ml-1">(pode incluir endereço, ponto de referência, link do Google Maps, etc.)</span>
+                        </label>
+                        
+                        <textarea 
+                            id="localizacao-text" 
+                            class="input-dark resize-none font-mono text-sm w-full !h-auto min-h-[120px] p-4" 
+                            placeholder="Exemplo:
+📍 Endereço: Rua das Flores, 123 - Centro
+
+🚗 Referência: Em frente à Praça Central
+
+🗺️ Google Maps: https://maps.google.com/..."
+                        ></textarea>
+
+                        <p class="text-slate-500 text-xs mt-2">
+                            💡 Dica: Você pode usar emojis, quebras de linha e formatação para deixar a mensagem mais clara.
+                        </p>
+                    </div>
+                </section>
+
+                <!-- Seção: Dúvidas Frequentes -->
+                <section id="section-duvidas" class="section-card scroll-mt-40 border-t-4 border-t-purple-500 !h-auto min-h-fit">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 w-full">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center shadow-lg shadow-purple-900 dark:shadow-purple-900 flex-shrink-0">
+                                <i data-lucide="help-circle" class="w-6 h-6 text-purple-400"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-2xl font-bold text-white">Dúvidas Frequentes</h2>
+                                <p class="text-slate-400 text-sm">Crie perguntas e respostas para seus clientes</p>
+                            </div>
+                        </div>
+                        
+                        <button type="button"
+                            onclick="addDuvida()" 
+                            class="btn-adicionar-duvida w-full sm:w-auto group flex items-center justify-center gap-2 bg-slate-800 dark:bg-slate-800 hover:bg-purple-600 hover:text-white hover:scale-105 text-purple-400 px-4 py-2.5 rounded-lg border border-purple-500/30 transition-all shadow-lg active:scale-95"
+                        >
+                            <i data-lucide="plus" class="w-5 h-5"></i>
+                            <span>Adicionar</span>
+                        </button>
+                    </div>
+
+                    <div class="aviso bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4 mb-6">
+                        <div class="flex gap-3">
+                            <i data-lucide="alert-circle" class="icone-aviso w-5 h-5 text-yellow-500 flex-shrink-0 mt-0.5"></i>
+                            <div>
+                                <h4 class="text-yellow-500 font-semibold mb-1">Atenção Importante</h4>
+                                <p class="text-yellow-200/90 text-sm">
+                                    As dúvidas e respostas que você cadastrar serão enviadas <strong>exatamente como digitadas</strong> para o cliente.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="duvidas-list" class="w-full h-auto flex flex-col gap-6 pb-4">
+                    </div>
+
+                </section>
+
             </form>
         </div>
        
         <!-- Footer -->
-        <footer class="text-center pb-2 md:pb-8 pt-4 text-xs text-slate-600 border-t border-slate-900 mt-10">
+        <footer class="text-center pb-2 md:pb-8 pt-4 text-xs text-slate-600 border-t border-slate-900 dark:border-slate-900 mt-10">
             <p>Logika Bots &copy; 2026. Todos os direitos reservados.</p>
         </footer>
     </main>
@@ -375,8 +496,8 @@
 
     <!-- Modal Perfil -->
     <div id="modal-perfil" class="fixed inset-0 z-[100] hidden items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
-        <div class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
-            <div class="p-6 border-b border-slate-800 flex justify-between items-center">
+        <div class="w-full max-w-md bg-slate-900 dark:bg-slate-900 border border-slate-800 dark:border-slate-800 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div class="p-6 border-b border-slate-800 dark:border-slate-800 flex justify-between items-center">
                 <h3 class="text-xl font-bold text-white flex items-center gap-2">
                     <i data-lucide="user-cog" class="w-5 h-5 text-emerald-400"></i> Meu Perfil
                 </h3>
@@ -393,10 +514,12 @@
                     </div>
                 </div>
                 <div class="space-y-1.5 relative">
-                    <label class="text-xs font-bold text-slate-500 uppercase">E-mail</label>
-                    <div class="relative">
-                        <i data-lucide="mail" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500"></i>
-                        <input type="email" id="edit-profile-email" class="input-dark pl-12" placeholder="seu@email.com">
+                    <label class="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Usuário de Login</label>
+                    <div class="relative group">
+                        <i data-lucide="user" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-emerald-500 transition-colors"></i>
+                        <input type="text" id="edit-profile-usuario" 
+                            class="input-dark pl-12 w-full" 
+                            placeholder="ex: admin_lucas">
                     </div>
                 </div>
                 <div class="space-y-1.5 relative">
@@ -407,9 +530,9 @@
                     </div>
                 </div>
             </div>
-            <div class="p-6 bg-slate-950/50 border-t border-slate-800 flex gap-3">
+            <div class="p-6 bg-slate-950/50 dark:bg-slate-950/50 border-t border-slate-800 dark:border-slate-800 flex gap-3">
                 <button onclick="togglePerfilModal()" 
-                        class="flex-1 px-4 py-3 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition-all font-medium">
+                        class="flex-1 px-4 py-3 rounded-lg bg-slate-800 dark:bg-slate-800 text-slate-300 hover:bg-slate-700 dark:hover:bg-slate-700 transition-all font-medium">
                     Cancelar
                 </button>
                 <button onclick="updateUserProfile()" 

@@ -1,74 +1,63 @@
 lucide.createIcons();
 
-// Verifica se já está logado e redireciona (opcional)
+// Verifica se já está logado
+if(localStorage.getItem('user_data')) {
+    // window.location.href = 'index.html'; 
+}
 
-        if(localStorage.getItem('user_data')) {
-
-            // window.location.href = 'index.html';
-
-        }
-
-// Simulação de banco de dados com Vetores
-const usuariosCadastrados = [
-    { 
-        id: 1, 
-        nome: "Gabriel Franco", 
-        email: "gafranco.contato@gmail.com", 
-        senha: "123" 
-    },
-    { 
-        id: 2, 
-        nome: "Admin Logikabots", 
-        email: "admin@logikabots.com", 
-        senha: "admin" 
-    }
-];
-
-function handleLogin(e) {
+async function handleLogin(e) {
     e.preventDefault();
     
-    const emailInput = document.getElementById('email').value;
-    const passwordInput = document.getElementById('password').value;
+    // MUDANÇA: Pegando pelo ID 'usuario' em vez de 'email'
+    const usuario = document.getElementById('usuario').value;
+    const password = document.getElementById('password').value;
     const btn = document.getElementById('btnSubmit');
     const errorMsg = document.getElementById('errorMsg');
 
-    // Estado de Loading (Visual)
+    // Estado de Loading
     const originalContent = btn.innerHTML;
     btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Autenticando...`;
     btn.disabled = true;
     errorMsg.classList.add('hidden');
     lucide.createIcons();
 
-    // Simulando um delay de rede de 500ms para ficar profissional
-    setTimeout(() => {
-        // BUSCA NO VETOR: Verifica se existe usuário com email e senha correspondentes
-        const usuarioEncontrado = usuariosCadastrados.find(user => 
-            user.email === emailInput && user.senha === passwordInput
-        );
+    try {
+        // Envia 'usuario' e 'password' para o servidor
+        const response = await fetch('http://localhost:3000/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ usuario, password })
+        });
 
-        if (usuarioEncontrado) {
-            // SUCESSO: Salva os dados (exceto a senha por segurança)
-            const { senha, ...dadosParaSalvar } = usuarioEncontrado;
-            localStorage.setItem('user_data', JSON.stringify(dadosParaSalvar));
+        const data = await response.json();
+
+        if (response.ok) {
+            // SUCESSO: Salva os dados no navegador
+            // O objeto 'user' agora contém 'usuario' em vez de 'email'
+            localStorage.setItem('user_data', JSON.stringify(data.user));
             
             // Feedback visual
             btn.classList.remove('bg-emerald-600', 'hover:bg-emerald-500');
             btn.classList.add('bg-green-500');
             btn.innerHTML = `<i data-lucide="check" class="w-5 h-5"></i> Sucesso!`;
             
+            // Redireciona para o painel principal
             setTimeout(() => {
                 window.location.href = 'index.html';
             }, 800);
         } else {
-            // ERRO: Usuário não encontrado
-            errorMsg.textContent = "E-mail ou senha incorretos.";
-            errorMsg.classList.remove('hidden');
-            
-            // Restaura botão
-            btn.innerHTML = originalContent;
-            btn.disabled = false;
-            lucide.createIcons();
+            throw new Error(data.message || 'Erro ao fazer login');
         }
-    }, 500);
-}
 
+    } catch (error) {
+        errorMsg.textContent = error.message;
+        errorMsg.classList.remove('hidden');
+        
+        // Restaura botão
+        btn.innerHTML = originalContent;
+        btn.classList.remove('bg-green-500');
+        btn.classList.add('bg-emerald-600');
+        btn.disabled = false;
+        lucide.createIcons();
+    }
+}

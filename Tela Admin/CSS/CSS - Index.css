@@ -192,11 +192,11 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     opacity: 0.6;
 }
 
-#Perfil {
+.perfil {
     transition: transform 0.2s;
 }
 
-#Perfil:hover {
+.perfil:hover {
     transform: scale(1.02);
     background-color: rgba(30, 41, 59, 0.5);
     cursor: pointer;
@@ -205,6 +205,38 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 /* Highlight effect */
 .section-highlight {
     animation: highlightPulse 1.5s ease-out;
+}
+
+.light .btn-adicionar-duvida:hover {
+    background-color: oklch(71.4% 0.203 305.504) !important;
+    color: white !important;
+}
+
+/* Cards de Dúvidas no modo claro */
+.light .duvida-card {
+    background-color: #f1f5f9 !important;
+    border-color: #e0e7ff !important;
+}
+
+.light .duvida-item {
+    background-color: #e0e7ff !important;
+    border-color: #c7d2fe !important;
+}
+
+.light .duvida-titulo,
+.light .duvida-resposta {
+    background-color: #ffffff !important;
+    border-color: #e2e8f0 !important;
+    color: #1e293b !important;
+}
+
+/* Ajuste do texto para não sumir no fundo claro */
+.light .aviso h4, 
+.light .aviso p, 
+.light .aviso i,
+.light .aviso,
+.light .aviso .icone-aviso {
+    color: #b91c1c !important; /* Texto em vermelho escuro para leitura */
 }
 
 @keyframes highlightPulse {
@@ -401,38 +433,31 @@ input[type=number] {
 /* --- MODO CLARO --- */
 .light body,
 .light main,
-.light #main-scroll,
-.light .bg-slate-800,
-.light .bg-slate-900,
-.light .bg-slate-700\/50,
-.light div[class*="bg-slate-"],
-.light div[class*="bg-gray-"],
-.light .flex.flex-col.gap-4.w-full.pl-3,
-.light [class*="service-container"],
-.light .rounded-xl,
-.light .rounded-lg,
-.light .flex.gap-4.items-center.w-full.sm\:flex-1,
-.light .bg-gradient-to-r.from-slate-900.to-slate-800,
-.light .bg-slate-950\/50 {
-    background-color: #ffffff !important;
-}
-
-.light body,
-.light main,
 .light #main-scroll {
     background-color: #f8fafc !important;
 }
 
-.light .bg-gradient-to-r.from-slate-900.to-slate-800 {
-    background-image: none !important;
-    border-bottom: 1px solid #e2e8f0 !important;
-}
-
-.light aside,
-.light {
+.light aside {
     background-color: #ffffff !important;
     border-color: #e2e8f0 !important;
     box-shadow: rgb(82, 82, 82) 2px 0px 20px;
+}
+
+/* Cards e containers com fundo branco */
+.light .section-card,
+.light .bg-slate-800,
+.light .bg-slate-900,
+.light .bg-slate-700\/50,
+.light .bg-slate-950\/50,
+.light .service-card,
+.light .barber-card,
+.light .block-card {
+    background-color: #ffffff !important;
+}
+
+/* Gradientes removidos no modo claro */
+.light .bg-gradient-to-r {
+    background-image: none !important;
 }
 
 .light .shortcut-nav {
@@ -663,6 +688,15 @@ input[type=number] {
     background: #9ca3af;
 }
 
+/* Background decorativo no modo claro */
+.light .bg-emerald-500\/5 {
+    background-color: rgba(16, 185, 129, 0.03) !important;
+}
+
+.light .bg-purple-500\/5 {
+    background-color: rgba(147, 51, 234, 0.03) !important;
+}
+
 .light .group\/rel:hover {
     background-color: #f1f5f9 !important;
 }
@@ -717,26 +751,31 @@ input[type=number] {
 }
 
 /* --- CORREÇÃO DEFINITIVA DO PERFIL (MODO CLARO) --- */
-.light aside #Perfil,
-.light .perfil#Perfil {
+.light aside .perfil,
+.light .perfil {
     background-color: oklch(87.1% 0.006 286.286) !important;
     border: 1px solid #818181 !important;
     box-shadow: 1px 2px 3px black !important;
     transition: all 0.3s ease !important;
 }
 
-.light aside #Perfil:hover,
-.light .perfil#Perfil:hover {
+.light aside .perfil:hover,
+.light .perfil:hover {
     background-color: #dce0e4 !important;
     border-color: #10b981 !important;
     transform: translateY(-2px) scale(1.02);
 }
 
-.light #Perfil #user-name-display {
+/* Avatar do perfil com fundo branco no modo claro */
+.light .perfil .bg-slate-700 {
+    background-color: #ffffff !important;
+}
+
+.light .perfil #user-name-display {
     color: #1e293b !important;
 }
 
-.light #Perfil #user-email-display {
+.light .perfil #user-email-display {
     color: #64748b !important;
 }
 
@@ -782,20 +821,6 @@ button[onclick="logout()"]:hover i {
     background-color: oklch(69.6% 0.17 162.48);
 }
 
-/* Ajuste do Card de Perfil */
-.light #Perfil {
-    background-color: #f8fafc !important;
-    border-color: #e2e8f0 !important;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.light #Perfil:hover {
-    background-color: #ffffff !important;
-    border-color: #10b981 !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    transform: translateY(-2px);
-}
-
 /* Logo Pulsante (Sutil) */
 .group:hover img {
     transform: scale(1.05);
@@ -834,28 +859,45 @@ button[onclick="logout()"]:hover i {
         display: none;
     }
 
-    /* 2. Ajustar o container para não rolar e espalhar os itens */
+    /* Container distribui os ícones igualmente */
     .shortcut-nav .flex {
-        overflow-x: hidden !important; /* Força a remoção da rolagem */
-        justify-content: space-around; /* Distribui os ícones igualmente na tela */
-        padding: 0.5rem;
+        overflow-x: hidden !important;
+        justify-content: space-around;
+        padding: 0.5rem 0;
+        gap: 0 !important;
     }
 
-    /* 3. Centralizar o ícone e ajustar o tamanho do botão */
+    /* Cada pill com tamanho fixo e idêntico */
     .nav-pill {
-        padding: 0.75rem !important;
-        min-width: 44px;
-        justify-content: center;
+        padding: 0 !important;
+        width: 44px !important;
+        height: 44px !important;
+        min-width: 44px !important;
+        max-width: 44px !important;
+        flex-shrink: 0 !important;
+        flex-grow: 0 !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
         margin: 0 !important;
     }
 
-    /* Remove a margem do ícone já que não tem mais texto ao lado */
+    /* Ícone com tamanho fixo */
     .nav-pill i {
-        margin-right: 0 !important;
+        margin: 0 !important;
+        width: 20px !important;
+        height: 20px !important;
+        min-width: 20px !important;
+        min-height: 20px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
     }
 
-    .icon {
-        width: 3vh;
+    /* SVGs gerados pelo Lucide Icons com tamanho forçado */
+    .nav-pill i svg {
+        width: 20px !important;
+        height: 20px !important;
     }
 }
 

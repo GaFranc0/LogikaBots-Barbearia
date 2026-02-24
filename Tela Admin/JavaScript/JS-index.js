@@ -6,9 +6,19 @@ let userSession = {};
 let servicosList = [];
 let barbeirosList = [];
 let bloqueiosList = [];
+let duvidasList = [];
 const deletedServices = new Set();
 const deletedBarbers = new Set();
 const deletedBlocks = new Set();
+const deletedDuvidas = new Set();
+
+// ⚡ NOVOS: Configurações da barbearia para validação
+let barbeariaConfig = {
+    horario_inicio: '09:00',
+    horario_fim: '19:00',
+    dia_inicio: 2, // Segunda
+    dia_fim: 6     // Sexta
+};
 
 // ==========================================
 // INICIALIZAÇÃO
@@ -19,6 +29,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     initTheme();
     initUI();
     await loadAllData();
+    setupBusinessHoursListeners(); // ⚡ NOVO
 });
 
 function checkAuth() {
@@ -40,8 +51,15 @@ function initUI() {
     const userNameDisplay = document.getElementById('user-name-display');
     const userEmailDisplay = document.getElementById('user-email-display');
     
-    if (userNameDisplay) userNameDisplay.innerText = userSession.nome || 'Admin';
-    if (userEmailDisplay) userEmailDisplay.innerText = userSession.email || 'admin@logika.com';
+    if (userNameDisplay) {
+        userNameDisplay.innerText = userSession.nome || 'Admin';
+    }
+    
+    if (userEmailDisplay) {
+        // ⚡ COMPATIBILIDADE: Mostra email OU @usuario
+        const displayText = userSession.email || (userSession.usuario ? `@${userSession.usuario}` : 'admin@logika.com');
+        userEmailDisplay.innerText = displayText;
+    }
     
     const savedInterval = localStorage.getItem('intervaloCortes');
     if (savedInterval) {
@@ -57,22 +75,254 @@ function initTheme() {
 }
 
 // ==========================================
+// ⚡ NOVO: LISTENERS PARA CONFIGURAÇÕES GERAIS
+// ==========================================
+function setupBusinessHoursListeners() {
+    const horarioAbertura = document.getElementById('horario-abertura');
+    const horarioFechamento = document.getElementById('horario-fechamento');
+    const diaInicio = document.getElementById('dia-inicio');
+    const diaFim = document.getElementById('dia-fim');
+    
+    if (horarioAbertura) {
+        horarioAbertura.addEventListener('change', () => {
+            barbeariaConfig.horario_inicio = horarioAbertura.value;
+            validateAllBarbers();
+        });
+    }
+    
+    if (horarioFechamento) {
+        horarioFechamento.addEventListener('change', () => {
+            barbeariaConfig.horario_fim = horarioFechamento.value;
+            validateAllBarbers();
+        });
+    }
+    
+    if (diaInicio) {
+        diaInicio.addEventListener('change', () => {
+            barbeariaConfig.dia_inicio = parseInt(diaInicio.value);
+            validateAllBarbers();
+        });
+    }
+    
+    if (diaFim) {
+        diaFim.addEventListener('change', () => {
+            barbeariaConfig.dia_fim = parseInt(diaFim.value);
+            validateAllBarbers();
+        });
+    }
+}
+
+// ==========================================
+// ⚡ NOVO: FUNÇÕES DE VALIDAÇÃO
+// ==========================================
+function isDayAllowed(dayNumber) {
+    // dayNumber: 1=domingo, 2=segunda, ..., 7=sábado
+    // Converte de dia da semana para número se necessário
+    const dayMap = {
+        'dom': 1, 'seg': 2, 'ter': 3, 'qua': 4, 
+        'qui': 5, 'sex': 6, 'sab': 7
+    };
+    
+    if (typeof dayNumber === 'string') {
+        dayNumber = dayMap[dayNumber];
+    }
+    
+    const inicio = barbeariaConfig.dia_inicio;
+    const fim = barbeariaConfig.dia_fim;
+    
+    // Se a faixa cruza a semana (ex: sábado a segunda)
+    if (fim < inicio) {
+        return dayNumber >= inicio || dayNumber <= fim;
+    }
+    
+    // Faixa normal (ex: segunda a sexta)
+    return dayNumber >= inicio && dayNumber <= fim;
+}
+
+function isTimeAllowed(time) {
+    if (!time) return false;
+    const inicio = barbeariaConfig.horario_inicio;
+    const fim = barbeariaConfig.horario_fim;
+    return time >= inicio && time <= fim;
+}
+
+function validateTimeInput(input, type = 'both') {
+    const value = input.value;
+    // Só valida se o horário estiver completo (formato HH:MM)
+    if (!value || value.length < 5) return;
+    
+    const inicio = barbeariaConfig.horario_inicio;
+    const fim = barbeariaConfig.horario_fim;
+    
+    // Validar contra horário da barbearia
+    if (type === 'start' || type === 'both') {
+        if (value < inicio) {
+            input.value = inicio;
+            showToast(`Horário mínimo de abertura: ${inicio}`, 'error');
+            return;
+        }
+    }
+    
+    if (type === 'end' || type === 'both') {
+        if (value > fim) {
+            input.value = fim;
+            showToast(`Horário máximo de fechamento: ${fim}`, 'error');
+            return;
+        }
+    }
+    
+    // Validar horário de fim vs início (para jornada de trabalho)
+    if (input.classList.contains('end-time')) {
+        const row = input.closest('div').parentElement;
+        const startInput = row.querySelector('.start-time');
+        if (startInput && startInput.value && value <= startInput.value) {
+            showToast(`Horário de saída deve ser maior que o de entrada!`, 'error');
+            // Define um horário padrão 1 hora depois do início
+            const [h, m] = startInput.value.split(':').map(Number);
+            const newHour = Math.min(h + 1, 23);
+            input.value = `${String(newHour).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+        }
+    }
+    
+    // Validar horário de almoço fim vs início
+    if (input.classList.contains('lunch-end')) {
+        const card = input.closest('.barber-card');
+        const lunchStart = card.querySelector('.lunch-start');
+        if (lunchStart && lunchStart.value && value <= lunchStart.value) {
+            showToast(`Horário de fim do almoço deve ser maior que o de início!`, 'error');
+            // Define um horário padrão 1 hora depois do início
+            const [h, m] = lunchStart.value.split(':').map(Number);
+            const newHour = Math.min(h + 1, 23);
+            input.value = `${String(newHour).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+        }
+    }
+}
+
+function validateAllBarbers() {
+    document.querySelectorAll('.barber-card').forEach(card => {
+        validateBarberCard(card);
+    });
+}
+
+function validateBarberCard(card) {
+    const dayChecks = card.querySelectorAll('.day-check');
+    
+    dayChecks.forEach(checkbox => {
+        const dayId = checkbox.dataset.day;
+        const allowed = isDayAllowed(dayId);
+        const row = checkbox.closest('div').parentElement;
+        const timeDiv = row.querySelector('[id^="times_"]');
+        const startInput = timeDiv.querySelector('.start-time');
+        const endInput = timeDiv.querySelector('.end-time');
+        
+        if (!allowed) {
+            // Dia não permitido - desmarcar e desabilitar
+            checkbox.checked = false;
+            checkbox.disabled = true;
+            row.style.opacity = '0.3';
+            row.style.pointerEvents = 'none';
+            
+            // Adicionar indicador visual
+            const label = row.querySelector('label');
+            if (label && !label.querySelector('.not-allowed-badge')) {
+                const badge = document.createElement('span');
+                badge.className = 'not-allowed-badge text-[9px] bg-red-500/20 text-red-400 px-2 py-0.5 rounded ml-2';
+                badge.textContent = 'Fora do horário';
+                label.appendChild(badge);
+            }
+        } else {
+            // Dia permitido - habilitar
+            checkbox.disabled = false;
+            row.style.opacity = '';
+            row.style.pointerEvents = '';
+            
+            // Remover badge se existir
+            const label = row.querySelector('label');
+            if (label) {
+                const badge = label.querySelector('.not-allowed-badge');
+                if (badge) badge.remove();
+            }
+            
+            // Validar horários se o checkbox estiver marcado
+            if (checkbox.checked && startInput.value && endInput.value) {
+                // Validar contra horário da barbearia
+                if (startInput.value < barbeariaConfig.horario_inicio) {
+                    startInput.value = barbeariaConfig.horario_inicio;
+                }
+                if (endInput.value > barbeariaConfig.horario_fim) {
+                    endInput.value = barbeariaConfig.horario_fim;
+                }
+                
+                // Validar horário fim > início
+                if (endInput.value <= startInput.value) {
+                    const [h, m] = startInput.value.split(':').map(Number);
+                    const newHour = Math.min(h + 1, 23);
+                    endInput.value = `${String(newHour).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+                }
+            }
+        }
+    });
+    
+    // Validar horário de almoço
+    const lunchStart = card.querySelector('.lunch-start');
+    const lunchEnd = card.querySelector('.lunch-end');
+    if (lunchStart && lunchStart.value) {
+        if (lunchStart.value < barbeariaConfig.horario_inicio) {
+            lunchStart.value = barbeariaConfig.horario_inicio;
+        }
+        if (lunchStart.value > barbeariaConfig.horario_fim) {
+            lunchStart.value = barbeariaConfig.horario_fim;
+        }
+    }
+    if (lunchEnd && lunchEnd.value) {
+        if (lunchEnd.value > barbeariaConfig.horario_fim) {
+            lunchEnd.value = barbeariaConfig.horario_fim;
+        }
+        if (lunchEnd.value < barbeariaConfig.horario_inicio) {
+            lunchEnd.value = barbeariaConfig.horario_inicio;
+        }
+        // Validar horário fim do almoço > início do almoço
+        if (lunchStart && lunchStart.value && lunchEnd.value <= lunchStart.value) {
+            const [h, m] = lunchStart.value.split(':').map(Number);
+            const newHour = Math.min(h + 1, 23);
+            lunchEnd.value = `${String(newHour).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+        }
+    }
+}
+
+// ==========================================
 // CARREGAMENTO DE DADOS
 // ==========================================
 async function loadAllData() {
     const idBarb = userSession.id_barbearia;
     try {
-        const [servicos, barbeiros, bloqueios, barbearia] = await Promise.all([
+        const [servicos, barbeiros, bloqueios, barbearia, duvidas] = await Promise.all([
             fetchData(`${API_URL}/servicos/${idBarb}`),
             fetchData(`${API_URL}/barbeiros/${idBarb}`),
             fetchData(`${API_URL}/bloqueios/${idBarb}`),
-            fetchData(`${API_URL}/barbearia/${idBarb}`)
+            fetchData(`${API_URL}/barbearia/${idBarb}`),
+            fetchData(`${API_URL}/duvidas/${idBarb}`)
         ]);
+        
+        // ⚡ NOVO: Atualizar configurações da barbearia ANTES de renderizar barbeiros
+        if (barbearia.horario_funcionamento_inicio) {
+            barbeariaConfig.horario_inicio = barbearia.horario_funcionamento_inicio.substring(0, 5);
+        }
+        if (barbearia.horario_funcionamento_fim) {
+            barbeariaConfig.horario_fim = barbearia.horario_funcionamento_fim.substring(0, 5);
+        }
+        if (barbearia.dia_inicio) {
+            barbeariaConfig.dia_inicio = parseInt(barbearia.dia_inicio);
+        }
+        if (barbearia.dia_fim) {
+            barbeariaConfig.dia_fim = parseInt(barbearia.dia_fim);
+        }
         
         renderServices(servicos);
         renderBarbers(barbeiros);
         renderBlocks(bloqueios);
         renderBusinessHours(barbearia);
+        renderDuvidas(duvidas);
         
         updateBarberSelects();
     } catch (error) {
@@ -120,6 +370,38 @@ function renderBusinessHours(barbearia) {
     if (barbearia.horario_funcionamento_fim) {
         document.getElementById('horario-fechamento').value = barbearia.horario_funcionamento_fim.substring(0,5);
     }
+    
+    // Renderizar dias de funcionamento
+    if (barbearia.dia_inicio) {
+        document.getElementById('dia-inicio').value = barbearia.dia_inicio;
+    }
+    if (barbearia.dia_fim) {
+        document.getElementById('dia-fim').value = barbearia.dia_fim;
+    }
+    
+    // Renderizar localização
+    if (barbearia.localizacao) {
+        document.getElementById('localizacao-text').value = barbearia.localizacao;
+    }
+}
+
+function renderDuvidas(duvidas) {
+    const container = document.getElementById('duvidas-list');
+    container.innerHTML = '';
+    const emptyMsg = document.getElementById('no-duvidas-msg');
+    
+    if (emptyMsg) {
+        if (duvidas.length > 0) {
+            emptyMsg.style.display = 'none';
+        } else {
+            emptyMsg.style.display = 'flex';
+        }
+    }
+    
+    if (Array.isArray(duvidas)) {
+        duvidasList = duvidas;
+        duvidas.forEach(d => addDuvidaToDOM(d));
+    }
 }
 
 // ==========================================
@@ -159,7 +441,6 @@ function updateThemeUI(text, transform, iconDark, iconLight, isLight) {
 // ==========================================
 // NAVEGAÇÃO
 // ==========================================
-// 1. Função para gerenciar o estado visual (CSS)
 function updateActivePill(id) {
     const pills = document.querySelectorAll('.nav-pill');
     pills.forEach(pill => {
@@ -170,7 +451,6 @@ function updateActivePill(id) {
     });
 }
 
-// 2. Configuração do Observer para detectar as seções
 const observerOptions = {
     root: null,
     rootMargin: '-20% 0px -70% 0px',
@@ -185,146 +465,29 @@ const observer = new IntersectionObserver((entries) => {
     });
 }, observerOptions);
 
-// 3. Seleciona as seções que devem ser monitoradas
 document.querySelectorAll('section[id], div[id^="section-"]').forEach((section) => {
     observer.observe(section);
 });
 
-// 4. Mantém o suporte ao clique manual
 function setActivePill(element) {
     const id = element.getAttribute('href').replace('#', '');
     updateActivePill(id);
 }
 
 // ==========================================
-// UTILITÁRIOS
-// ==========================================
-function timeToMinutes(timeStr) {
-    if (!timeStr) return 30;
-    const parts = timeStr.split(':');
-    return (parseInt(parts[0]) * 60) + parseInt(parts[1]);
-}
-
-// ==========================================
-// MENU MOBILE
-// ==========================================
-const sidebar = document.getElementById('sidebar');
-const sidebarOverlay = document.getElementById('sidebar-overlay');
-const mobileMenuButton = document.getElementById('mobile-menu-button');
-
-mobileMenuButton.addEventListener('click', toggleSidebar);
-sidebarOverlay.addEventListener('click', toggleSidebar);
-
-function toggleSidebar() {
-    const isHidden = sidebar.classList.contains('-translate-x-full');
-    if (isHidden) {
-        sidebar.classList.remove('-translate-x-full');
-        sidebarOverlay.classList.remove('hidden');
-        document.body.style.overflow = 'hidden';
-    } else {
-        sidebar.classList.add('-translate-x-full');
-        sidebarOverlay.classList.add('hidden');
-        document.body.style.overflow = '';
-    }
-}
-
-// ==========================================
-// MENU CONTA CLIENTE
-// ==========================================
-function togglePerfilModal() {
-    const modal = document.getElementById('modal-perfil');
-    const isHidden = modal.classList.contains('hidden');
-    
-    if (isHidden) {
-        document.getElementById('edit-profile-name').value = userSession.nome || '';
-        document.getElementById('edit-profile-email').value = userSession.email || '';
-        document.getElementById('edit-profile-pass').value = '';
-        
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-    } else {
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-    }
-}
-
-async function updateUserProfile() {
-    const btn = document.getElementById('btn-save-profile');
-    const originalText = btn.innerText;
-    
-    const novoNome = document.getElementById('edit-profile-name').value.trim();
-    const novoEmail = document.getElementById('edit-profile-email').value.trim();
-    const novaSenha = document.getElementById('edit-profile-pass').value.trim();
-    
-    if (!validateProfileData(novoNome, novoEmail)) return;
-    
-    try {
-        btn.innerText = "Salvando...";
-        btn.disabled = true;
-        
-        const result = await saveProfileToServer(novoNome, novoEmail, novaSenha);
-        
-        updateLocalSession(novoNome, novoEmail);
-        updateProfileUI(novoNome, novoEmail);
-        
-        showToast("Perfil atualizado!", "success");
-        togglePerfilModal();
-    } catch (error) {
-        console.error(error);
-        showToast(error.message, "error");
-    } finally {
-        btn.innerText = originalText;
-        btn.disabled = false;
-    }
-}
-
-function validateProfileData(nome, email) {
-    if (!nome || !email) {
-        showToast("Nome e E-mail são obrigatórios.", "error");
-        return false;
-    }
-    
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-        showToast("Por favor, insira um e-mail válido (ex@email.com).", "error");
-        document.getElementById('edit-profile-email').focus();
-        return false;
-    }
-    
-    return true;
-}
-
-async function saveProfileToServer(nome, email, senha) {
-    const response = await fetch(`${API_URL}/usuarios/update`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            id_usuario: userSession.id_usuario || userSession.id,
-            nome: nome,
-            email: email,
-            senha_hash: senha || null
-        })
-    });
-    
-    const result = await response.json();
-    if (!response.ok) throw new Error(result.error || 'Erro ao atualizar');
-    return result;
-}
-
-function updateLocalSession(nome, email) {
-    userSession.nome = nome;
-    userSession.email = email;
-    localStorage.setItem('user_data', JSON.stringify(userSession));
-}
-
-function updateProfileUI(nome, email) {
-    document.getElementById('user-name-display').innerText = nome;
-    document.getElementById('user-email-display').innerText = email;
-}
-
-// ==========================================
 // SERVIÇOS
 // ==========================================
+function filterServices() {
+    const searchTerm = document.getElementById('search-service').value.toLowerCase();
+    const cards = document.querySelectorAll('.service-card');
+    
+    cards.forEach(card => {
+        const nameInput = card.querySelector('.service-name');
+        const serviceName = nameInput ? nameInput.value.toLowerCase() : "";
+        card.style.display = serviceName.includes(searchTerm) ? "" : "none";
+    });
+}
+
 function addService() {
     addServiceToDOM();
 }
@@ -433,6 +596,9 @@ function addBarberToDOM(data = null) {
     container.prepend(div);
     lucide.createIcons();
     updateBarberSelects();
+    
+    // ⚡ NOVO: Validar o card após criação
+    setTimeout(() => validateBarberCard(div), 100);
 }
 
 function getBarberHTML(id, nome, almocoIni, almocoFim, data) {
@@ -481,8 +647,8 @@ function getBarberHTML(id, nome, almocoIni, almocoFim, data) {
 
 function getDayHTML(id, d, data) {
     let ativo = true;
-    let ini = '09:00';
-    let fim = '19:00';
+    let ini = barbeariaConfig.horario_inicio || '09:00';
+    let fim = barbeariaConfig.horario_fim || '19:00';
     
     if (data && data.agenda) {
         const ag = data.agenda.find(a => a.dia_semana === d.id);
@@ -494,25 +660,43 @@ function getDayHTML(id, d, data) {
         }
     }
     
+    // 🔥 CORREÇÃO: ID único mesmo para barbeiros novos
+    const uniqueId = id || `new_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+    const checkboxId = `chk_${uniqueId}_${d.id}`;
+    const timesId = `times_${uniqueId}_${d.id}`;
+    
     return `
         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 border-b border-slate-800/50 last:border-0 hover:bg-slate-800/10 gap-3">
             <div class="flex items-center gap-3 w-full sm:w-32">
-                <input type="checkbox" id="chk_${id || 'new'}_${d.id}" class="checkbox-custom day-check" data-day="${d.id}" ${ativo ? 'checked' : ''}>
-                <label for="chk_${id || 'new'}_${d.id}" class="text-sm font-medium text-slate-300 cursor-pointer flex-1">${d.l}</label>
+                <input type="checkbox" 
+                       id="${checkboxId}" 
+                       class="checkbox-custom day-check" 
+                       data-day="${d.id}" 
+                       ${ativo ? 'checked' : ''}>
+                <label for="${checkboxId}" 
+                       class="text-sm font-medium text-slate-300 cursor-pointer flex-1">
+                    ${d.l}
+                </label>
             </div>
-            <div class="flex items-center gap-2 w-full sm:w-auto transition-opacity ${ativo ? '' : 'opacity-25 pointer-events-none'}" id="times_${id || 'new'}_${d.id}">
+            <div class="flex items-center gap-2 w-full sm:w-auto transition-opacity ${ativo ? '' : 'opacity-25 pointer-events-none'}" 
+                 id="${timesId}">
                 <div class="relative w-24">
-                    <input type="time" value="${ini}" class="input-dark text-center py-1.5 px-1 text-sm w-full start-time">
+                    <input type="time" 
+                           value="${ini}" 
+                           class="input-dark text-center py-1.5 px-1 text-sm w-full start-time">
                 </div>
                 <span class="text-slate-600 self-center">-</span>
                 <div class="relative w-24">
-                    <input type="time" value="${fim}" class="input-dark text-center py-1.5 px-1 text-sm w-full end-time">
+                    <input type="time" 
+                           value="${fim}" 
+                           class="input-dark text-center py-1.5 px-1 text-sm w-full end-time">
                 </div>
             </div>
         </div>`;
 }
 
 function setupBarberEvents(div, id) {
+    // ⚡ NOVO: Eventos de checkbox com validação
     div.querySelectorAll('.day-check').forEach(chk => {
         chk.addEventListener('change', (e) => {
             const timeDiv = e.target.closest('div').nextElementSibling;
@@ -520,6 +704,25 @@ function setupBarberEvents(div, id) {
             timeDiv.classList.toggle('pointer-events-none', !e.target.checked);
         });
     });
+    
+    // ⚡ NOVO: Validar horários ao SAIR do campo (blur), não durante digitação
+    div.querySelectorAll('.start-time').forEach(input => {
+        input.addEventListener('blur', () => validateTimeInput(input, 'start'));
+    });
+    
+    div.querySelectorAll('.end-time').forEach(input => {
+        input.addEventListener('blur', () => validateTimeInput(input, 'end'));
+    });
+    
+    // ⚡ NOVO: Validar horário de almoço ao SAIR do campo
+    const lunchStart = div.querySelector('.lunch-start');
+    const lunchEnd = div.querySelector('.lunch-end');
+    if (lunchStart) {
+        lunchStart.addEventListener('blur', () => validateTimeInput(lunchStart, 'start'));
+    }
+    if (lunchEnd) {
+        lunchEnd.addEventListener('blur', () => validateTimeInput(lunchEnd, 'end'));
+    }
     
     div.querySelector('.btn-remove-barber').addEventListener('click', () => {
         if (id) deletedBarbers.add(id);
@@ -581,18 +784,69 @@ function extractBlockData(data) {
     let barberId = 'todos';
     
     if (data && data.data_inicio && data.data_fim) {
-        const startDate = data.data_inicio.split(' ')[0];
-        const startTime = data.data_inicio.split(' ')[1]?.substring(0,5) || '';
-        const endDate = data.data_fim.split(' ')[0];
-        const endTime = data.data_fim.split(' ')[1]?.substring(0,5) || '';
-        dIni = startDate;
-        hIni = startTime;
-        dFim = endDate;
-        hFim = endTime;
+        // ✅ Processar data_inicio SEM conversão de timezone
+        if (typeof data.data_inicio === 'string') {
+            if (data.data_inicio.includes(' ')) {
+                // Formato MySQL: "2026-02-16 08:20:00"
+                const parts = data.data_inicio.split(' ');
+                dIni = parts[0]; // "2026-02-16"
+                hIni = parts[1] ? parts[1].substring(0, 5) : '00:00'; // "08:20"
+            } else if (data.data_inicio.includes('T')) {
+                // Formato ISO: "2026-02-16T08:20:00"
+                const parts = data.data_inicio.split('T');
+                dIni = parts[0];
+                hIni = parts[1] ? parts[1].substring(0, 5) : '00:00';
+            } else {
+                dIni = data.data_inicio;
+                hIni = '00:00';
+            }
+        }
+        
+        // ✅ Processar data_fim SEM conversão de timezone
+        if (typeof data.data_fim === 'string') {
+            if (data.data_fim.includes(' ')) {
+                const parts = data.data_fim.split(' ');
+                dFim = parts[0];
+                hFim = parts[1] ? parts[1].substring(0, 5) : '00:00';
+            } else if (data.data_fim.includes('T')) {
+                const parts = data.data_fim.split('T');
+                dFim = parts[0];
+                hFim = parts[1] ? parts[1].substring(0, 5) : '00:00';
+            } else {
+                dFim = data.data_fim;
+                hFim = '00:00';
+            }
+        }
+        
         barberId = data.id_barbeiro || 'todos';
     }
     
+    console.log('📅 Dados do bloqueio extraídos:', { dIni, hIni, dFim, hFim, barberId });
     return { dIni, hIni, dFim, hFim, barberId };
+}
+
+// ⭐ NOVA FUNÇÃO: Formatar data para português
+function formatarDataPtBr(dataString) {
+    if (!dataString) return 'Data inválida';
+    
+    try {
+        // ✅ Extrair partes da data sem usar Date()
+        const parts = dataString.split('-');
+        if (parts.length !== 3) return dataString;
+        
+        const [ano, mes, dia] = parts;
+        
+        // Nomes dos meses
+        const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 
+                       'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+        
+        const mesNome = meses[parseInt(mes) - 1] || mes;
+        
+        return `${dia}/${mesNome}/${ano}`;
+    } catch (error) {
+        console.error('Erro ao formatar data:', error);
+        return dataString;
+    }
 }
 
 function getBlockHTML(id, dIni, hIni, dFim, hFim, barberId, motivo) {
@@ -610,106 +864,257 @@ function getBlockHTML(id, dIni, hIni, dFim, hFim, barberId, motivo) {
         </div>
         <div class="pl-3 grid grid-cols-1 gap-4">
             <div>
-                <label class="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Quem será bloqueado?</label>
-                <select class="input-dark mt-1 barber-select-block py-2">
+                <label class="text-[10px] text-slate-500 font-bold uppercase mb-2 block">Profissional</label>
+                <select class="input-dark text-sm barber-select-block">
                     ${barberOptions}
                 </select>
             </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="grid grid-cols-2 gap-3">
                 <div>
-                    <label class="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Início</label>
-                    <div class="flex flex-wrap xs:flex-nowrap gap-2 mt-1">
-                        <input type="date" value="${dIni}" class="input-dark flex-1 min-w-[130px] block-d-ini text-sm px-2">
-                        <input type="time" value="${hIni}" class="input-dark w-full xs:w-24 block-h-ini text-sm px-2">
-                    </div>
+                    <label class="text-[10px] text-slate-500 font-bold uppercase mb-2 block">Data Início</label>
+                    <input type="date" value="${dIni}" class="input-dark text-sm block-d-ini">
                 </div>
                 <div>
-                    <label class="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Fim</label>
-                    <div class="flex flex-wrap xs:flex-nowrap gap-2 mt-1">
-                        <input type="date" value="${dFim}" class="input-dark flex-1 min-w-[130px] block-d-fim text-sm px-2">
-                        <input type="time" value="${hFim}" class="input-dark w-full xs:w-24 block-h-fim text-sm px-2">
-                    </div>
+                    <label class="text-[10px] text-slate-500 font-bold uppercase mb-2 block">Hora Início</label>
+                    <input type="time" value="${hIni}" class="input-dark text-sm block-h-ini">
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="text-[10px] text-slate-500 font-bold uppercase mb-2 block">Data Fim</label>
+                    <input type="date" value="${dFim}" class="input-dark text-sm block-d-fim">
+                </div>
+                <div>
+                    <label class="text-[10px] text-slate-500 font-bold uppercase mb-2 block">Hora Fim</label>
+                    <input type="time" value="${hFim}" class="input-dark text-sm block-h-fim">
                 </div>
             </div>
             <div>
-                <label class="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Motivo</label>
-                <input type="text" value="${motivo}" placeholder="Ex: Feriado, Reforma..." class="input-dark mt-1 block-motivo py-2.5">
+                <label class="text-[10px] text-slate-500 font-bold uppercase mb-2 block">Motivo</label>
+                <input type="text" value="${motivo}" placeholder="Ex: Férias, Viagem..." class="input-dark text-sm block-motivo">
             </div>
         </div>`;
 }
 
-function getBarberSelectOptions(selectedBarberId) {
-    const barbers = getCurrentBarbers();
-    const options = barbers.map(b => 
-        `<option value="${b.id}" ${selectedBarberId == b.id ? 'selected' : ''}>${b.nome}</option>`
-    ).join('');
-    return `<option value="todos">Todos os Profissionais</option>` + options;
+function getBarberSelectOptions(selectedId) {
+    let options = '<option value="todos">Todos os Profissionais</option>';
+    document.querySelectorAll('.barber-card').forEach(card => {
+        const id = card.dataset.id;
+        const nome = card.querySelector('.barber-name').value || 'Sem Nome';
+        if (id) {
+            const selected = id == selectedId ? 'selected' : '';
+            options += `<option value="${id}" ${selected}>${nome}</option>`;
+        }
+    });
+    return options;
 }
 
 function setupBlockEvents(div, id) {
     div.querySelector('.btn-remove-block').addEventListener('click', () => {
         if (id) deletedBlocks.add(id);
         div.remove();
-        
-        const remainingBlocks = document.querySelectorAll('.block-card').length;
-        const emptyMsg = document.getElementById('no-blocks-msg');
-        if (emptyMsg && remainingBlocks === 0) {
-            emptyMsg.style.display = 'flex';
+        const container = document.getElementById('blocks-list');
+        if (container.children.length === 0) {
+            const emptyMsg = document.getElementById('no-blocks-msg');
+            if (emptyMsg) emptyMsg.style.display = 'flex';
         }
     });
 }
 
 // ==========================================
-// SALVAR TUDO
+// DÚVIDAS FREQUENTES
+// ==========================================
+function addDuvida() {
+    addDuvidaToDOM();
+}
+
+function addDuvidaToDOM(data = null) {
+    const container = document.getElementById('duvidas-list');
+    const emptyMsg = document.getElementById('no-duvidas-msg');
+    if (emptyMsg) emptyMsg.style.display = 'none';
+    
+    const id = data ? data.id_duvida : null;
+    const titulo = data ? data.duvida_titulo : '';
+    const resposta = data ? data.duvida_resposta : '';
+    
+    const div = document.createElement('div');
+    div.className = "duvida-card bg-slate-900/60 border border-slate-800 rounded-xl p-5 animate-fade-in-up relative overflow-hidden shadow-lg mb-4";
+    if (id) div.dataset.id = id;
+    
+    div.innerHTML = getDuvidaHTML(titulo, resposta);
+    
+    setupDuvidaEvents(div, id);
+    container.prepend(div);
+    lucide.createIcons();
+}
+
+function getDuvidaHTML(titulo, resposta) {
+    return `
+        <div class="absolute top-0 left-0 w-1 h-full bg-purple-500/50"></div>
+        <div class="flex justify-between items-center mb-4 pl-3">
+            <span class="text-[10px] font-bold text-purple-400 uppercase tracking-widest bg-purple-500/10 px-2 py-1 rounded flex items-center gap-1.5">
+                <i data-lucide="help-circle" class="w-3 h-3"></i> Dúvida Frequente
+            </span>
+            <button type="button" class="btn-remove-duvida text-slate-500 p-1 transition-colors">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+        <div class="pl-3 space-y-4">
+            <div>
+                <label class="text-[10px] text-slate-500 font-bold uppercase mb-2 block">Pergunta</label>
+                <input type="text" value="${titulo}" placeholder="Ex: Qual o horário de funcionamento?" class="input-dark text-sm duvida-titulo">
+            </div>
+            <div>
+                <label class="text-[10px] text-slate-500 font-bold uppercase mb-2 block">Resposta</label>
+                <textarea class="input-dark text-sm resize-none duvida-resposta" rows="3" placeholder="Digite aqui a resposta que será enviada ao cliente...">${resposta}</textarea>
+            </div>
+        </div>`;
+}
+
+function setupDuvidaEvents(div, id) {
+    div.querySelector('.btn-remove-duvida').addEventListener('click', () => {
+        if (id) deletedDuvidas.add(id);
+        div.remove();
+        const container = document.getElementById('duvidas-list');
+        if (container.children.length === 0) {
+            const emptyMsg = document.getElementById('no-duvidas-msg');
+            if (emptyMsg) emptyMsg.style.display = 'flex';
+        }
+    });
+}
+
+// ==========================================
+// HELPERS
+// ==========================================
+function timeToMinutes(mysqlTime) {
+    if (!mysqlTime) return 30;
+    const [h, m] = mysqlTime.split(':').map(Number);
+    return h * 60 + m;
+}
+
+function toggleMobileMenu() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+    
+    sidebar.classList.toggle('-translate-x-full');
+    overlay.classList.toggle('hidden');
+}
+
+document.getElementById('mobile-menu-button')?.addEventListener('click', toggleMobileMenu);
+
+// ==========================================
+// ⚡ VALIDAÇÃO ANTES DE SALVAR
 // ==========================================
 async function saveConfig() {
-    const btn = document.querySelector('button[onclick="saveConfig()"]');
-    const originalText = btn.innerHTML;
+    const idBarb = userSession.id_barbearia;
+    const fab = document.querySelector('.fab');
     
-    btn.innerHTML = `<i data-lucide="loader-2" class="animate-spin w-4 h-4"></i> Salvando...`;
-    btn.disabled = true;
-    lucide.createIcons();
+    fab.classList.add('scale-90');
+    setTimeout(() => fab.classList.remove('scale-90'), 150);
     
     try {
-        await saveAllData();
-        showToast('Configurações salvas com sucesso!', 'success');
-        clearDeletedItems();
-        setTimeout(() => window.location.reload(), 1500);
-    } catch (err) {
-        console.error('Erro ao salvar:', err);
-        showToast('Erro ao salvar. Tente novamente mais tarde.', 'error');
-        btn.innerHTML = originalText;
-        btn.disabled = false;
-        lucide.createIcons();
+        // ⚡ NOVO: Validar todos os barbeiros antes de salvar
+        const invalidBarbers = validateAllBarbersBeforeSave();
+        if (invalidBarbers.length > 0) {
+            const message = `Atenção! Os seguintes profissionais têm configurações inválidas:\n\n${invalidBarbers.join('\n')}\n\nPor favor, corrija antes de salvar.`;
+            alert(message);
+            return;
+        }
+        
+        const servicosData = collectServicesData();
+        const barbeirosData = collectBarbersData();
+        const bloqueiosData = collectBlocksData();
+        const horarioData = collectBusinessHoursData();
+        const duvidasData = collectDuvidasData();
+        
+        const [servRes, barbRes, blockRes, hourRes, duvidasRes] = await Promise.all([
+            saveServices(idBarb, servicosData),
+            saveBarbers(idBarb, barbeirosData),
+            saveBlocks(idBarb, bloqueiosData),
+            saveBusinessHours(idBarb, horarioData),
+            saveDuvidas(idBarb, duvidasData)
+        ]);
+        
+        if ([servRes, barbRes, blockRes, hourRes, duvidasRes].every(r => r.ok)) {
+            await calculateTimeSlots(idBarb, horarioData);
+            showToast("✅ Configurações salvas com sucesso!", "success");
+            clearDeletedItems();
+            
+            const intervaloSelect = document.getElementById('intervalo-cortes');
+            if (intervaloSelect) localStorage.setItem('intervaloCortes', intervaloSelect.value);
+        } else {
+            throw new Error('Falha em alguma etapa do salvamento');
+        }
+        
+    } catch (error) {
+        console.error("Erro ao salvar:", error);
+        showToast("❌ Erro ao salvar as configurações.", "error");
     }
 }
 
-async function saveAllData() {
-    const idBarb = userSession.id_barbearia;
-    saveIntervalToLocalStorage();
+// ⚡ NOVO: Validar todos os barbeiros antes de salvar
+function validateAllBarbersBeforeSave() {
+    const invalidBarbers = [];
     
-    const [
-        servicosData,
-        barbeirosData,
-        bloqueiosData,
-        horarioData
-    ] = await Promise.all([
-        collectServicesData(),
-        collectBarbersData(),
-        collectBlocksData(),
-        collectBusinessHoursData()
-    ]);
+    document.querySelectorAll('.barber-card').forEach(card => {
+        const nome = card.querySelector('.barber-name').value || 'Profissional sem nome';
+        const issues = [];
+        
+        // Verificar dias inválidos
+        card.querySelectorAll('.day-check:checked').forEach(checkbox => {
+            const dayId = checkbox.dataset.day;
+            if (!isDayAllowed(dayId)) {
+                const dayNames = {
+                    'seg': 'Segunda', 'ter': 'Terça', 'qua': 'Quarta',
+                    'qui': 'Quinta', 'sex': 'Sexta', 'sab': 'Sábado', 'dom': 'Domingo'
+                };
+                issues.push(`${dayNames[dayId]} está fora dos dias de funcionamento`);
+            }
+        });
+        
+        // Verificar horários inválidos e inconsistentes
+        card.querySelectorAll('.day-check:checked').forEach(checkbox => {
+            const row = checkbox.closest('div').parentElement;
+            const startInput = row.querySelector('.start-time');
+            const endInput = row.querySelector('.end-time');
+            
+            if (startInput && endInput && startInput.value && endInput.value) {
+                // Validar contra horário da barbearia
+                if (!isTimeAllowed(startInput.value)) {
+                    issues.push(`Horário início (${startInput.value}) está fora do horário de funcionamento`);
+                }
+                if (!isTimeAllowed(endInput.value)) {
+                    issues.push(`Horário fim (${endInput.value}) está fora do horário de funcionamento`);
+                }
+                // Validar horário fim > início
+                if (endInput.value <= startInput.value) {
+                    issues.push(`Horário de saída (${endInput.value}) deve ser maior que horário de entrada (${startInput.value})`);
+                }
+            }
+        });
+        
+        // Verificar horário de almoço
+        const lunchStart = card.querySelector('.lunch-start');
+        const lunchEnd = card.querySelector('.lunch-end');
+        if (lunchStart && lunchStart.value && !isTimeAllowed(lunchStart.value)) {
+            issues.push(`Almoço início (${lunchStart.value}) está fora do horário de funcionamento`);
+        }
+        if (lunchEnd && lunchEnd.value && !isTimeAllowed(lunchEnd.value)) {
+            issues.push(`Almoço fim (${lunchEnd.value}) está fora do horário de funcionamento`);
+        }
+        if (lunchStart && lunchEnd && lunchStart.value && lunchEnd.value && lunchEnd.value <= lunchStart.value) {
+            issues.push(`Horário fim do almoço (${lunchEnd.value}) deve ser maior que horário início (${lunchStart.value})`);
+        }
+        
+        if (issues.length > 0) {
+            invalidBarbers.push(`• ${nome}:\n  - ${issues.join('\n  - ')}`);
+        }
+    });
     
-    await Promise.all([
-        saveServices(idBarb, servicosData),
-        saveBarbers(idBarb, barbeirosData),
-        saveBlocks(idBarb, bloqueiosData),
-        saveBusinessHours(idBarb, horarioData),
-        calculateTimeSlots(idBarb, horarioData)
-    ]);
+    return invalidBarbers;
 }
 
-function saveIntervalToLocalStorage() {
+function saveInterval() {
     const intervaloSelect = document.getElementById('intervalo-cortes');
     localStorage.setItem('intervaloCortes', intervaloSelect.value);
 }
@@ -729,24 +1134,77 @@ function collectServicesData() {
 
 function collectBarbersData() {
     const barbeirosData = [];
+    
     document.querySelectorAll('.barber-card').forEach(el => {
+        const diasProcessados = new Set();
         const agenda = [];
+        
         el.querySelectorAll('.day-check:checked').forEach(chk => {
+            const diaSemana = chk.dataset.day;
+            
+            if (diasProcessados.has(diaSemana)) {
+                console.warn(`Dia ${diaSemana} duplicado ignorado`);
+                return;
+            }
+            
+            // ⚡ NOVO: Validar se o dia está permitido
+            if (!isDayAllowed(diaSemana)) {
+                console.warn(`Dia ${diaSemana} está fora do horário de funcionamento - ignorado`);
+                return;
+            }
+            
+            diasProcessados.add(diaSemana);
+            
             const row = chk.closest('div').parentElement;
-            agenda.push({
-                dia_semana: chk.dataset.day,
-                inicio: row.querySelector('.start-time').value,
-                fim: row.querySelector('.end-time').value
-            });
+            const inicio = row.querySelector('.start-time').value;
+            const fim = row.querySelector('.end-time').value;
+            
+            // ⚡ NOVO: Validar horários
+            if (!inicio || !fim) {
+                console.warn(`Horário faltando para ${diaSemana} - ignorado`);
+                return;
+            }
+            
+            // ⚡ NOVO: Validar se horário fim > início
+            if (fim <= inicio) {
+                console.warn(`Horário inválido para ${diaSemana}: ${inicio}-${fim} (fim deve ser maior que início) - ignorado`);
+                return;
+            }
+            
+            // ⚡ NOVO: Validar se os horários estão dentro do permitido
+            if (isTimeAllowed(inicio) && isTimeAllowed(fim)) {
+                agenda.push({
+                    dia_semana: diaSemana,
+                    inicio: inicio,
+                    fim: fim
+                });
+            } else {
+                console.warn(`Horário fora do permitido para ${diaSemana}: ${inicio}-${fim} - ignorado`);
+            }
         });
+        
+        const lunchStart = el.querySelector('.lunch-start').value;
+        const lunchEnd = el.querySelector('.lunch-end').value;
+        
+        // Validar horário de almoço
+        let validLunchStart = lunchStart;
+        let validLunchEnd = lunchEnd;
+        
+        if (lunchStart && lunchEnd && lunchEnd <= lunchStart) {
+            console.warn(`Horário de almoço inválido (fim deve ser maior que início) - usando padrão`);
+            validLunchStart = '12:00';
+            validLunchEnd = '13:00';
+        }
+        
         barbeirosData.push({
             id_barbeiro: el.dataset.id || null,
             nome: el.querySelector('.barber-name').value.trim(),
-            agenda,
-            almoco_inicio: el.querySelector('.lunch-start').value,
-            almoco_fim: el.querySelector('.lunch-end').value
+            agenda: agenda,
+            almoco_inicio: validLunchStart,
+            almoco_fim: validLunchEnd
         });
     });
+    
     return barbeirosData;
 }
 
@@ -777,8 +1235,28 @@ function collectBusinessHoursData() {
     const inicio = document.getElementById('horario-abertura').value;
     const fim = document.getElementById('horario-fechamento').value;
     const intervalo = parseInt(document.getElementById('intervalo-cortes').value) || 30;
+    const diaInicio = parseInt(document.getElementById('dia-inicio').value);
+    const diaFim = parseInt(document.getElementById('dia-fim').value);
+    const localizacao = document.getElementById('localizacao-text').value.trim();
     
-    return { inicio, fim, intervalo };
+    return { inicio, fim, intervalo, diaInicio, diaFim, localizacao };
+}
+
+function collectDuvidasData() {
+    const duvidasData = [];
+    document.querySelectorAll('.duvida-card').forEach(el => {
+        const titulo = el.querySelector('.duvida-titulo').value.trim();
+        const resposta = el.querySelector('.duvida-resposta').value.trim();
+        
+        if (titulo && resposta) {
+            duvidasData.push({
+                id_duvida: el.dataset.id || null,
+                titulo: titulo,
+                resposta: resposta
+            });
+        }
+    });
+    return duvidasData;
 }
 
 async function saveServices(idBarb, servicosData) {
@@ -824,7 +1302,22 @@ async function saveBusinessHours(idBarb, horarioData) {
         body: JSON.stringify({ 
             id_barbearia: idBarb, 
             inicio: horarioData.inicio, 
-            fim: horarioData.fim 
+            fim: horarioData.fim,
+            dia_inicio: horarioData.diaInicio,
+            dia_fim: horarioData.diaFim,
+            localizacao: horarioData.localizacao
+        })
+    });
+}
+
+async function saveDuvidas(idBarb, duvidasData) {
+    return fetch(`${API_URL}/duvidas`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ 
+            id_barbearia: idBarb, 
+            duvidas: duvidasData, 
+            deleted_ids: Array.from(deletedDuvidas) 
         })
     });
 }
@@ -848,6 +1341,7 @@ function clearDeletedItems() {
     deletedServices.clear();
     deletedBarbers.clear();
     deletedBlocks.clear();
+    deletedDuvidas.clear();
 }
 
 function discardChanges() {
@@ -879,4 +1373,93 @@ function showToast(msg, type) {
 function logout() {
     localStorage.removeItem('user_data');
     window.location.href = 'login.html';
+}
+// ==========================================
+// MODAL DE PERFIL
+// ==========================================
+function togglePerfilModal() {
+    const modal = document.getElementById('modal-perfil');
+    const isHidden = modal.classList.contains('hidden');
+    
+    if (isHidden) {
+        // Abrindo modal - preenche os campos com dados atuais
+        document.getElementById('edit-profile-name').value = userSession.nome || '';
+        document.getElementById('edit-profile-usuario').value = userSession.usuario || '';
+        document.getElementById('edit-profile-pass').value = ''; // Sempre começa vazio
+        
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    } else {
+        // Fechando modal
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+}
+
+async function updateUserProfile() {
+    const nome = document.getElementById('edit-profile-name').value.trim();
+    const usuario = document.getElementById('edit-profile-usuario').value.trim();
+    const senha = document.getElementById('edit-profile-pass').value.trim();
+    const btnSave = document.getElementById('btn-save-profile');
+    
+    // Validações
+    if (!nome) {
+        showToast('O nome não pode estar vazio', 'error');
+        return;
+    }
+    
+    if (!usuario) {
+        showToast('O usuário não pode estar vazio', 'error');
+        return;
+    }
+    
+    // Desabilita botão durante o salvamento
+    const originalText = btnSave.innerHTML;
+    btnSave.innerHTML = '<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Salvando...';
+    btnSave.disabled = true;
+    
+    try {
+        const body = {
+            id_usuario: userSession.id_usuario,
+            nome: nome,
+            usuario: usuario
+        };
+        
+        // Só envia senha se foi preenchida
+        if (senha && senha.length > 0) {
+            body.senha_hash = senha;
+        }
+        
+        const response = await fetch(`${API_URL}/usuarios/update`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            // Atualiza a sessão local
+            userSession.nome = nome;
+            userSession.usuario = usuario;
+            localStorage.setItem('user_data', JSON.stringify(userSession));
+            
+            // Atualiza a UI
+            document.getElementById('user-name-display').innerText = nome;
+            document.getElementById('user-email-display').innerText = `@${usuario}`;
+            
+            showToast('Perfil atualizado com sucesso!', 'success');
+            togglePerfilModal();
+        } else {
+            throw new Error(data.error || 'Erro ao atualizar perfil');
+        }
+        
+    } catch (error) {
+        console.error('Erro ao atualizar perfil:', error);
+        showToast(error.message || 'Erro ao atualizar perfil', 'error');
+    } finally {
+        btnSave.innerHTML = originalText;
+        btnSave.disabled = false;
+        lucide.createIcons();
+    }
 }

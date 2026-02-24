@@ -94,6 +94,14 @@
                         <div class="side-nav-indicator"></div>
                         <span class="side-nav-text">Bloqueios</span>
                     </a>
+                    <a href="#localizacao" class="side-nav-link" onclick="setActiveSideNav(this)" data-section="localizacao">
+                        <div class="side-nav-indicator"></div>
+                        <span class="side-nav-text">Localização</span>
+                    </a>
+                    <a href="#duvidas-freq" class="side-nav-link" onclick="setActiveSideNav(this)" data-section="duvidas-freq">
+                        <div class="side-nav-indicator"></div>
+                        <span class="side-nav-text">Dúvidas Frequentes</span>
+                    </a>
                     <a href="#dicas" class="side-nav-link" onclick="setActiveSideNav(this)" data-section="dicas">
                         <div class="side-nav-indicator"></div>
                         <span class="side-nav-text">Dicas</span>
@@ -104,35 +112,34 @@
 
         <!-- Navegação inferior mobile - CORRIGIDA -->
         <nav class="lg:hidden mobile-nav-container" aria-label="Navegação mobile">
-            <div class="max-w-screen-xl mx-auto px-2 sm:px-4">
-                <div class="flex items-center justify-around py-2.5">
+            <div class="w-full overflow-x-auto hide-scrollbar">
+                <div class="flex items-center py-2 px-2 gap-1" style="width: max-content; min-width: 100%;">
                     <a href="#intro" class="mobile-nav-item active" data-section="intro">
-                        <i data-lucide="rocket" class="w-6 h-6"></i>
-                        <span>Intro</span>
+                        <i data-lucide="rocket"></i>
                     </a>
                     <a href="#intervalo" class="mobile-nav-item" data-section="intervalo">
-                        <i data-lucide="hourglass" class="w-6 h-6"></i>
-                        <span>Intervalo</span>
+                        <i data-lucide="hourglass"></i>
                     </a>
                     <a href="#horarios" class="mobile-nav-item" data-section="horarios">
-                        <i data-lucide="clock" class="w-6 h-6"></i>
-                        <span>Horários</span>
+                        <i data-lucide="clock"></i>
                     </a>
                     <a href="#servicos" class="mobile-nav-item" data-section="servicos">
-                        <i data-lucide="scissors" class="w-6 h-6"></i>
-                        <span>Serviços</span>
+                        <i data-lucide="scissors"></i>
                     </a>
                     <a href="#profissionais" class="mobile-nav-item" data-section="profissionais">
-                        <i data-lucide="users" class="w-6 h-6"></i>
-                        <span>Equipe</span>
+                        <i data-lucide="users"></i>
                     </a>
                     <a href="#bloqueios" class="mobile-nav-item" data-section="bloqueios">
-                        <i data-lucide="calendar-off" class="w-6 h-6"></i>
-                        <span>Bloqueios</span>
+                        <i data-lucide="calendar-off"></i>
+                    </a>
+                    <a href="#localizacao" class="mobile-nav-item" data-section="localizacao">
+                        <i data-lucide="map-pin"></i>
+                    </a>
+                    <a href="#duvidas-freq" class="mobile-nav-item" data-section="duvidas-freq">
+                        <i data-lucide="help-circle"></i>
                     </a>
                     <a href="#dicas" class="mobile-nav-item" data-section="dicas">
-                        <i data-lucide="lightbulb" class="w-6 h-6"></i>
-                        <span>Dicas</span>
+                        <i data-lucide="lightbulb"></i>
                     </a>
                 </div>
             </div>
@@ -681,6 +688,236 @@
             </div>
         </section>
 
+        <!-- Seção 5: Localização -->
+        <section id="localizacao" class="mb-20 scroll-mt-24">
+            <div class="flex items-center gap-3 mb-8">
+                <div class="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center shadow-blue-950 shadow-md">
+                    <i data-lucide="map-pin" class="w-6 h-6 text-blue-400"></i>
+                </div>
+                <div>
+                    <h2 class="text-3xl font-bold text-white">7. Localização</h2>
+                    <p class="text-slate-400">Configure a localização da sua barbearia</p>
+                </div>
+            </div>
+            <div class="space-y-6">
+                <div class="tutorial-card">
+                    <div class="flex items-start gap-4 mb-4">
+                        <div class="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0">
+                            <span class="text-xl font-bold text-blue-400">1</span>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-white mb-2">Por que configurar a localização?</h3>
+                            <p class="text-slate-400 leading-relaxed">
+                                Quando um cliente solicitar a localização da barbearia através do bot, ele receberá automaticamente a mensagem que você configurar aqui.
+                                Isso facilita muito para seus clientes encontrarem sua barbearia!
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tutorial-card">
+                    <div class="flex items-start gap-4 mb-4">
+                        <div class="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
+                            <span class="text-xl font-bold text-emerald-400">2</span>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-white mb-2">O que incluir na mensagem?</h3>
+                            <p class="text-slate-400 leading-relaxed mb-4">
+                                Você pode personalizar completamente a mensagem de localização. Algumas sugestões do que incluir:
+                            </p>
+                            <ul class="space-y-2 text-slate-400">
+                                <li class="flex items-start gap-2">
+                                    <i data-lucide="check" class="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5"></i>
+                                    <span><strong class="text-white">Endereço completo:</strong> Rua, número, bairro e cidade</span>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <i data-lucide="check" class="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5"></i>
+                                    <span><strong class="text-white">Ponto de referência:</strong> "Em frente à praça", "Ao lado do banco", etc.</span>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <i data-lucide="check" class="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5"></i>
+                                    <span><strong class="text-white">Link do Google Maps:</strong> Facilita a navegação para seus clientes</span>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <i data-lucide="check" class="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5"></i>
+                                    <span><strong class="text-white">Emojis:</strong> Use 📍, 🚗, 🗺️ para deixar a mensagem mais visual</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tutorial-card">
+                    <div class="flex items-start gap-4 mb-4">
+                        <div class="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center flex-shrink-0">
+                            <span class="text-xl font-bold text-purple-400">3</span>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-white mb-2">Exemplo de mensagem</h3>
+                            <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-4 font-mono text-sm text-slate-300 mt-3">
+                                <p class="mb-2">📍 <strong>Endereço:</strong></p>
+                                <p class="mb-3 pl-6">Rua das Flores, 123 - Centro</p>
+                                <p class="mb-2">🚗 <strong>Referência:</strong></p>
+                                <p class="mb-3 pl-6">Em frente à Praça Central</p>
+                                <p class="mb-2">🗺️ <strong>Google Maps:</strong></p>
+                                <p class="pl-6">https://maps.google.com/...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tutorial-card bg-yellow-500/5 border border-yellow-500/20">
+                    <div class="flex items-start gap-3">
+                        <i data-lucide="lightbulb" class="w-6 h-6 text-yellow-400 flex-shrink-0 mt-1"></i>
+                        <div>
+                            <h3 class="text-lg font-bold text-yellow-400 mb-2">Dica Importante</h3>
+                            <p class="text-yellow-200/90 text-sm leading-relaxed">
+                                Para obter o link do Google Maps, abra o Google Maps no seu celular ou computador, 
+                                busque pela sua barbearia, clique em "Compartilhar" e copie o link. Cole esse link na mensagem de localização!
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção 6: Dúvidas Frequentes -->
+        <section id="duvidas-freq" class="mb-20 scroll-mt-24">
+            <div class="flex items-center gap-3 mb-8">
+                <div class="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center shadow-purple-950 shadow-md">
+                    <i data-lucide="help-circle" class="w-6 h-6 text-purple-400"></i>
+                </div>
+                <div>
+                    <h2 class="text-3xl font-bold text-white">8. Dúvidas Frequentes</h2>
+                    <p class="text-slate-400">Crie um FAQ automatizado para seus clientes</p>
+                </div>
+            </div>
+            <div class="space-y-6">
+                <div class="tutorial-card">
+                    <div class="flex items-start gap-4 mb-4">
+                        <div class="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center flex-shrink-0">
+                            <span class="text-xl font-bold text-purple-400">1</span>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-white mb-2">O que é esta seção?</h3>
+                            <p class="text-slate-400 leading-relaxed">
+                                Aqui você pode cadastrar perguntas e respostas que seus clientes fazem com frequência. 
+                                Quando um cliente perguntar algo ao bot, ele poderá ver as dúvidas cadastradas e receber a resposta automaticamente.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tutorial-card">
+                    <div class="flex items-start gap-4 mb-4">
+                        <div class="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
+                            <span class="text-xl font-bold text-emerald-400">2</span>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-white mb-2">Como adicionar uma dúvida?</h3>
+                            <ol class="space-y-3 text-slate-400 mt-4">
+                                <li class="flex items-start gap-3">
+                                    <span class="flex-shrink-0 w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-sm font-bold">1</span>
+                                    <span>Clique no botão <strong class="text-white">"Adicionar"</strong> na seção de Dúvidas Frequentes</span>
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <span class="flex-shrink-0 w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-sm font-bold">2</span>
+                                    <span>Digite a <strong class="text-white">pergunta</strong> no primeiro campo (ex: "Aceita cartão?")</span>
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <span class="flex-shrink-0 w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-sm font-bold">3</span>
+                                    <span>Digite a <strong class="text-white">resposta</strong> no segundo campo (ex: "Sim! Aceitamos cartão de crédito e débito.")</span>
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <span class="flex-shrink-0 w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-sm font-bold">4</span>
+                                    <span>Clique em <strong class="text-white">"Salvar Tudo"</strong> no botão flutuante verde no canto inferior direito</span>
+                                </li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tutorial-card">
+                    <div class="flex items-start gap-4 mb-4">
+                        <div class="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0">
+                            <span class="text-xl font-bold text-blue-400">3</span>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-white mb-2">Exemplos de dúvidas para cadastrar</h3>
+                            <div class="space-y-4 mt-4">
+                                <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-4">
+                                    <p class="text-emerald-400 font-semibold mb-2">❓ "Aceita cartão?"</p>
+                                    <p class="text-slate-300 text-sm pl-6">✅ "Sim! Aceitamos cartão de crédito, débito e Pix."</p>
+                                </div>
+                                <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-4">
+                                    <p class="text-emerald-400 font-semibold mb-2">❓ "Qual o horário de funcionamento?"</p>
+                                    <p class="text-slate-300 text-sm pl-6">✅ "Funcionamos de segunda a sábado, das 9h às 19h."</p>
+                                </div>
+                                <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-4">
+                                    <p class="text-emerald-400 font-semibold mb-2">❓ "Precisa agendar?"</p>
+                                    <p class="text-slate-300 text-sm pl-6">✅ "Sim, trabalhamos apenas com agendamento prévio para melhor atendê-lo!"</p>
+                                </div>
+                                <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-4">
+                                    <p class="text-emerald-400 font-semibold mb-2">❓ "Tem estacionamento?"</p>
+                                    <p class="text-slate-300 text-sm pl-6">✅ "Sim, temos estacionamento gratuito no local."</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tutorial-card">
+                    <div class="flex items-start gap-4 mb-4">
+                        <div class="w-10 h-10 rounded-full bg-orange-500/20 flex items-center justify-center flex-shrink-0">
+                            <span class="text-xl font-bold text-orange-400">4</span>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-white mb-2">Como editar ou remover dúvidas?</h3>
+                            <p class="text-slate-400 leading-relaxed mb-4">
+                                É muito simples gerenciar suas dúvidas frequentes:
+                            </p>
+                            <ul class="space-y-2 text-slate-400">
+                                <li class="flex items-start gap-2">
+                                    <i data-lucide="edit" class="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5"></i>
+                                    <span><strong class="text-white">Para editar:</strong> Basta modificar o texto diretamente nos campos e clicar em "Salvar Tudo"</span>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <i data-lucide="trash-2" class="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5"></i>
+                                    <span><strong class="text-white">Para remover:</strong> Clique no ícone de lixeira no canto superior direito da dúvida e depois em "Salvar Tudo"</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tutorial-card bg-red-500/5 border border-red-500/20">
+                    <div class="flex items-start gap-3">
+                        <i data-lucide="alert-circle" class="w-6 h-6 text-red-400 flex-shrink-0 mt-1"></i>
+                        <div>
+                            <h3 class="text-lg font-bold text-red-400 mb-2">Atenção Importante</h3>
+                            <p class="text-red-200/90 text-sm leading-relaxed">
+                                As dúvidas e respostas que você cadastrar serão enviadas <strong>exatamente como você digitou</strong> para o cliente.
+                                Por isso, revise bem a ortografia e a clareza das suas respostas antes de salvar!
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tutorial-card bg-emerald-500/5 border border-emerald-500/20">
+                    <div class="flex items-start gap-3">
+                        <i data-lucide="sparkles" class="w-6 h-6 text-emerald-400 flex-shrink-0 mt-1"></i>
+                        <div>
+                            <h3 class="text-lg font-bold text-emerald-400 mb-2">Dica Pro</h3>
+                            <p class="text-emerald-200/90 text-sm leading-relaxed">
+                                Cadastre as perguntas mais comuns que você recebe no WhatsApp! Isso vai economizar muito tempo seu e dos seus clientes.
+                                Perguntas sobre formas de pagamento, horários, localização e política de cancelamento são sempre as mais frequentes.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- Seção 7: Dicas e Boas Práticas -->
         <section id="dicas" class="mb-20 scroll-mt-24">
             <div class="flex items-center gap-3 mb-8">
@@ -688,7 +925,7 @@
                     <i data-lucide="lightbulb" class="w-6 h-6 text-yellow-400"></i>
                 </div>
                 <div>
-                    <h2 class="text-3xl font-bold text-white">7. Dicas e Boas Práticas</h2>
+                    <h2 class="text-3xl font-bold text-white">9. Dicas e Boas Práticas</h2>
                     <p class="text-slate-400">Tire o máximo proveito do sistema</p>
                 </div>
             </div>
@@ -884,7 +1121,7 @@
                         <i data-lucide="settings" class="w-5 h-5"></i>
                         Ir para Configurações
                     </a>
-                    <a href="LINK_WHATSAPP" target="_blank" rel="noopener noreferrer" class="go-suport px-8 py-4 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold transition-all flex items-center gap-2">
+                    <a href="https://api.whatsapp.com/send/?phone=5519997920862" target="_blank" rel="noopener noreferrer" class="go-suport px-8 py-4 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold transition-all flex items-center gap-2">
                         <i data-lucide="message-circle" class="w-5 h-5"></i>
                         Falar com Suporte
                     </a>

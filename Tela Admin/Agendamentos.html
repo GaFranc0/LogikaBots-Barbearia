@@ -94,16 +94,16 @@
             <div class="mt-8 pt-6 border-t border-slate-800">
                 <p class="px-4 text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Suporte</p>
                 
-                <a href="tutorial.html" 
+                <a href="tutorial_agendamentos.html" 
                    class="nav-item flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-blue-400 hover:bg-blue-500/5 rounded-xl transition-all">
-                    <i data-lucide="help-circle" class="w-5 h-5 icon-animation"></i>
+                    <i data-lucide="file-question" class="w-5 h-5 icon-animation"></i>
                     <span>Como Usar</span>
                 </a>
 
                 <a target="_blank" 
-                   href="LINK_WHATSAPP" 
+                   href="https://api.whatsapp.com/send/?phone=5519997920862" 
                    class="nav-item flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-blue-400 hover:bg-blue-500/5 rounded-xl transition-all">
-                    <i data-lucide="message-circle" class="w-5 h-5 icon-animation"></i>
+                    <i data-lucide="help-circle" class="w-5 h-5 icon-animation"></i>
                     <span>Central de Ajuda</span>
                 </a>
             </div>
@@ -132,55 +132,31 @@
         </div>
     </aside>
 
-    <!-- Conteúdo Principal -->
-    <main class="flex-1 flex flex-col bg-slate-950 relative overflow-hidden">
-        
-        <!-- Background Decorativo -->
-        <div class="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
-            <div class="absolute top-[-10%] right-[-5%] w-[300px] md:w-[600px] h-[300px] md:h-[600px] bg-emerald-500/5 rounded-full blur-[80px] md:blur-[120px]"></div>
-            <div class="absolute bottom-[20%] left-[-10%] w-[250px] md:w-[500px] h-[250px] md:h-[500px] bg-purple-500/5 rounded-full blur-[60px] md:blur-[100px]"></div>
-        </div>
-
-        <!-- Container com Scroll -->
-        <div class="relative z-10 flex-1 overflow-y-auto">
-            <div class="w-full max-w-7xl mx-auto px-4 md:px-6 py-6">
+    <!-- Main Content -->
+    <main class="flex-1 overflow-y-auto bg-slate-950" id="main-scroll">
+        <div class="min-h-full p-4 sm:p-6 lg:p-8">
+            <div class="max-w-7xl mx-auto space-y-6">
                 
                 <!-- Header -->
-                <header class="mb-6">
-                    <div class="flex items-center gap-2 text-sm text-emerald-500 font-mono mb-2">
-                        <span>Admin</span>
-                        <i data-lucide="chevron-right" class="w-3 h-3"></i>
-                        <span>Agendamentos</span>
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                        <h1 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-3">
+                            <i data-lucide="calendar-clock" class="w-7 h-7 sm:w-8 sm:h-8 text-emerald-500"></i>
+                            Agendamentos
+                        </h1>
+                        <p class="text-slate-400 text-sm mt-2">Gerencie todos os agendamentos do seu salão</p>
                     </div>
-                    <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
-                        <div>
-                            <h1 class="text-2xl md:text-3xl font-bold text-white tracking-tight">
-                                Painel de Agendamentos
-                            </h1>
-                            <p class="text-slate-400 mt-1 text-sm flex items-center gap-2">
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                                Visão em tempo real do fluxo da barbearia
-                            </p>
-                        </div>
-                        <div class="live flex items-center gap-3 bg-slate-900/50 border border-emerald-500/20 px-3 py-2 rounded-full shadow-lg shadow-emerald-900">
-                            <span class="relative flex h-2 w-2">
-                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                            </span>
-                            <span class="text-xs font-mono font-bold text-emerald-400 uppercase">Live</span>
-                        </div>
-                    </div>
-                </header>
+                </div>
 
-                <!-- Cards Estatísticas -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                <!-- Cards de Estatísticas -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div class="section-card p-4 flex items-start justify-between group border-t-4 border-t-blue-500">
                         <div>
                             <p class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Hoje</p>
-                            <p class="text-2xl md:text-3xl font-bold text-white" id="stat-hoje">0</p>
+                            <p class="text-2xl md:text-3xl font-bold text-blue-400 font-mono" id="stat-hoje">0</p>
                         </div>
                         <div class="p-3 bg-blue-500/10 rounded-xl text-blue-400 border border-blue-500/20 shadow-lg shadow-blue-900">
-                            <i data-lucide="calendar" class="w-5 h-5"></i>
+                            <i data-lucide="calendar-check" class="w-5 h-5"></i>
                         </div>
                     </div>
 
@@ -205,49 +181,72 @@
                     </div>
                 </div>
 
-                <!-- Tabela de Agendamentos com Altura Fixa -->
+                <!-- Tabela de Agendamentos -->
                 <div class="section-card table-container overflow-hidden flex flex-col">
                     <!-- Header da Tabela -->
                     <div class="p-3 border-b border-slate-700/50 bg-slate-900/40 flex-shrink-0">
+                        <!-- Filtros de Data e Botões -->
                         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-3">
                             <div class="flex items-center gap-2 flex-wrap w-full sm:w-auto">
-                                <div class="filter-btn active text-xs font-bold px-3 py-1.5 rounded-lg transition-colors cursor-pointer" 
+                                <button class="filter-btn active text-xs font-bold px-3 py-1.5 rounded-lg transition-colors cursor-pointer" 
                                         data-filter="hoje">
                                     Hoje
-                                </div>
-                                <div class="filter-btn text-xs font-bold px-3 py-1.5 rounded-lg transition-colors cursor-pointer" 
+                                </button>
+                                <button class="filter-btn text-xs font-bold px-3 py-1.5 rounded-lg transition-colors cursor-pointer" 
                                         data-filter="amanha">
                                     Amanhã
-                                </div>
-                                <div class="filter-btn text-xs font-bold px-3 py-1.5 rounded-lg transition-colors cursor-pointer" 
+                                </button>
+                                <button class="filter-btn text-xs font-bold px-3 py-1.5 rounded-lg transition-colors cursor-pointer" 
                                         data-filter="semana">
                                     Semana
-                                </div>
+                                </button>
                             </div>
-                            <button id="btn-toggle-free-slots"
-                                    class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20 hover:bg-blue-500/20 transition-all text-xs font-bold w-full sm:w-auto justify-center">
-                                <i data-lucide="calendar-plus" class="w-4 h-4"></i>
-                                <span class="hidden sm:inline">Ver Todos Horários</span>
-                                <span class="sm:hidden">Horários</span>
-                            </button>
+                            <div class="flex gap-2 w-full sm:w-auto">
+                                <button id="btn-toggle-free-slots"
+                                        class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20 hover:bg-blue-500/20 transition-all text-xs font-bold flex-1 sm:flex-initial justify-center">
+                                    <i data-lucide="calendar-plus" class="w-4 h-4"></i>
+                                    <span class="hidden sm:inline">Ver Todos Horários</span>
+                                    <span class="sm:hidden">Horários</span>
+                                </button>
+                                <button id="btn-block-slot"
+                                        class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 transition-all text-xs font-bold flex-1 sm:flex-initial justify-center">
+                                    <i data-lucide="ban" class="w-4 h-4"></i>
+                                    <span class="hidden sm:inline">Bloquear Horário</span>
+                                    <span class="sm:hidden">Bloquear</span>
+                                </button>
+                            </div>
                         </div>
-                        <div class="relative">
-                            <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500"></i>
-                            <input type="text" 
-                                   id="search-input"
-                                   placeholder="Buscar cliente..." 
-                                   class="bg-slate-950 border border-slate-700 text-slate-300 text-sm rounded-lg pl-9 pr-3 py-2 focus:border-emerald-500 outline-none w-full transition-all">
+
+                        <!-- Filtro por Barbeiro e Busca -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            <!-- Filtro por Barbeiro -->
+                            <div class="relative">
+                                <i data-lucide="user" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500"></i>
+                                <select id="barber-filter" 
+                                        class="bg-slate-950 border border-slate-700 text-slate-300 text-sm rounded-lg pl-9 pr-3 py-2 focus:border-emerald-500 outline-none w-full transition-all">
+                                    <option value="todos">Todos os Barbeiros</option>
+                                </select>
+                            </div>
+
+                            <!-- Busca -->
+                            <div class="relative">
+                                <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500"></i>
+                                <input type="text" 
+                                       id="search-input"
+                                       placeholder="Buscar cliente..." 
+                                       class="bg-slate-950 border border-slate-700 text-slate-300 text-sm rounded-lg pl-9 pr-3 py-2 focus:border-emerald-500 outline-none w-full transition-all">
+                            </div>
                         </div>
                     </div>
 
                     <!-- Tabela com Scroll -->
                     <div class="flex-1 overflow-y-auto min-h-[300px]">
                         <table class="w-full text-left border-collapse">
-                            <!-- Cabeçalhos otimizados para mobile -->
                             <thead class="bg-slate-900/80 text-[10px] md:text-[11px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-700/50 sticky top-0 z-10">
                                 <tr>
                                     <th class="px-3 md:px-6 py-3 min-w-[120px]">Cliente</th>
-                                    <th class="px-3 md:px-6 py-3 hidden md:table-cell">Horário</th>
+                                    <th class="px-3 md:px-6 py-3 hidden sm:table-cell">Horário</th>
+                                    <th class="px-3 md:px-6 py-3 hidden md:table-cell">Data</th>
                                     <th class="px-3 md:px-6 py-3 hidden lg:table-cell">Profissional</th>
                                     <th class="px-3 md:px-6 py-3 hidden xl:table-cell">Serviço</th>
                                     <th class="px-3 md:px-6 py-3 text-right hidden sm:table-cell">Valor</th>
@@ -265,6 +264,56 @@
             </div>
         </div>
     </main>
+
+    <!-- Modal de Perfil -->
+    <div id="modal-perfil" class="fixed inset-0 z-[100] hidden items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
+        <div class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div class="p-6 border-b border-slate-800 flex justify-between items-center">
+                <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                    <i data-lucide="user-cog" class="w-5 h-5 text-emerald-400"></i> Meu Perfil
+                </h3>
+                <button onclick="togglePerfilModal()" class="text-slate-400 hover:text-white transition-colors">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            <div class="p-6 space-y-4">
+                <div class="space-y-1.5 relative">
+                    <label class="text-xs font-bold text-slate-500 uppercase">Nome Completo</label>
+                    <div class="relative">
+                        <i data-lucide="user" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500"></i>
+                        <input type="text" id="edit-profile-name" class="input-dark pl-12" placeholder="Seu nome">
+                    </div>
+                </div>
+                <div class="space-y-1.5 relative">
+                    <label class="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Usuário de Login</label>
+                    <div class="relative group">
+                        <i data-lucide="user" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-emerald-500 transition-colors"></i>
+                        <input type="text" id="edit-profile-usuario" 
+                            class="input-dark pl-12 w-full" 
+                            placeholder="ex: admin_lucas">
+                    </div>
+                </div>
+                <div class="space-y-1.5 relative">
+                    <label class="text-xs font-bold text-slate-500 uppercase">Nova Senha</label>
+                    <div class="relative">
+                        <i data-lucide="lock" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500"></i>
+                        <input type="password" id="edit-profile-pass" class="input-dark pl-12" placeholder="Deixe em branco para manter">
+                    </div>
+                </div>
+            </div>
+            <div class="p-6 bg-slate-950/50 border-t border-slate-800 flex gap-3">
+                <button onclick="togglePerfilModal()" 
+                        class="flex-1 px-4 py-3 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition-all font-medium">
+                    Cancelar
+                </button>
+                <button onclick="updateUserProfile()" 
+                        id="btn-save-profile" 
+                        class="flex-1 px-4 py-3 rounded-lg bg-emerald-500 text-slate-900 hover:bg-emerald-400 transition-all font-bold">
+                    Salvar
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- Toast Container -->
     <div id="toast-container" class="fixed bottom-4 right-4 z-[200] flex flex-col gap-2 max-w-[calc(100vw-2rem)]"></div>

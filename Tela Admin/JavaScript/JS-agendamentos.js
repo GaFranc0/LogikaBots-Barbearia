@@ -4,11 +4,14 @@
 const API_URL = 'http://localhost:3000';
 let userSession = {};
 let allAppointments = [];
+let blockedSlots = []; // ⭐ NOVO: Lista de horários bloqueados
 let filteredAppointments = [];
 let currentFilter = 'hoje';
 let selectedAppointmentId = null;
 let showingFreeSlots = false;
 let allTimeSlots = [];
+let allBarbers = [];
+let selectedBarber = 'todos';
 
 // ⚡ CONTROLES DE PERFORMANCE
 let isLoading = false;
@@ -24,7 +27,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     checkAuth();
     initTheme();
     initUI();
-    setupEventListeners(); // ⚡ Antes de carregar dados
+    setupEventListeners();
+    await loadBarbers();
     await loadAppointments();
     startAutoRefresh();
 });
@@ -73,10 +77,26 @@ function setupEventListeners() {
             toggleFreeSlots();
         });
     }
+
+    const blockSlotBtn = document.getElementById('btn-block-slot');
+    if (blockSlotBtn) {
+        blockSlotBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            openBlockSlotModal();
+        });
+    }
+    
+    const barberFilter = document.getElementById('barber-filter');
+    if (barberFilter) {
+        barberFilter.addEventListener('change', function(e) {
+            selectedBarber = e.target.value;
+            applyAllFilters();
+        });
+    }
     
     const searchInput = document.getElementById('search-input');
     if (searchInput) {
-        // ⚡ Debounce na busca para evitar renderizações excessivas
         searchInput.addEventListener('input', debounceSearch);
     }
     
@@ -98,6 +118,7 @@ function checkAuth() {
         console.log('✅ Usuário autenticado:', {
             nome: userSession.nome,
             email: userSession.email,
+            usuario: userSession.usuario,
             id_barbearia: userSession.id_barbearia
         });
     } catch (e) {
@@ -118,7 +139,8 @@ function initUI() {
     }
     
     if (userEmailDisplay) {
-        userEmailDisplay.textContent = userSession.email || 'admin@logika.com';
+        const displayText = userSession.email || (userSession.usuario ? `@${userSession.usuario}` : 'admin@logika.com');
+        userEmailDisplay.textContent = displayText;
     }
     
     criarModalDetalhes();
@@ -138,10 +160,125 @@ function initTheme() {
 }
 
 // ==========================================
-// CARREGAMENTO DE DADOS - SUPER OTIMIZADO ⚡⚡⚡
+// CARREGAR BARBEIROS
+// ==========================================
+async function loadBarbers() {
+    const idBarb = userSession.id_barbearia;
+    
+    if (!idBarb) {
+        console.error('❌ ID da barbearia não encontrado');
+        return;
+    }
+    
+    try {
+        console.log('👨‍💼 Carregando barbeiros...');
+        const response = await fetch(`${API_URL}/barbeiros/${idBarb}`);
+        
+        if (response.ok) {
+            const data = await response.json();
+            allBarbers = data.filter(b => b.situacao === 'ativo');
+            console.log(`✅ ${allBarbers.length} barbeiros carregados`);
+            
+            const barberFilter = document.getElementById('barber-filter');
+            if (barberFilter) {
+                barberFilter.innerHTML = '<option value="todos">Todos os Barbeiros</option>';
+                allBarbers.forEach(barber => {
+                    const option = document.createElement('option');
+                    option.value = barber.id_barbeiro;
+                    option.textContent = barber.nome;
+                    barberFilter.appendChild(option);
+                });
+            }
+        }
+    } catch (error) {
+        console.error('❌ Erro ao carregar barbeiros:', error);
+    }
+}
+
+// ==========================================
+// 🔒 CARREGAR BLOQUEIOS - ✅ CORRIGIDO TIMEZONE
+// ==========================================
+async function loadBlockedSlots() {
+    const idBarb = userSession.id_barbearia;
+    
+    if (!idBarb) {
+        console.error('❌ ID da barbearia não encontrado');
+        return;
+    }
+    
+    try {
+        console.log('🔒 Carregando horários bloqueados...');
+        const response = await fetch(`${API_URL}/bloqueios/${idBarb}`);
+        
+        if (response.ok) {
+            const data = await response.json();
+            
+            // ⭐ CORREÇÃO: Processar bloqueios SEM conversão de timezone
+            blockedSlots = data.map(block => {
+                let dataInicio, horaInicio, dataFim, horaFim;
+                
+                // ✅ Processar data_inicio
+                if (block.data_inicio && typeof block.data_inicio === 'string') {
+                    if (block.data_inicio.includes(' ')) {
+                        // Formato MySQL: "2026-02-16 08:20:00"
+                        const parts = block.data_inicio.split(' ');
+                        dataInicio = parts[0]; // "2026-02-16"
+                        horaInicio = parts[1] ? parts[1].substring(0, 5) : '00:00'; // "08:20"
+                    } else if (block.data_inicio.includes('T')) {
+                        // Formato ISO: "2026-02-16T08:20:00"
+                        const parts = block.data_inicio.split('T');
+                        dataInicio = parts[0];
+                        horaInicio = parts[1] ? parts[1].substring(0, 5) : '00:00';
+                    } else {
+                        dataInicio = block.data_inicio;
+                        horaInicio = '00:00';
+                    }
+                }
+                
+                // ✅ Processar data_fim
+                if (block.data_fim && typeof block.data_fim === 'string') {
+                    if (block.data_fim.includes(' ')) {
+                        const parts = block.data_fim.split(' ');
+                        dataFim = parts[0];
+                        horaFim = parts[1] ? parts[1].substring(0, 5) : '00:00';
+                    } else if (block.data_fim.includes('T')) {
+                        const parts = block.data_fim.split('T');
+                        dataFim = parts[0];
+                        horaFim = parts[1] ? parts[1].substring(0, 5) : '00:00';
+                    } else {
+                        dataFim = block.data_fim;
+                        horaFim = '00:00';
+                    }
+                }
+                
+                const bloqueio = {
+                    id_bloqueio: block.id_bloqueio,
+                    id_barbeiro: block.id_barbeiro,
+                    nome_barbeiro: block.nome_barbeiro || 'Barbeiro',
+                    data: dataInicio,           // compatibilidade
+                    hora: horaInicio,           // compatibilidade
+                    data_inicio: dataInicio,    // completo
+                    hora_inicio: horaInicio,    // completo
+                    data_fim: dataFim,          // completo
+                    hora_fim: horaFim,          // completo
+                    motivo: block.motivo || 'Horário bloqueado'
+                };
+                
+                console.log('✅ Bloqueio processado:', bloqueio);
+                return bloqueio;
+            });
+            
+            console.log(`✅ ${blockedSlots.length} bloqueios carregados`);
+        }
+    } catch (error) {
+        console.error('❌ Erro ao carregar bloqueios:', error);
+    }
+}
+
+// ==========================================
+// CARREGAMENTO DE DADOS - SUPER OTIMIZADO
 // ==========================================
 async function loadAppointments() {
-    // ⚡ Prevenir múltiplas requisições simultâneas
     if (isLoading) {
         console.log('⏸️ Carregamento já em andamento, ignorando...');
         return;
@@ -156,21 +293,18 @@ async function loadAppointments() {
     }
     
     isLoading = true;
-    console.log(`🔍 Carregando agendamentos da barbearia: ${idBarb}`);
+    console.log(`🔍 Carregando dados da barbearia: ${idBarb}`);
     
-    // ⚡ AbortController para cancelar requisições longas
     loadingController = new AbortController();
     const signal = loadingController.signal;
     
     try {
         showLoading();
         
-        // ⚡ TIMEOUT de 10 segundos para evitar travamentos
         const timeoutId = setTimeout(() => {
             loadingController.abort();
         }, 10000);
         
-        // ⚡ Carregar em paralelo com timeout
         const [horariosResponse, agendamentosResponse] = await Promise.all([
             fetch(`${API_URL}/horarios/${idBarb}`, { signal }),
             fetch(`${API_URL}/agendamentos/${idBarb}`, { signal })
@@ -207,10 +341,12 @@ async function loadAppointments() {
         allAppointments = processAppointmentsData(data);
         console.log(`📊 ${allAppointments.length} agendamentos processados`);
         
-        // ⚡ Usar requestAnimationFrame para renderização suave
+        await loadBlockedSlots();
+        
         requestAnimationFrame(() => {
-            applyFilters();
+            applyAllFilters();
             updateStatistics();
+            updateFreeSlotButtonState();
             hideLoading();
         });
         
@@ -248,7 +384,6 @@ function processAppointmentsData(data) {
         return [];
     }
     
-    // ⚡ Map otimizado sem múltiplas conversões de data
     return data.map((app, index) => {
         const dataObj = new Date(app.data_agendamento);
         const dataFormatada = formatDate(dataObj);
@@ -257,9 +392,11 @@ function processAppointmentsData(data) {
             ...app,
             id_agendamento: app.id_agendamento || index + 1,
             data_agendamento: dataFormatada,
+            data_obj: dataObj,
             nome_cliente: app.nome_cliente || `Cliente ${index + 1}`,
             telefone_cliente: app.telefone_cliente || 'Sem telefone',
             nome_barbeiro: app.nome_barbeiro || 'Não definido',
+            id_barbeiro: app.id_barbeiro,
             nome_servico: app.nome_servico || 'Serviço',
             preco: parseFloat(app.preco || 0),
             status_agendamento: app.status_agendamento || 'agendado',
@@ -269,13 +406,16 @@ function processAppointmentsData(data) {
     });
 }
 
-function applyFilters() {
+// ==========================================
+// APLICAR TODOS OS FILTROS
+// ==========================================
+function applyAllFilters() {
     const now = new Date();
     const today = formatDate(now);
     const tomorrow = formatDate(new Date(now.getTime() + 24 * 60 * 60 * 1000));
     const weekEnd = formatDate(new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000));
     
-    filteredAppointments = allAppointments.filter(app => {
+    let filtered = allAppointments.filter(app => {
         const appDate = app.data_agendamento;
         
         switch(currentFilter) {
@@ -290,14 +430,55 @@ function applyFilters() {
         }
     });
     
-    // Ordenação otimizada
-    filteredAppointments.sort((a, b) => {
+    if (selectedBarber !== 'todos') {
+        filtered = filtered.filter(app => app.id_barbeiro == selectedBarber);
+    }
+    
+    const searchTerm = document.getElementById('search-input')?.value?.toLowerCase().trim();
+    if (searchTerm) {
+        filtered = filtered.filter(app => {
+            const nomeCliente = (app.nome_cliente || '').toLowerCase();
+            const telefone = (app.telefone_cliente || '').toLowerCase().replace(/\D/g, '');
+            const nomeBarbeiro = (app.nome_barbeiro || '').toLowerCase();
+            const searchTermClean = searchTerm.replace(/\D/g, '');
+            
+            return nomeCliente.includes(searchTerm) || 
+                   (telefone && telefone.includes(searchTermClean)) || 
+                   nomeBarbeiro.includes(searchTerm);
+        });
+    }
+    
+    filteredAppointments = filtered.sort((a, b) => {
         const dateCompare = a.data_agendamento.localeCompare(b.data_agendamento);
         if (dateCompare !== 0) return dateCompare;
         return (a.horario_inicio || '').localeCompare(b.horario_inicio || '');
     });
     
     renderAppointments();
+}
+
+function filterByDate(filter) {
+    console.log('🔍 Filtro alterado para:', filter);
+    currentFilter = filter;
+    showingFreeSlots = false;
+    
+    const btnFreeSlots = document.getElementById('btn-toggle-free-slots');
+    if (btnFreeSlots) {
+        btnFreeSlots.innerHTML = '<i data-lucide="calendar-plus" class="w-4 h-4"></i> <span class="hidden sm:inline">Ver Todos Horários</span><span class="sm:hidden">Horários</span>';
+        btnFreeSlots.classList.remove('bg-emerald-500/10', 'text-emerald-400', 'border-emerald-500/20');
+        btnFreeSlots.classList.add('bg-blue-500/10', 'text-blue-400', 'border-blue-500/20');
+        lucide.createIcons();
+    }
+    
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.getAttribute('data-filter') === filter) {
+            btn.classList.add('active');
+        }
+    });
+    
+    updateFreeSlotButtonState();
+    applyAllFilters();
 }
 
 function formatDate(date) {
@@ -307,8 +488,34 @@ function formatDate(date) {
     return `${year}-${month}-${day}`;
 }
 
+function updateFreeSlotButtonState() {
+    const btn = document.getElementById('btn-toggle-free-slots');
+    if (!btn) return;
+    
+    if (currentFilter === 'hoje' || currentFilter === 'amanha') {
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        btn.style.cursor = 'pointer';
+        btn.title = '';
+    } else {
+        btn.disabled = true;
+        btn.style.opacity = '0.5';
+        btn.style.cursor = 'not-allowed';
+        btn.title = 'Disponível apenas para Hoje e Amanhã';
+        
+        if (showingFreeSlots) {
+            showingFreeSlots = false;
+            btn.innerHTML = '<i data-lucide="calendar-plus" class="w-4 h-4"></i> <span class="hidden sm:inline">Ver Todos Horários</span><span class="sm:hidden">Horários</span>';
+            btn.classList.remove('bg-emerald-500/10', 'text-emerald-400', 'border-emerald-500/20');
+            btn.classList.add('bg-blue-500/10', 'text-blue-400', 'border-blue-500/20');
+            lucide.createIcons();
+            renderAppointments();
+        }
+    }
+}
+
 // ==========================================
-// RENDERIZAÇÃO - OTIMIZADA ⚡
+// RENDERIZAÇÃO - OTIMIZADA
 // ==========================================
 function renderAppointments() {
     console.log('🎨 Renderizando agendamentos...');
@@ -316,10 +523,9 @@ function renderAppointments() {
     const tbody = document.getElementById('appointments-tbody');
     if (!tbody) return;
     
-    // ⚡ Usar DocumentFragment para renderização eficiente
     const fragment = document.createDocumentFragment();
     
-    const hoje = formatDate(new Date());
+    const targetDate = getTargetDateFromFilter();
     const agora = new Date();
     const horaAtual = agora.getHours() * 60 + agora.getMinutes();
     
@@ -327,7 +533,7 @@ function renderAppointments() {
         if (filteredAppointments.length === 0) {
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td colspan="7" class="px-6 py-12 text-center">
+                <td colspan="8" class="px-6 py-12 text-center">
                     <div class="flex flex-col items-center gap-3 text-slate-500">
                         <i data-lucide="calendar-x" class="w-12 h-12 opacity-50"></i>
                         <p class="text-sm">Nenhum agendamento encontrado</p>
@@ -336,7 +542,6 @@ function renderAppointments() {
             `;
             fragment.appendChild(tr);
         } else {
-            // ⚡ Batch rendering
             filteredAppointments.forEach(app => {
                 const row = createAppointmentRow(app);
                 fragment.appendChild(row);
@@ -346,7 +551,7 @@ function renderAppointments() {
         if (allTimeSlots.length === 0) {
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td colspan="7" class="px-6 py-12 text-center">
+                <td colspan="8" class="px-6 py-12 text-center">
                     <div class="flex flex-col items-center gap-3 text-slate-500">
                         <i data-lucide="clock-alert" class="w-12 h-12 opacity-50"></i>
                         <p class="text-sm">Nenhum horário configurado</p>
@@ -356,52 +561,163 @@ function renderAppointments() {
             fragment.appendChild(tr);
         } else {
             const sortedSlots = [...allTimeSlots].sort();
-            const agendamentosPorHorario = {};
             
-            filteredAppointments.forEach(app => {
-                if (app.data_agendamento === hoje) {
-                    const horario = app.horario_inicio?.substring(0, 5);
-                    if (horario) {
-                        agendamentosPorHorario[horario] = app;
-                    }
-                }
-            });
-            
-            sortedSlots.forEach(horario => {
-                const [horas, minutos] = horario.split(':').map(Number);
-                const minutosHorario = horas * 60 + minutos;
-                const isHorarioPassado = hoje === formatDate(new Date()) && minutosHorario < horaAtual;
-                
-                const agendamento = agendamentosPorHorario[horario];
-                const tr = createTimeSlotRow(horario, agendamento, isHorarioPassado);
-                fragment.appendChild(tr);
-            });
+            if (selectedBarber !== 'todos') {
+                renderSlotsByBarber(sortedSlots, fragment, targetDate, horaAtual);
+            } else {
+                renderSlotsAllBarbers(sortedSlots, fragment, targetDate, horaAtual);
+            }
         }
     }
     
-    // ⚡ Uma única operação de DOM
     tbody.innerHTML = '';
     tbody.appendChild(fragment);
     
-    // ⚡ Event delegation em vez de listeners individuais
     tbody.addEventListener('click', handleTableClick);
     
-    // ⚡ Batch icon creation
     requestAnimationFrame(() => {
         lucide.createIcons();
     });
 }
 
-// ⚡ Event delegation para melhor performance
+function getTargetDateFromFilter() {
+    const now = new Date();
+    
+    switch(currentFilter) {
+        case 'hoje':
+            return formatDate(now);
+        case 'amanha':
+            return formatDate(new Date(now.getTime() + 24 * 60 * 60 * 1000));
+        default:
+            return formatDate(now);
+    }
+}
+
+function renderSlotsByBarber(sortedSlots, fragment, targetDate, horaAtual) {
+    const agendamentosPorHorario = {};
+    const bloqueiosPorHorario = {};
+    
+    // Mapear agendamentos por horário
+    filteredAppointments.forEach(app => {
+        if (app.data_agendamento === targetDate) {
+            const horario = app.horario_inicio?.substring(0, 5);
+            if (horario) {
+                agendamentosPorHorario[horario] = app;
+            }
+        }
+    });
+    
+    // ⭐ CORREÇÃO: Mapear bloqueios por intervalo completo
+    blockedSlots.forEach(block => {
+        if (block.data_inicio === targetDate && block.id_barbeiro == selectedBarber) {
+            // Verificar todos os horários que este bloqueio afeta
+            const [bloqInicioHora, bloqInicioMin] = (block.hora_inicio || '00:00').split(':').map(Number);
+            const [bloqFimHora, bloqFimMin] = (block.hora_fim || '23:59').split(':').map(Number);
+            
+            const bloqInicioMinutos = bloqInicioHora * 60 + bloqInicioMin;
+            const bloqFimMinutos = bloqFimHora * 60 + bloqFimMin;
+            
+            // Marcar todos os horários dentro deste intervalo
+            sortedSlots.forEach(horario => {
+                const [hora, min] = horario.split(':').map(Number);
+                const horarioMinutos = hora * 60 + min;
+                
+                // ✅ Lógica correta: horário está bloqueado se está dentro do intervalo
+                if (horarioMinutos >= bloqInicioMinutos && horarioMinutos < bloqFimMinutos) {
+                    bloqueiosPorHorario[horario] = block;
+                }
+            });
+        }
+    });
+    
+    sortedSlots.forEach(horario => {
+        const [horas, minutos] = horario.split(':').map(Number);
+        const minutosHorario = horas * 60 + minutos;
+        const isHorarioPassado = targetDate === formatDate(new Date()) && minutosHorario < horaAtual;
+        
+        const agendamento = agendamentosPorHorario[horario];
+        const bloqueio = bloqueiosPorHorario[horario];
+        
+        const tr = createTimeSlotRow(horario, agendamento, isHorarioPassado, bloqueio);
+        fragment.appendChild(tr);
+    });
+}
+
+function renderSlotsAllBarbers(sortedSlots, fragment, targetDate, horaAtual) {
+    sortedSlots.forEach(horario => {
+        const [horas, minutos] = horario.split(':').map(Number);
+        const minutosHorario = horas * 60 + minutos;
+        const isHorarioPassado = targetDate === formatDate(new Date()) && minutosHorario < horaAtual;
+        
+        // Buscar todos os agendamentos para este horário
+        const agendamentosHorario = filteredAppointments.filter(app => {
+            if (app.data_agendamento !== targetDate) return false;
+            const horarioApp = app.horario_inicio?.substring(0, 5);
+            return horarioApp === horario;
+        });
+        
+        // ⭐ CORREÇÃO: Buscar bloqueios que afetam este horário (intervalo completo)
+        const bloqueiosHorario = blockedSlots.filter(block => {
+            if (block.data_inicio !== targetDate) return false;
+            
+            // Verificar se este horário está dentro do intervalo de bloqueio
+            const [hora, min] = horario.split(':').map(Number);
+            const horarioMinutos = hora * 60 + min;
+            
+            const [bloqInicioHora, bloqInicioMin] = (block.hora_inicio || '00:00').split(':').map(Number);
+            const [bloqFimHora, bloqFimMin] = (block.hora_fim || '23:59').split(':').map(Number);
+            
+            const bloqInicioMinutos = bloqInicioHora * 60 + bloqInicioMin;
+            const bloqFimMinutos = bloqFimHora * 60 + bloqFimMin;
+            
+            // ✅ Lógica correta: horário está bloqueado se está dentro do intervalo
+            return horarioMinutos >= bloqInicioMinutos && horarioMinutos < bloqFimMinutos;
+        });
+        
+        // Mostrar agendamentos
+        if (agendamentosHorario.length > 0) {
+            agendamentosHorario.forEach(agendamento => {
+                const tr = createTimeSlotRow(horario, agendamento, isHorarioPassado, null);
+                fragment.appendChild(tr);
+            });
+        }
+        
+        // Mostrar bloqueios (mesmo que haja agendamentos - para outros barbeiros)
+        if (bloqueiosHorario.length > 0) {
+            bloqueiosHorario.forEach(bloqueio => {
+                // Verificar se já não há um agendamento deste barbeiro neste horário
+                const temAgendamento = agendamentosHorario.some(ag => ag.id_barbeiro == bloqueio.id_barbeiro);
+                if (!temAgendamento) {
+                    const tr = createTimeSlotRow(horario, null, isHorarioPassado, bloqueio);
+                    fragment.appendChild(tr);
+                }
+            });
+        }
+        
+        // Se não tem nem agendamento nem bloqueio, mostrar horário livre
+        if (agendamentosHorario.length === 0 && bloqueiosHorario.length === 0) {
+            const tr = createTimeSlotRow(horario, null, isHorarioPassado, null);
+            fragment.appendChild(tr);
+        }
+    });
+}
+
 function handleTableClick(e) {
     const row = e.target.closest('tr[data-appointment-id]');
     if (row) {
         const id = parseInt(row.getAttribute('data-appointment-id'));
         viewDetails(id);
     }
+    
+    const unblockBtn = e.target.closest('.btn-unblock-slot');
+    if (unblockBtn) {
+        e.stopPropagation();
+        const blockId = parseInt(unblockBtn.getAttribute('data-block-id'));
+        unblockTimeSlot(blockId);
+    }
 }
 
-function createTimeSlotRow(horario, agendamento, isHorarioPassado) {
+function createTimeSlotRow(horario, agendamento, isHorarioPassado, bloqueio) {
     const tr = document.createElement('tr');
     tr.className = 'transition-colors hover:bg-slate-900/40';
     
@@ -411,6 +727,7 @@ function createTimeSlotRow(horario, agendamento, isHorarioPassado) {
         
         const statusInfo = getStatusInfo(agendamento.status_agendamento);
         const statusClass = getStatusClass(agendamento.status_agendamento);
+        const dataFormatada = formatDisplayDateShort(agendamento.data_agendamento);
         
         tr.innerHTML = `
             <td class="px-4 md:px-6 py-3">
@@ -420,12 +737,15 @@ function createTimeSlotRow(horario, agendamento, isHorarioPassado) {
                     </div>
                     <div class="min-w-0 flex-1">
                         <p class="text-white font-medium text-sm md:text-base truncate">${agendamento.nome_cliente || 'Cliente'}</p>
-                        <p class="text-xs text-slate-500 truncate md:hidden">${horario}</p>
+                        <p class="text-xs text-slate-500 truncate sm:hidden">${horario}</p>
                     </div>
                 </div>
             </td>
-            <td class="px-4 md:px-6 py-3 text-white font-mono text-xs md:text-sm hidden md:table-cell">
+            <td class="px-4 md:px-6 py-3 text-white font-mono text-xs md:text-sm hidden sm:table-cell">
                 ${horario}
+            </td>
+            <td class="px-4 md:px-6 py-3 text-slate-300 text-xs hidden md:table-cell">
+                ${dataFormatada}
             </td>
             <td class="px-4 md:px-6 py-3 text-slate-300 hidden lg:table-cell">
                 <span class="text-xs">${agendamento.nome_barbeiro}</span>
@@ -447,9 +767,38 @@ function createTimeSlotRow(horario, agendamento, isHorarioPassado) {
                 </div>
             </td>
         `;
-    } else if (isHorarioPassado) {
+    }
+    else if (bloqueio) {
+        tr.className = 'transition-colors hover:bg-slate-900/40';
+        
         tr.innerHTML = `
-            <td colspan="7" class="px-4 md:px-6 py-3">
+            <td colspan="8" class="px-4 md:px-6 py-3">
+                <div class="flex items-center justify-between bg-red-500/5 border border-red-500/20 rounded-lg p-2">
+                    <div class="flex items-center gap-3 flex-1">
+                        <div class="w-10 h-10 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center flex-shrink-0">
+                            <i data-lucide="ban" class="w-5 h-5 text-red-400"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex flex-col md:flex-row md:items-center gap-1 md:gap-3">
+                                <p class="text-red-400 font-mono font-bold text-sm md:text-base">${horario}</p>
+                                <span class="text-xs text-red-400/80">BLOQUEADO</span>
+                                <span class="text-xs text-slate-400 hidden md:inline">• ${bloqueio.nome_barbeiro}</span>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-0.5">${bloqueio.motivo}</p>
+                        </div>
+                    </div>
+                    <button class="btn-unblock-slot px-3 py-1.5 rounded-lg bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 transition-all text-xs font-bold flex items-center gap-1.5" 
+                            data-block-id="${bloqueio.id_bloqueio}">
+                        <i data-lucide="unlock" class="w-3 h-3"></i>
+                        <span class="hidden sm:inline">Desbloquear</span>
+                    </button>
+                </div>
+            </td>
+        `;
+    }
+    else if (isHorarioPassado) {
+        tr.innerHTML = `
+            <td colspan="8" class="px-4 md:px-6 py-3">
                 <div class="flex items-center justify-between opacity-40">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-full bg-slate-800/50 border border-slate-700 flex items-center justify-center flex-shrink-0">
@@ -468,9 +817,10 @@ function createTimeSlotRow(horario, agendamento, isHorarioPassado) {
                 </div>
             </td>
         `;
-    } else {
+    }
+    else {
         tr.innerHTML = `
-            <td colspan="7" class="px-4 md:px-6 py-3">
+            <td colspan="8" class="px-4 md:px-6 py-3">
                 <div class="flex items-center justify-between opacity-80">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center flex-shrink-0">
@@ -502,6 +852,7 @@ function createAppointmentRow(app) {
     const horarioFormatado = app.horario_inicio ? app.horario_inicio.substring(0, 5) : '--:--';
     const nomeCliente = app.nome_cliente || 'Cliente';
     const iniciais = nomeCliente.substring(0, 2).toUpperCase();
+    const dataFormatada = formatDisplayDateShort(app.data_agendamento);
     
     tr.innerHTML = `
         <td class="px-3 md:px-6 py-3">
@@ -511,12 +862,15 @@ function createAppointmentRow(app) {
                 </div>
                 <div class="min-w-0 flex-1">
                     <p class="text-white font-medium text-sm md:text-base truncate">${nomeCliente}</p>
-                    <p class="text-[10px] md:text-xs text-slate-500 truncate md:hidden">${horarioFormatado}</p>
+                    <p class="text-[10px] md:text-xs text-slate-500 truncate sm:hidden">${horarioFormatado}</p>
                 </div>
             </div>
         </td>
-        <td class="px-3 md:px-6 py-3 text-white font-mono text-xs md:text-sm hidden md:table-cell">
+        <td class="px-3 md:px-6 py-3 text-white font-mono text-xs md:text-sm hidden sm:table-cell">
             ${horarioFormatado}
+        </td>
+        <td class="px-3 md:px-6 py-3 text-slate-300 text-xs hidden md:table-cell">
+            ${dataFormatada}
         </td>
         <td class="px-3 md:px-6 py-3 text-slate-300 hidden lg:table-cell">
             <span class="text-xs">${app.nome_barbeiro}</span>
@@ -561,63 +915,24 @@ function getStatusClass(status) {
 }
 
 // ==========================================
-// FUNÇÕES DE FILTRO E BUSCA - OTIMIZADAS ⚡
+// FUNÇÕES DE FILTRO E BUSCA
 // ==========================================
-function filterByDate(filter) {
-    console.log('🔍 Filtro alterado para:', filter);
-    currentFilter = filter;
-    showingFreeSlots = false;
-    
-    const btnFreeSlots = document.getElementById('btn-toggle-free-slots');
-    if (btnFreeSlots) {
-        btnFreeSlots.innerHTML = '<i data-lucide="calendar-plus" class="w-4 h-4"></i> <span class="hidden sm:inline">Ver Todos Horários</span><span class="sm:hidden">Horários</span>';
-        btnFreeSlots.classList.remove('bg-emerald-500/10', 'text-emerald-400', 'border-emerald-500/20');
-        btnFreeSlots.classList.add('bg-blue-500/10', 'text-blue-400', 'border-blue-500/20');
-        lucide.createIcons();
-    }
-    
-    document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.classList.remove('active');
-        if (btn.getAttribute('data-filter') === filter) {
-            btn.classList.add('active');
-        }
-    });
-    
-    applyFilters();
-}
-
-// ⚡ Debounce para busca
 function debounceSearch(e) {
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(() => {
-        searchAppointments(e.target.value);
-    }, 300); // 300ms de delay
-}
-
-function searchAppointments(searchTerm) {
-    const term = searchTerm.toLowerCase().trim();
-    
-    if (!term) {
-        applyFilters();
-        return;
-    }
-    
-    filteredAppointments = allAppointments.filter(app => {
-        const nomeCliente = (app.nome_cliente || '').toLowerCase();
-        const telefone = (app.telefone_cliente || '').toLowerCase().replace(/\D/g, '');
-        const nomeBarbeiro = (app.nome_barbeiro || '').toLowerCase();
-        const searchTermClean = term.replace(/\D/g, '');
-        
-        return nomeCliente.includes(term) || 
-               (telefone && telefone.includes(searchTermClean)) || 
-               nomeBarbeiro.includes(term);
-    });
-    
-    renderAppointments();
+        applyAllFilters();
+    }, 300);
 }
 
 function toggleFreeSlots() {
+    if (currentFilter !== 'hoje' && currentFilter !== 'amanha') {
+        showToast('Função disponível apenas para Hoje e Amanhã', 'error');
+        return;
+    }
+    
     console.log('🔄 Toggle horários - Estado anterior:', showingFreeSlots);
+    console.log('🔄 Filtro ativo:', currentFilter);
+    
     showingFreeSlots = !showingFreeSlots;
     
     const btn = document.getElementById('btn-toggle-free-slots');
@@ -634,6 +949,234 @@ function toggleFreeSlots() {
     
     lucide.createIcons();
     renderAppointments();
+}
+
+// ==========================================
+// MODAL DE BLOQUEIO DE HORÁRIO
+// ==========================================
+function openBlockSlotModal() {
+    const modal = document.createElement('div');
+    modal.id = 'modal-block-slot';
+    modal.className = 'fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4';
+    
+    const hoje = new Date();
+    const hojeStr = hoje.toISOString().split('T')[0];
+    
+    let defaultDate = hojeStr;
+    if (currentFilter === 'amanha') {
+        const amanha = new Date(hoje.getTime() + 24 * 60 * 60 * 1000);
+        defaultDate = amanha.toISOString().split('T')[0];
+    }
+    
+    modal.innerHTML = `
+        <div class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden">
+            <div class="p-6 border-b border-slate-800 flex justify-between items-center">
+                <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                    <i data-lucide="ban" class="w-5 h-5 text-red-400"></i> Bloquear Horário
+                </h3>
+                <button onclick="closeBlockSlotModal()" class="text-slate-400 hover:text-white transition-colors">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            <div class="p-6 space-y-4">
+                <div class="space-y-1.5">
+                    <label class="text-xs font-bold text-slate-500 uppercase">Data</label>
+                    <input type="date" 
+                           id="block-date" 
+                           min="${hojeStr}"
+                           value="${defaultDate}"
+                           class="input-dark">
+                </div>
+                
+                <div class="space-y-1.5">
+                    <label class="text-xs font-bold text-slate-500 uppercase">Horário</label>
+                    <select id="block-time" class="input-dark">
+                        ${allTimeSlots.map(slot => `<option value="${slot}">${slot}</option>`).join('')}
+                    </select>
+                </div>
+                
+                <div class="space-y-1.5">
+                    <label class="text-xs font-bold text-slate-500 uppercase">Barbeiro</label>
+                    <select id="block-barber" class="input-dark">
+                        ${allBarbers.map(barber => `<option value="${barber.id_barbeiro}">${barber.nome}</option>`).join('')}
+                    </select>
+                </div>
+                
+                <div class="space-y-1.5">
+                    <label class="text-xs font-bold text-slate-500 uppercase">Motivo (Opcional)</label>
+                    <input type="text" 
+                           id="block-reason" 
+                           placeholder="Ex: Almoço, Manutenção..."
+                           class="input-dark">
+                </div>
+            </div>
+            <div class="p-6 bg-slate-950/50 border-t border-slate-800 flex gap-3">
+                <button onclick="closeBlockSlotModal()" 
+                        class="flex-1 px-4 py-3 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition-all font-medium">
+                    Cancelar
+                </button>
+                <button onclick="blockTimeSlot()" 
+                        class="flex-1 px-4 py-3 rounded-lg bg-red-500 text-white hover:bg-red-600 transition-all font-bold">
+                    Bloquear
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    lucide.createIcons();
+}
+
+function closeBlockSlotModal() {
+    const modal = document.getElementById('modal-block-slot');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+// ==========================================
+// ✅ CORRIGIDO: INTERVALO DINÂMICO
+// ==========================================
+async function blockTimeSlot() {
+    const date = document.getElementById('block-date').value;
+    const time = document.getElementById('block-time').value;
+    const barberId = document.getElementById('block-barber').value;
+    const reason = document.getElementById('block-reason').value || 'Horário bloqueado manualmente';
+    
+    if (!date || !time || !barberId) {
+        showToast('Preencha todos os campos obrigatórios', 'error');
+        return;
+    }
+    
+    const selectedDate = new Date(date + 'T00:00:00');
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+    
+    if (selectedDate < hoje) {
+        showToast('Não é possível bloquear datas passadas', 'error');
+        return;
+    }
+    
+    // ⭐ VALIDAÇÃO: Verificar se horário já está bloqueado (intervalo completo)
+    const jaExiste = blockedSlots.some(block => {
+        if (block.data_inicio !== date || block.id_barbeiro != barberId) return false;
+        
+        // Verificar se há sobreposição de horários
+        const [novoHora, novoMin] = time.split(':').map(Number);
+        const novoMinutos = novoHora * 60 + novoMin;
+        
+        const [bloqInicioHora, bloqInicioMin] = (block.hora_inicio || '00:00').split(':').map(Number);
+        const [bloqFimHora, bloqFimMin] = (block.hora_fim || '23:59').split(':').map(Number);
+        
+        const bloqInicioMinutos = bloqInicioHora * 60 + bloqInicioMin;
+        const bloqFimMinutos = bloqFimHora * 60 + bloqFimMin;
+        
+        // ✅ Retorna true se há sobreposição
+        return novoMinutos >= bloqInicioMinutos && novoMinutos < bloqFimMinutos;
+    });
+    
+    if (jaExiste) {
+        showToast('Este horário já está bloqueado para este barbeiro', 'error');
+        return;
+    }
+    
+    const temAgendamento = allAppointments.some(app => 
+        app.data_agendamento === date &&
+        app.horario_inicio?.substring(0, 5) === time &&
+        app.id_barbeiro == barberId &&
+        app.status_agendamento === 'agendado'
+    );
+    
+    if (temAgendamento) {
+        showToast('Já existe um agendamento neste horário. Cancele-o primeiro.', 'error');
+        return;
+    }
+    
+    try {
+        // ⭐ CORREÇÃO: Usar intervalo configurado ao invés de 30 fixo
+        const intervalo = parseInt(localStorage.getItem('intervaloCortes')) || 20;
+        console.log(`⏱️ Intervalo configurado: ${intervalo} minutos`);
+        
+        const [hora, minuto] = time.split(':').map(Number);
+        
+        let minutoFim = minuto + intervalo;
+        let horaFim = hora;
+        
+        if (minutoFim >= 60) {
+            horaFim = hora + Math.floor(minutoFim / 60);
+            minutoFim = minutoFim % 60;
+        }
+        
+        const horaFimFormatada = `${String(horaFim).padStart(2, '0')}:${String(minutoFim).padStart(2, '0')}`;
+        
+        console.log(`🕐 Bloqueando: ${time} até ${horaFimFormatada} (${intervalo} minutos)`);
+        
+        const response = await fetch(`${API_URL}/bloqueios`, {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json' 
+            },
+            body: JSON.stringify({
+                id_barbearia: userSession.id_barbearia,
+                bloqueios: [{
+                    id_barbeiro: barberId,
+                    data_inicio: date,
+                    hora_inicio: time,
+                    data_fim: date,
+                    hora_fim: horaFimFormatada,
+                    motivo: reason
+                }],
+                deleted_ids: []
+            })
+        });
+        
+        if (!response.ok) {
+            throw new Error('Erro ao bloquear horário');
+        }
+        
+        showToast(`Horário bloqueado com sucesso! (${time} - ${horaFimFormatada})`, 'success');
+        closeBlockSlotModal();
+        await loadAppointments();
+        
+    } catch (error) {
+        console.error('❌ Erro ao bloquear:', error);
+        showToast(`Erro: ${error.message}`, 'error');
+    }
+}
+
+async function unblockTimeSlot(blockId) {
+    if (!blockId) {
+        showToast('ID de bloqueio inválido', 'error');
+        return;
+    }
+    
+    const confirmed = confirm('Deseja realmente desbloquear este horário?');
+    if (!confirmed) return;
+    
+    try {
+        const response = await fetch(`${API_URL}/bloqueios`, {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json' 
+            },
+            body: JSON.stringify({
+                id_barbearia: userSession.id_barbearia,
+                bloqueios: [],
+                deleted_ids: [blockId]
+            })
+        });
+        
+        if (!response.ok) {
+            throw new Error('Erro ao desbloquear horário');
+        }
+        
+        showToast('Horário desbloqueado com sucesso!', 'success');
+        await loadAppointments();
+        
+    } catch (error) {
+        console.error('❌ Erro ao desbloquear:', error);
+        showToast(`Erro: ${error.message}`, 'error');
+    }
 }
 
 // ==========================================
@@ -659,10 +1202,8 @@ function criarModalDetalhes() {
                 </div>
             </div>
             <div id="modal-detalhes-content" class="p-4 max-h-[60vh] overflow-y-auto">
-                <!-- Conteúdo dinâmico -->
             </div>
             <div id="modal-botoes-container" class="p-4 bg-slate-950/50 border-t border-slate-800">
-                <!-- Botões dinâmicos -->
             </div>
         </div>
     `;
@@ -822,9 +1363,6 @@ function closeDetailsModal() {
     }
 }
 
-// ==========================================
-// FUNÇÕES DE AÇÃO
-// ==========================================
 async function confirmarCancelamento(idAgendamento) {
     if (!idAgendamento) return;
     
@@ -952,6 +1490,14 @@ function formatTelefone(telefone) {
     return telefone;
 }
 
+function formatDisplayDateShort(dateString) {
+    if (!dateString) return '--/--';
+    const [year, month, day] = dateString.split('-');
+    const dateObj = new Date(year, month - 1, day);
+    const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+    return `${diasSemana[dateObj.getDay()]}, ${day}/${month}`;
+}
+
 function formatDisplayDateFull(dateString) {
     if (!dateString) return '--/--/----';
     const [year, month, day] = dateString.split('-');
@@ -1011,7 +1557,7 @@ function showLoading() {
     if (tbody) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="7" class="px-6 py-8 text-center">
+                <td colspan="8" class="px-6 py-8 text-center">
                     <i data-lucide="loader-2" class="w-8 h-8 animate-spin mx-auto text-emerald-500"></i>
                     <p class="text-slate-500 mt-3 text-sm">Carregando...</p>
                 </td>
@@ -1022,7 +1568,6 @@ function showLoading() {
 }
 
 function hideLoading() {
-    // Loading é escondido pela renderização normal
 }
 
 function showToast(msg, type) {
@@ -1044,13 +1589,12 @@ function showToast(msg, type) {
     }, 4000);
 }
 
-// ⚡ Auto-refresh MENOS agressivo (2 minutos em vez de 1)
 function startAutoRefresh() {
     setInterval(() => {
         if (!isLoading) {
             loadAppointments();
         }
-    }, 120000); // 2 minutos
+    }, 120000);
 }
 
 function toggleTheme() {
@@ -1101,7 +1645,96 @@ function toggleSidebar() {
 }
 
 function togglePerfilModal() {
-    showToast("Funcionalidade de perfil em desenvolvimento", "info");
+    const modal = document.getElementById('modal-perfil');
+    const isHidden = modal.classList.contains('hidden');
+    
+    if (isHidden) {
+        document.getElementById('edit-profile-name').value = userSession.nome || '';
+        document.getElementById('edit-profile-usuario').value = userSession.usuario || '';
+        document.getElementById('edit-profile-pass').value = '';
+        
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        lucide.createIcons();
+    } else {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+}
+
+async function updateUserProfile() {
+    const btn = document.getElementById('btn-save-profile');
+    const originalText = btn.innerText;
+    
+    const novoNome = document.getElementById('edit-profile-name').value.trim();
+    const novoUsuario = document.getElementById('edit-profile-usuario').value.trim();
+    const novaSenha = document.getElementById('edit-profile-pass').value.trim();
+    
+    if (!validateProfileData(novoNome, novoUsuario)) return;
+    
+    try {
+        btn.innerText = "Salvando...";
+        btn.disabled = true;
+        
+        const result = await saveProfileToServer(novoNome, novoUsuario, novaSenha);
+        
+        updateLocalSession(novoNome, novoUsuario);
+        updateProfileUI(novoNome, novoUsuario);
+        
+        showToast("Perfil atualizado!", "success");
+        togglePerfilModal();
+    } catch (error) {
+        console.error(error);
+        showToast(error.message, "error");
+    } finally {
+        btn.innerText = originalText;
+        btn.disabled = false;
+    }
+}
+
+function validateProfileData(nome, usuario) {
+    if (!nome || !usuario) {
+        showToast("Nome e Usuário são obrigatórios.", "error");
+        return false;
+    }
+    
+    if (usuario.length < 3) {
+        showToast("Usuário deve ter pelo menos 3 caracteres.", "error");
+        document.getElementById('edit-profile-usuario').focus();
+        return false;
+    }
+    
+    return true;
+}
+
+async function saveProfileToServer(nome, usuario, senha) {
+    const payload = {
+        id_usuario: userSession.id_usuario || userSession.id,
+        nome: nome,
+        usuario: usuario,
+        senha_hash: senha || null
+    };
+    
+    const response = await fetch(`${API_URL}/usuarios/update`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    });
+    
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || 'Erro ao atualizar');
+    return result;
+}
+
+function updateLocalSession(nome, usuario) {
+    userSession.nome = nome;
+    userSession.usuario = usuario;
+    localStorage.setItem('user_data', JSON.stringify(userSession));
+}
+
+function updateProfileUI(nome, usuario) {
+    document.getElementById('user-name-display').innerText = nome;
+    document.getElementById('user-email-display').innerText = `@${usuario}`;
 }
 
 function logout() {

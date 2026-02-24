@@ -24,12 +24,10 @@ main {
     transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Anima o ícone quando o link pai recebe hover */
 .nav-item:hover .icon-animation {
-    transform: rotateZ(45deg); /* 180 fica bem legal para ícones */
+    transform: rotateZ(45deg);
 }
 
-/* Opcional: Adiciona profundidade ao link */
 .nav-item {
     perspective: 1000px;
 }
@@ -219,7 +217,6 @@ select.input-dark {
     background-color: rgba(30, 41, 59, 0.5);
 }
 
-/* Logo Pulsante (Sutil) */
 .group:hover img {
     transform: scale(1.05);
     transition: transform 0.3s ease;
@@ -290,7 +287,8 @@ select.input-dark {
 }
 
 .light .input-dark,
-.light #search-input {
+.light #search-input,
+.light #barber-filter {
     background-color: #e6e9ec !important;
     border: 1px solid #e2e8f0 !important;
     color: #1e293b !important;
@@ -298,14 +296,16 @@ select.input-dark {
 }
 
 .light .input-dark:focus,
-.light #search-input:focus {
+.light #search-input:focus,
+.light #barber-filter:focus {
     background-color: #ffffff !important;
     border-color: #10b981 !important;
     box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1) !important;
 }
 
 .light .input-dark:hover:not(:focus),
-.light #search-input:hover:not(:focus) {
+.light #search-input:hover:not(:focus),
+.light #barber-filter:hover:not(:focus) {
     border-color: #94a3b8 !important;
     background-color: #ffffff !important;
 }
@@ -349,12 +349,10 @@ select.input-dark {
     background-color: black;
 }
 
-/* Botões modo claro */
 .light .btn-tema {
     box-shadow: rgb(82, 82, 82) 2px 3px 4px;
 }
 
-/* Perfil no modo claro - IGUAL AO INDEX */
 .light aside .perfil,
 .light .perfil {
     background-color: oklch(87.1% 0.006 286.286) !important;
@@ -378,7 +376,6 @@ select.input-dark {
     color: #64748b !important;
 }
 
-/* Status badges no modo claro */
 .light .status-badge.bg-emerald-500\/10 {
     background-color: #d1fae5 !important;
     border-color: #a7f3d0 !important;
@@ -411,7 +408,6 @@ select.input-dark {
     border-color: #cbd5e1 !important;
 }
 
-/* Cards de estatísticas no modo claro */
 .light .text-emerald-400 {
     color: #059669 !important;
 }
@@ -456,20 +452,20 @@ select.input-dark {
     border-color: #fecaca !important;
 }
 
-/* Modais no modo claro */
 .light #modal-perfil .bg-slate-900,
-.light #modal-detalhes .bg-slate-900 {
+.light #modal-detalhes .bg-slate-900,
+.light #modal-block-slot .bg-slate-900 {
     background-color: #ffffff !important;
     border-color: #e2e8f0 !important;
 }
 
 .light #modal-perfil .bg-slate-950\/50,
-.light #modal-detalhes .bg-slate-950\/50 {
+.light #modal-detalhes .bg-slate-950\/50,
+.light #modal-block-slot .bg-slate-950\/50 {
     background-color: #f8fafc !important;
     border-color: #e2e8f0 !important;
 }
 
-/* Scrollbar no modo claro */
 .light ::-webkit-scrollbar-track {
     background: #f1f5f9;
 }
@@ -483,7 +479,6 @@ select.input-dark {
     background: #94a3b8;
 }
 
-/* Textos de ícones no modo claro */
 .light .text-slate-500 i,
 .light .text-slate-400 i {
     color: inherit !important;
@@ -493,7 +488,6 @@ select.input-dark {
     opacity: 0.8 !important;
 }
 
-/* Background decorativo no modo claro */
 .light .bg-emerald-500\/5 {
     background-color: rgba(16, 185, 129, 0.03) !important;
 }
@@ -502,7 +496,6 @@ select.input-dark {
     background-color: rgba(147, 51, 234, 0.03) !important;
 }
 
-/* Navegação no modo claro */
 .light .nav-item:hover {
     background-color: rgba(16, 185, 129, 0.08) !important;
     color: #059669 !important;
@@ -526,13 +519,11 @@ select.input-dark {
     color: #ef4444 !important;
 }
 
-/* Toast no modo claro */
 .light .toast-container,
 .light #toast-container {
     background-color: transparent !important;
 }
 
-/* Botões no header da tabela */
 .light #btn-toggle-free-slots {
     background-color: #dbeafe !important;
     color: #2563eb !important;
@@ -543,12 +534,10 @@ select.input-dark {
     background-color: #bfdbfe !important;
 }
 
-/* Cor do texto dos status */
 .light .text-slate-600 {
     color: #334155 !important;
 }
 
-/* Bordas dos cards de estatísticas */
 .light .border-t-blue-500 {
     border-top-color: #3b82f6 !important;
 }
@@ -565,8 +554,6 @@ select.input-dark {
     background-color: oklch(87.1% 0.006 286.286);
 }
 
-
-/* Ajuste do header da tabela */
 .light thead {
     background-color: #f8fafc !important;
     border-color: #e2e8f0 !important;
@@ -577,17 +564,33 @@ select.input-dark {
 }
 
 /* ==========================================
-   TABELA DE AGENDAMENTOS - RESPONSIVIDADE
+   TABELA DE AGENDAMENTOS - RESPONSIVIDADE MELHORADA
    ========================================== */
-@media (min-width: 1024px) {
+
+/* Desktop - Altura fixa para scroll */
+@media (min-width: 1280px) {
     .section-card.table-container {
-        height: calc(100vh - 20rem) !important;
+        height: calc(100vh - 18rem) !important;
+        max-height: 700px;
     }
 }
 
+@media (min-width: 1024px) and (max-width: 1279px) {
+    .section-card.table-container {
+        height: calc(100vh - 20rem) !important;
+        max-height: 650px;
+    }
+    
+    table {
+        font-size: 0.875rem;
+    }
+}
+
+/* Tablet */
 @media (min-width: 768px) and (max-width: 1023px) {
     .section-card.table-container {
         height: calc(100vh - 25rem) !important;
+        max-height: 550px;
     }
     
     table {
@@ -602,13 +605,23 @@ select.input-dark {
     table tbody td {
         padding: 0.75rem 0.5rem !important;
     }
+    
+    .status-badge {
+        font-size: 0.65rem;
+        padding: 0.2rem 0.5rem;
+    }
 }
 
-@media (max-width: 767px) {
+/* Mobile Grande */
+@media (min-width: 640px) and (max-width: 767px) {
     .section-card.table-container {
         height: auto !important;
-        max-height: 70vh;
+        max-height: 60vh;
         overflow-y: auto;
+    }
+    
+    .section-card {
+        padding: 1rem;
     }
     
     table {
@@ -617,7 +630,40 @@ select.input-dark {
     
     table thead th {
         font-size: 0.65rem;
+        padding: 0.6rem 0.4rem !important;
+    }
+    
+    table tbody td {
+        padding: 0.6rem 0.4rem !important;
+    }
+    
+    .status-badge {
+        font-size: 0.6rem;
+        padding: 0.15rem 0.4rem;
+    }
+}
+
+/* Mobile Médio */
+@media (max-width: 639px) {
+    .section-card.table-container {
+        height: auto !important;
+        max-height: 55vh;
+        overflow-y: auto;
+    }
+    
+    .section-card {
+        padding: 0.75rem;
+        border-radius: 1rem;
+    }
+    
+    table {
+        font-size: 0.7rem;
+    }
+    
+    table thead th {
+        font-size: 0.6rem;
         padding: 0.5rem 0.25rem !important;
+        white-space: nowrap;
     }
     
     table tbody td {
@@ -627,24 +673,31 @@ select.input-dark {
     .status-badge {
         font-size: 0.55rem;
         padding: 0.15rem 0.35rem;
+        white-space: nowrap;
     }
     
     .text-truncate {
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        max-width: 120px;
+        max-width: 100px;
     }
     
     .table-row-hover {
-        min-height: 50px;
+        min-height: 48px;
     }
 }
 
+/* Mobile Pequeno */
 @media (max-width: 375px) {
     .section-card {
         padding: 0.5rem !important;
         margin: 0.25rem !important;
+        border-radius: 0.75rem;
+    }
+    
+    .section-card.table-container {
+        max-height: 50vh;
     }
     
     .filter-btn {
@@ -652,13 +705,51 @@ select.input-dark {
         padding: 0.25rem 0.5rem;
     }
     
-    #search-input {
-        font-size: 0.75rem;
+    #search-input,
+    #barber-filter {
+        font-size: 0.7rem;
         padding: 0.5rem 0.5rem 0.5rem 2rem;
+    }
+    
+    table {
+        font-size: 0.65rem;
+    }
+    
+    table thead th {
+        font-size: 0.55rem;
+        padding: 0.4rem 0.2rem !important;
+    }
+    
+    table tbody td {
+        padding: 0.4rem 0.2rem !important;
+    }
+    
+    .text-truncate {
+        max-width: 80px;
     }
 }
 
+/* Ajuste do container de scroll */
 .section-card.table-container > div:last-child {
     height: 100%;
     overflow-y: auto;
+}
+
+/* Melhorias de touch para mobile */
+@media (max-width: 1023px) {
+    .table-row-hover {
+        -webkit-tap-highlight-color: rgba(16, 185, 129, 0.1);
+        tap-highlight-color: rgba(16, 185, 129, 0.1);
+    }
+    
+    button, .cursor-pointer {
+        -webkit-tap-highlight-color: rgba(16, 185, 129, 0.1);
+        tap-highlight-color: rgba(16, 185, 129, 0.1);
+    }
+}
+
+/* Smooth scrolling */
+.overflow-y-auto {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
 }
