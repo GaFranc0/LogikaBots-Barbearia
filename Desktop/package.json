@@ -1,0 +1,16 @@
+{
+  "name": "logika-bots-desktop",
+  "version": "1.0.0",
+  "description": "Cadastro de clientes Logika Bots",
+  "main": "src/main/index.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "^44.3.0"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "mysql2": "^3.9.0"
+  }
+}

@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Logika Bots — Novo Cliente</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;800&family=DM+Sans:wght@400;500&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #060d1a;
+      --bg2: #0a1628;
+      --surface: #0d1f35;
+      --surface2: #112540;
+      --border: #1a3a5c;
+      --border2: #1e4570;
+      --accent: #00d4ff;
+      --accent2: #0099cc;
+      --accent3: #00ffee;
+      --silver: #c0d8f0;
+      --silver2: #8aafc8;
+      --text: #d0eaf8;
+      --muted: #4a7a9b;
+      --danger: #ff4d6d;
+      --success: #00e5c3;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 32px 24px;
+      background-image:
+        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(0,150,255,0.12) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 30% at 80% 80%, rgba(0,212,255,0.05) 0%, transparent 60%);
+    }
+
+    header {
+      width: 100%;
+      max-width: 560px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 36px;
+    }
+
+    .logo-mark {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      flex-shrink: 0;
+      object-fit: cover;
+    }
+
+    .logo-text {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 20px;
+      letter-spacing: -0.3px;
+      color: var(--silver);
+      text-shadow: 0 0 20px rgba(0,212,255,0.4);
+    }
+
+    .logo-text span {
+      color: var(--accent);
+      text-shadow: 0 0 16px rgba(0,212,255,0.7);
+    }
+
+    .win-controls {
+      position: fixed;
+      top: 12px;
+      right: 12px;
+      z-index: 500;
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .win-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      border: 1px solid var(--border2);
+      background: var(--surface);
+      color: var(--silver2);
+      font-size: 15px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all .2s;
+      flex-shrink: 0;
+    }
+
+    .win-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(0,212,255,0.08);
+      box-shadow: 0 0 10px rgba(0,212,255,0.2);
+    }
+
+    .win-btn.fechar:hover {
+      border-color: var(--danger);
+      color: var(--danger);
+      background: rgba(255,77,109,0.1);
+      box-shadow: 0 0 12px rgba(255,77,109,0.25);
+    }
+
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(6,13,26,0.85);
+      backdrop-filter: blur(4px);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-overlay.show { display: flex; }
+
+    .modal-box {
+      background: linear-gradient(145deg, var(--surface) 0%, var(--surface2) 100%);
+      border: 1px solid var(--border2);
+      border-radius: 16px;
+      padding: 32px 28px 24px;
+      max-width: 340px;
+      width: 90%;
+      box-shadow: 0 0 0 1px rgba(0,212,255,0.06), 0 8px 50px rgba(0,0,0,0.6);
+      position: relative;
+      overflow: hidden;
+      text-align: center;
+    }
+
+    .modal-box::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,77,109,0.5), transparent);
+    }
+
+    .modal-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: rgba(255,77,109,0.08);
+      border: 1.5px solid var(--danger);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      margin: 0 auto 16px;
+      box-shadow: 0 0 18px rgba(255,77,109,0.2);
+    }
+
+    .modal-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 18px;
+      color: var(--silver);
+      margin-bottom: 8px;
+    }
+
+    .modal-desc {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .steps {
+      width: 100%;
+      max-width: 560px;
+      display: flex;
+      align-items: center;
+      margin-bottom: 28px;
+    }
+
+    .step {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+    }
+
+    .step-dot {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      border: 2px solid var(--border2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Syne', sans-serif;
+      font-weight: 600;
+      font-size: 12px;
+      color: var(--muted);
+      flex-shrink: 0;
+      transition: all .3s;
+      background: var(--surface);
+    }
+
+    .step.active .step-dot {
+      border-color: var(--accent);
+      background: rgba(0,212,255,0.15);
+      color: var(--accent);
+      box-shadow: 0 0 12px rgba(0,212,255,0.4);
+    }
+
+    .step.done .step-dot {
+      border-color: var(--success);
+      background: rgba(0,229,195,0.12);
+      color: var(--success);
+      box-shadow: 0 0 10px rgba(0,229,195,0.3);
+    }
+
+    .step-label { font-size: 12px; color: var(--muted); transition: color .3s; }
+    .step.active .step-label { color: var(--accent); }
+    .step.done .step-label { color: var(--success); }
+
+    .step-line {
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+      margin: 0 12px;
+      transition: background .3s;
+    }
+
+    .step-line.done { background: var(--success); box-shadow: 0 0 6px rgba(0,229,195,0.4); }
+
+    .card {
+      width: 100%;
+      max-width: 560px;
+      background: linear-gradient(145deg, var(--surface) 0%, var(--surface2) 100%);
+      border: 1px solid var(--border2);
+      border-radius: 18px;
+      padding: 32px;
+      box-shadow: 0 0 0 1px rgba(0,212,255,0.05), 0 4px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(0,212,255,0.1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(0,212,255,0.4), transparent);
+    }
+
+    .card-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 20px;
+      margin-bottom: 4px;
+      color: var(--silver);
+    }
+
+    .card-subtitle { color: var(--muted); font-size: 13px; margin-bottom: 28px; }
+
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group.full { grid-column: 1 / -1; }
+
+    label {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--accent2);
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+    }
+
+    input, select {
+      background: rgba(6,13,26,0.7);
+      border: 1px solid var(--border2);
+      border-radius: 9px;
+      padding: 10px 14px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+      width: 100%;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(0,212,255,0.12);
+    }
+
+    input::placeholder { color: var(--muted); }
+    select option { background: #0d1f35; }
+
+    input.campo-erro {
+      border-color: var(--danger) !important;
+      box-shadow: 0 0 0 3px rgba(255,77,109,0.15) !important;
+    }
+
+    input.campo-ok {
+      border-color: var(--success) !important;
+      box-shadow: 0 0 0 3px rgba(0,229,195,0.12) !important;
+    }
+
+    .field-hint {
+      font-size: 11px;
+      min-height: 14px;
+      margin-top: 2px;
+      transition: color .2s;
+    }
+
+    .actions { display: flex; gap: 12px; margin-top: 28px; }
+
+    .btn {
+      flex: 1;
+      padding: 12px;
+      border-radius: 10px;
+      border: none;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all .2s;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #0099cc, #00d4ff);
+      color: #060d1a;
+      font-weight: 700;
+      box-shadow: 0 0 20px rgba(0,212,255,0.3);
+    }
+
+    .btn-primary:hover { box-shadow: 0 0 28px rgba(0,212,255,0.55); transform: translateY(-1px); }
+    .btn-primary:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; box-shadow: none; transform: none; }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--silver2);
+      border: 1px solid var(--border2);
+    }
+
+    .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+
+    .btn-success {
+      background: linear-gradient(135deg, #00b89a, #00e5c3);
+      color: #060d1a;
+      font-weight: 700;
+      box-shadow: 0 0 20px rgba(0,229,195,0.25);
+    }
+
+    .btn-success:hover { box-shadow: 0 0 28px rgba(0,229,195,0.45); transform: translateY(-1px); }
+    .btn-success:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; box-shadow: none; transform: none; }
+
+    .btn-danger {
+      background: linear-gradient(135deg, #cc1a3a, #ff4d6d);
+      color: #fff;
+      font-weight: 700;
+      box-shadow: 0 0 16px rgba(255,77,109,0.3);
+    }
+
+    .btn-danger:hover { box-shadow: 0 0 24px rgba(255,77,109,0.5); transform: translateY(-1px); }
+
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 10px;
+      padding: 12px 20px;
+      font-size: 13px;
+      transition: transform .3s;
+      z-index: 100;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+    }
+
+    #toast.show { transform: translateX(-50%) translateY(0); }
+    #toast.erro { border-color: var(--danger); color: var(--danger); }
+    #toast.ok { border-color: var(--success); color: var(--success); }
+
+    #tela-sucesso {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      padding: 16px 0;
+      text-align: center;
+    }
+
+    .check-icon {
+      width: 68px;
+      height: 68px;
+      border-radius: 50%;
+      background: rgba(0,229,195,0.08);
+      border: 2px solid var(--success);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 30px;
+      box-shadow: 0 0 24px rgba(0,229,195,0.3);
+      color: var(--success);
+    }
+
+    #tela-sucesso h2 { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 20px; color: var(--silver); }
+    #tela-sucesso p { color: var(--muted); font-size: 13px; }
+  </style>
+</head>
+<body>
+
+  <div class="modal-overlay" id="modal-sair">
+    <div class="modal-box">
+      <div class="modal-icon">⚠</div>
+      <div class="modal-title">Deseja sair?</div>
+      <div class="modal-desc">Todos os dados preenchidos serão perdidos.</div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" id="btn-cancelar-modal">Cancelar</button>
+        <button class="btn btn-danger" id="btn-confirmar-saida">Sair</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="win-controls">
+    <button class="win-btn" id="btn-tray" title="Minimizar para bandeja">&#8212;</button>
+    <button class="win-btn" id="btn-fs" title="Alternar tela cheia">&#x2922;</button>
+    <button class="win-btn fechar" id="btn-fechar" title="Fechar">&#x2715;</button>
+  </div>
+
+  <header>
+    <img class="logo-mark" src="../../Images/logikabots.png" alt="Logo"/>
+    <div class="logo-text">Logika <span>Bots</span></div>
+  </header>
+
+  <div class="steps">
+    <div class="step active" id="step1-indicator">
+      <div class="step-dot">1</div>
+      <span class="step-label">Barbearia</span>
+    </div>
+    <div class="step-line" id="step-line"></div>
+    <div class="step" id="step2-indicator">
+      <div class="step-dot">2</div>
+      <span class="step-label">Usuário admin</span>
+    </div>
+  </div>
+
+  <div class="card" id="tela-barbearia">
+    <div class="card-title">Nova barbearia</div>
+    <div class="card-subtitle">Preencha os dados do cliente que contratou o serviço.</div>
+
+    <div class="form-grid">
+      <div class="form-group full">
+        <label>Nome da barbearia</label>
+        <input type="text" id="b-nome" placeholder="Ex: Barbearia do João"/>
+        <span class="field-hint"></span>
+      </div>
+      <div class="form-group">
+        <label>Telefone / WhatsApp</label>
+        <input type="text" id="b-telefone" placeholder="Ex: 5511999999999"/>
+        <span class="field-hint"></span>
+      </div>
+      <div class="form-group">
+        <label>Fuso horário</label>
+        <select id="b-timezone">
+          <option value="America/Sao_Paulo">America/Sao_Paulo</option>
+          <option value="America/Manaus">America/Manaus</option>
+          <option value="America/Belem">America/Belem</option>
+          <option value="America/Fortaleza">America/Fortaleza</option>
+          <option value="America/Recife">America/Recife</option>
+          <option value="America/Noronha">America/Noronha</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Horário de abertura</label>
+        <input type="time" id="b-abertura"/>
+        <span class="field-hint"></span>
+      </div>
+      <div class="form-group">
+        <label>Horário de fechamento</label>
+        <input type="time" id="b-fechamento"/>
+        <span class="field-hint"></span>
+      </div>
+      <div class="form-group full">
+        <label>ID da instância (id_instance)</label>
+        <input type="text" id="b-id-instance" placeholder="Ex: instancia-joao-01"/>
+        <span class="field-hint"></span>
+      </div>
+      <div class="form-group full">
+        <label>Token Evolution</label>
+        <input type="text" id="b-token" placeholder="Token da Evolution API"/>
+        <span class="field-hint"></span>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-primary" id="btn-continuar">Continuar →</button>
+    </div>
+  </div>
+
+  <div class="card" id="tela-usuario" style="display:none">
+    <div class="card-title">Usuário administrador</div>
+    <div class="card-subtitle">Crie o acesso inicial para esta barbearia.</div>
+
+    <div class="form-grid">
+      <div class="form-group full">
+        <label>Nome completo</label>
+        <input type="text" id="u-nome" placeholder="Ex: João Silva"/>
+        <span class="field-hint"></span>
+      </div>
+      <div class="form-group full">
+        <label>Usuário (login)</label>
+        <input type="text" id="u-usuario" placeholder="Ex: joao_barbeiro"/>
+        <span class="field-hint"></span>
+      </div>
+      <div class="form-group full">
+        <label>Senha</label>
+        <input type="password" id="u-senha" placeholder="Mínimo 6 caracteres, 1 letra e 1 número"/>
+        <span class="field-hint"></span>
+      </div>
+      <div class="form-group full">
+        <label>Nível de acesso</label>
+        <select id="u-nivel">
+          <option value="admin">Admin</option>
+          <option value="gerente">Gerente</option>
+          <option value="atendente">Atendente</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-secondary" id="btn-voltar">← Voltar</button>
+      <button class="btn btn-success" id="btn-finalizar">Finalizar cadastro</button>
+    </div>
+  </div>
+
+  <div class="card" id="tela-sucesso-card" style="display:none">
+    <div id="tela-sucesso" style="display:flex">
+      <div class="check-icon">✓</div>
+      <h2>Cadastro realizado!</h2>
+      <p>A barbearia e o usuário admin foram inseridos no banco com sucesso.</p>
+      <button class="btn btn-primary" id="btn-novo-cadastro" style="margin-top:8px; max-width:200px">
+        + Novo cadastro
+      </button>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>
