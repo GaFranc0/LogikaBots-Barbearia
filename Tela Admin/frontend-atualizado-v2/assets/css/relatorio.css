@@ -1,0 +1,420 @@
+/* --- ESTILOS GERAIS --- */
+body {
+    background-color: #020617;
+    color: #e2e8f0;
+    font-family: 'Inter', sans-serif;
+    font-feature-settings: "cv02", "cv03", "cv04";
+    overflow-x: hidden;
+}
+
+.fundo-ativar-desativar-tema {
+    background-color: #070629;
+    box-shadow: 1px 2px 1px rgb(71, 71, 71);
+}
+
+/* --- INPUTS E FORMULÁRIOS --- */
+.input-dark {
+    background: #0f172a;
+    border: 1px solid #334155;
+    color: white;
+    padding: 0.7rem 1rem;
+    border-radius: 0.75rem;
+    width: 100%;
+    outline: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 0.95rem;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.relative .input-dark {
+    padding-left: 2.8rem;
+}
+
+.input-dark:focus {
+    border-color: #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+    background: #1e293b;
+}
+
+.input-dark:hover:not(:focus) {
+    border-color: #475569;
+    background: #162032;
+}
+
+/* --- SCROLLBAR --- */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #020617;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 99px;
+    border: 2px solid #020617;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #475569;
+}
+
+/* --- GLASS CARD --- */
+.glass-card {
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(51, 65, 85, 0.5);
+    border-radius: 1.25rem;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.glass-card:hover {
+    border-color: rgba(51, 65, 85, 0.8);
+    background: rgba(15, 23, 42, 0.75);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.2);
+}
+
+/* --- GRÁFICO DE BARRAS --- */
+.chart-bar-container {
+    position: relative;
+    transition: all 0.3s;
+}
+
+.chart-tooltip {
+    opacity: 0;
+    transform: translateY(10px) translateX(-50%);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+    left: 50%;
+}
+
+.chart-bar-container:hover .chart-tooltip {
+    opacity: 1;
+    transform: translateY(-100%) translateX(-50%);
+    top: -10px;
+}
+
+.chart-bar-container:hover .bar-fill {
+    filter: brightness(1.2);
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+}
+
+/* --- PROGRESS BARS --- */
+.progress-fill {
+    transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* --- ANIMAÇÕES DA SIDEBAR --- */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.nav-item {
+    animation: slideIn 0.4s ease forwards;
+    opacity: 0;
+}
+
+.nav-item:nth-child(1) {
+    animation-delay: 0.1s;
+}
+
+.nav-item:nth-child(2) {
+    animation-delay: 0.15s;
+}
+
+.nav-item:nth-child(3) {
+    animation-delay: 0.2s;
+}
+
+.nav-item:nth-child(4) {
+    animation-delay: 0.25s;
+}
+
+/* --- PERFIL --- */
+#Perfil {
+    transition: transform 0.2s;
+}
+
+#Perfil:hover {
+    transform: scale(1.02);
+    background-color: rgba(30, 41, 59, 0.5);
+    cursor: pointer;
+}
+
+/* --- LOGO --- */
+.group:hover img {
+    transform: scale(1.05);
+    transition: transform 0.3s ease;
+}
+
+.bg-contrast-logo {
+    background-color: rgba(30, 41, 59, 0.5);
+}
+
+/* --- BOTÃO EXPORTAR --- */
+.btn-exportar {
+    position: relative;
+    overflow: hidden;
+}
+
+
+.btn-exportar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.btn-exportar:hover::before {
+    left: 100%;
+}
+
+/* --- BOTÃO TEMA --- */
+.btn-tema {
+    transition: all 0.3s ease;
+}
+
+/* ========================================
+   MODO CLARO
+   ======================================== */
+
+.light body,
+.light main,
+.light #main-scroll,
+.light .bg-slate-800,
+.light .bg-slate-900,
+.light .bg-slate-700\/50,
+.light div[class*="bg-slate-"],
+.light div[class*="bg-gray-"] {
+    background-color: #ffffff !important;
+}
+
+.light body,
+.light main,
+.light #main-scroll {
+    background-color: #f8fafc !important;
+}
+
+.light aside {
+    background-color: #ffffff !important;
+    border-color: #e2e8f0 !important;
+    box-shadow: rgb(82, 82, 82) 2px 0px 20px;
+}
+
+.light .text-white {
+    color: #1e293b !important;
+}
+
+.light .text-slate-300,
+.light .text-slate-400 {
+    color: #475569 !important;
+}
+
+.light .text-slate-500 {
+    color: #334155 !important;
+}
+
+.light h1,
+.light h2,
+.light h3 {
+    color: #0f172a !important;
+}
+
+/* --- GLASS CARDS NO MODO CLARO --- */
+.light .glass-card {
+    background-color: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: rgb(82, 82, 82) 2px 3px 4px !important;
+}
+
+.light .glass-card:hover {
+    border-color: #cbd5e1 !important;
+    box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* --- BORDAS E DIVISORES --- */
+.light .border-slate-700,
+.light .border-slate-800,
+.light .border-transparent,
+.light div[class*="border-slate-"] {
+    border-color: #e2e8f0 !important;
+}
+
+.light hr,
+.light .border-t,
+.light .border-b {
+    border-color: #f1f5f9 !important;
+}
+
+/* --- INPUTS --- */
+.light .input-dark,
+.light input[type="text"],
+.light input[type="email"],
+.light input[type="password"],
+.light select {
+    background-color: #e6e9ec !important;
+    border: 1px solid #e2e8f0 !important;
+    color: #1e293b !important;
+    box-shadow: 1px 2px 3px black;
+}
+
+.light .input-dark:focus {
+    background-color: #ffffff !important;
+    border-color: #10b981 !important;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1) !important;
+}
+
+.light .input-dark:hover:not(:focus) {
+    border-color: #9ca3af !important;
+}
+
+/* --- ÍCONES --- */
+.light i[data-lucide] {
+    opacity: 0.8 !important;
+}
+
+/* --- BOTÕES --- */
+.light .btn-exportar {
+    background-color: #10b981 !important;
+    box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2) !important;
+}
+
+.light .btn-exportar:hover {
+    background-color: #059669 !important;
+}
+
+.light .btn-tema {
+    box-shadow: rgb(82, 82, 82) 2px 3px 4px;
+}
+
+.light .fundo-ativar-desativar-tema {
+    background-color: #d1d4d6;
+    box-shadow: 1px 2px 1px rgb(71, 71, 71);
+}
+
+.light .ativar-desativar-tema {
+    background-color: black;
+}
+
+/* --- NAV ITEMS --- */
+.light .nav-item:hover {
+    background-color: rgba(16, 185, 129, 0.08) !important;
+    color: #059669 !important;
+    transform: translateX(4px);
+}
+
+.light .group\/help:hover {
+    background-color: #eff6ff !important;
+}
+
+.light .group\/logout:hover {
+    background-color: #fef2f2 !important;
+    color: #ef4444 !important;
+}
+
+.light .group\/logout:hover i {
+    color: #ef4444 !important;
+}
+
+/* --- PERFIL (MODO CLARO) --- */
+.light aside #Perfil,
+.light .perfil#Perfil {
+    background-color: oklch(87.1% 0.006 286.286) !important;
+    border: 1px solid #818181 !important;
+    box-shadow: 1px 2px 3px black !important;
+    transition: all 0.3s ease !important;
+}
+
+.light aside #Perfil:hover,
+.light .perfil#Perfil:hover {
+    background-color: #dce0e4 !important;
+    border-color: #10b981 !important;
+    transform: translateY(-2px) scale(1.02);
+}
+
+.light #Perfil #user-name-display {
+    color: #1e293b !important;
+}
+
+.light #Perfil #user-email-display {
+    color: #64748b !important;
+}
+
+/* --- LOGO (MODO CLARO) --- */
+.light .bg-contrast-logo {
+    background-color: #afb7be !important;
+    box-shadow: #343638 1px 1px 10px;
+}
+
+/* --- GRÁFICO (MODO CLARO) --- */
+.light .chart-bar-container .bar-fill {
+    opacity: 0.9;
+}
+
+.light .chart-tooltip {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+    color: white !important;
+}
+
+/* --- SCROLLBAR (MODO CLARO) --- */
+.light ::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+
+.light ::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border: 2px solid #f1f5f9;
+}
+
+.light ::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+}
+
+/* --- BADGES E TAGS --- */
+.light span[class*="bg-emerald-500/10"],
+.light span[class*="bg-blue-500/10"],
+.light span[class*="bg-purple-500/10"],
+.light span[class*="bg-slate-700/30"] {
+    background-color: rgba(0, 0, 0, 0.05) !important;
+}
+
+/* --- AI INSIGHT (MODO CLARO) --- */
+.light .bg-gradient-to-br.from-yellow-500\/10 {
+    background: linear-gradient(to bottom right, rgba(234, 179, 8, 0.15), rgba(249, 115, 22, 0.15)) !important;
+    border-color: rgba(234, 179, 8, 0.3) !important;
+}
+
+/* --- RESPONSIVIDADE --- */
+@media (max-width: 768px) {
+    .glass-card {
+        padding: 1.25rem;
+    }
+
+    .chart-bar-container {
+        min-width: 35px;
+    }
+}
+
+@media (max-width: 400px) {
+    .glass-card {
+        padding: 1rem !important;
+    }
+}
