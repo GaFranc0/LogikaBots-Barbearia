@@ -1,7 +1,7 @@
 // ==========================================
 // ESTADO GLOBAL & CONFIGURAÇÃO - OTIMIZADO
 // ==========================================
-const API_URL = 'https://back-end-logika-barbeiros.vercel.app';
+const API_URL = window.API_BASE_URL;
 let userSession = {};
 let allAppointments = [];
 let blockedSlots = []; // ⭐ NOVO: Lista de horários bloqueados

@@ -23,7 +23,7 @@ async function handleLogin(e) {
 
     try {
         // Envia 'usuario' e 'password' para o servidor
-        const response = await fetch('https://back-end-logika-barbeiros.vercel.app/login', {
+        const response = await fetch(`${window.API_BASE_URL}/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ usuario, password })

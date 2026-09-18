@@ -5,8 +5,8 @@ const router = express.Router();
 const {
     perguntarIA
 } = require('../services/iarelatorios');
+const { getOllamaEndpoint } = require('../services/ollama');
 
-const OLLAMA_URL = process.env.OLLAMA_URL;
 const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'qwen2.5:1.5b';
 
 router.post('/teste', async (req, res) => {
@@ -19,7 +19,7 @@ router.post('/teste', async (req, res) => {
             });
         }
 
-        const response = await fetch(`${OLLAMA_URL}/api/chat`, {
+        const response = await fetch(getOllamaEndpoint('/api/chat'), {
             method: 'POST',
 
             headers: {
@@ -59,9 +59,7 @@ router.post('/teste', async (req, res) => {
 
 router.get('/status', async (req, res) => {
     try {
-        const response = await fetch(
-            `${process.env.OLLAMA_URL}/api/tags`
-        );
+        const response = await fetch(getOllamaEndpoint('/api/tags'));
 
         const data = await response.json();
 
