@@ -119,16 +119,3 @@ graph TD
 🔧 Integrações - Em operação contínua
 
 Última atualização: Setembro 2026
-
-## 👤 Contato
-
-### Projeto desenvolvido por:
-
-**Gabriel Franco**
-* Email: gafranco.contato@gmail.com
-* Linkedin: https://www.linkedin.com/in/gabriel-franc0
-
-**Lucas Granusso**
-* Email: lucasgranuss@gmail.com
-* Linkedin: https://www.linkedin.com/in/lucas-granusso/
-* GitHub: https://github.com/lucasgranusso
