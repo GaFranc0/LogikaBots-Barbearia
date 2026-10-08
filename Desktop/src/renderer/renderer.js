@@ -1,4 +1,138 @@
 let dadosBarbearia = null
+let barbeariaSelecionada = null
+let usuarioEmEdicao = null
+let modoGerenciamento = false
+let salvando = false
+let versaoLista = 0
+
+function mostrarTela(id) {
+  document.querySelectorAll('.card').forEach(card => { card.style.display = card.id === id ? 'block' : 'none' })
+  document.querySelector('.steps').style.display = ['tela-barbearia', 'tela-usuario', 'tela-sucesso-card'].includes(id) && !modoGerenciamento ? 'flex' : 'none'
+  versaoLista++
+}
+
+function mensagemLista(lista, texto) {
+  const mensagem = document.createElement('p')
+  mensagem.className = 'lista-mensagem'
+  mensagem.textContent = texto
+  lista.replaceChildren(mensagem)
+}
+
+async function listarBarbearias() {
+  modoGerenciamento = false
+  mostrarTela('tela-lista-barbearias')
+  const versao = versaoLista
+  const lista = document.getElementById('lista-barbearias')
+  mensagemLista(lista, 'Carregando barbearias...')
+  try {
+    const resultado = await window.api.listarBarbearias()
+    if (versao !== versaoLista) return
+    if (!resultado.sucesso) throw new Error(resultado.erro)
+    lista.replaceChildren()
+    if (!resultado.barbearias.length) mensagemLista(lista, 'Nenhuma barbearia cadastrada. Volte à tela principal para criar a primeira.')
+    resultado.barbearias.forEach(barbearia => {
+      const botao = document.createElement('button')
+      botao.className = 'registro'
+      preencherRegistro(botao, barbearia.nome, `${barbearia.telefone_whatsapp || 'Sem telefone'} · ${barbearia.total_usuarios} usuário(s)`)
+      botao.addEventListener('click', () => {
+        barbeariaSelecionada = barbearia
+        listarUsuarios()
+      })
+      lista.appendChild(botao)
+    })
+  } catch (erro) {
+    if (versao !== versaoLista) return
+    mensagemLista(lista, 'Não foi possível carregar as barbearias. Clique em Atualizar para tentar novamente.')
+    mostrarToast(erro.message)
+  }
+}
+
+function preencherRegistro(elemento, nome, detalhes) {
+  const titulo = document.createElement('span')
+  titulo.className = 'registro-nome'
+  titulo.textContent = nome
+  const descricao = document.createElement('span')
+  descricao.className = 'registro-detalhes'
+  descricao.textContent = detalhes
+  elemento.append(titulo, descricao)
+}
+
+async function listarUsuarios() {
+  modoGerenciamento = true
+  mostrarTela('tela-gerenciar-usuarios')
+  const versao = versaoLista
+  document.getElementById('nome-barbearia-selecionada').textContent = barbeariaSelecionada.nome
+  const lista = document.getElementById('lista-usuarios')
+  mensagemLista(lista, 'Carregando usuários...')
+  try {
+    const resultado = await window.api.listarUsuarios({ id_barbearia: barbeariaSelecionada.id_barbearia })
+    if (versao !== versaoLista) return
+    if (!resultado.sucesso) throw new Error(resultado.erro)
+    lista.replaceChildren()
+    if (!resultado.usuarios.length) mensagemLista(lista, 'Esta barbearia ainda não tem usuários. Clique em Adicionar usuário.')
+    resultado.usuarios.forEach(usuario => {
+      const registro = document.createElement('div')
+      registro.className = 'registro'
+      preencherRegistro(registro, usuario.nome || usuario.usuario, `${usuario.usuario} · ${usuario.nivel} · ${Number(usuario.ativo) === 1 ? 'Ativo' : 'Inativo'}`)
+      const acoes = document.createElement('div')
+      acoes.className = 'actions'
+      const editar = document.createElement('button')
+      editar.className = 'btn btn-secondary'
+      editar.textContent = 'Editar'
+      editar.addEventListener('click', () => abrirFormularioUsuario(usuario))
+      const status = document.createElement('button')
+      status.className = 'btn btn-secondary'
+      status.textContent = Number(usuario.ativo) === 1 ? 'Desativar' : 'Ativar'
+      status.addEventListener('click', async () => {
+        status.disabled = true
+        editar.disabled = true
+        try {
+          const resultado = await window.api.alterarStatusUsuario({ id_barbearia: barbeariaSelecionada.id_barbearia, id_usuario: usuario.id_usuario, ativo: Number(usuario.ativo) !== 1 })
+          if (!resultado.sucesso) throw new Error(resultado.erro)
+          if (versao === versaoLista) {
+            mostrarToast('Status atualizado.', 'ok')
+            await listarUsuarios()
+          }
+        } catch (erro) { mostrarToast(erro.message) }
+        finally { status.disabled = false; editar.disabled = false }
+      })
+      acoes.append(editar, status)
+      registro.appendChild(acoes)
+      lista.appendChild(registro)
+    })
+  } catch (erro) {
+    if (versao !== versaoLista) return
+    mensagemLista(lista, 'Não foi possível carregar os usuários.')
+    const tentar = document.createElement('button')
+    tentar.className = 'btn btn-secondary'
+    tentar.textContent = 'Tentar novamente'
+    tentar.addEventListener('click', listarUsuarios)
+    lista.appendChild(tentar)
+    mostrarToast(erro.message)
+  }
+}
+
+function configurarFormularioUsuario() {
+  const tela = document.getElementById('tela-usuario')
+  tela.querySelector('.card-title').textContent = modoGerenciamento ? (usuarioEmEdicao ? 'Editar usuário' : 'Novo usuário') : 'Usuário administrador'
+  tela.querySelector('.card-subtitle').textContent = modoGerenciamento ? `Acesso para ${barbeariaSelecionada.nome}.` : 'Crie o acesso inicial para esta barbearia.'
+  document.getElementById('u-senha').placeholder = usuarioEmEdicao ? 'Deixe em branco para manter a senha atual' : 'Mínimo 6 caracteres, 1 letra e 1 número'
+  document.getElementById('btn-finalizar').textContent = modoGerenciamento ? 'Salvar usuário' : 'Finalizar cadastro'
+  document.getElementById('btn-finalizar').disabled = false
+}
+
+function abrirFormularioUsuario(usuario = null) {
+  usuarioEmEdicao = usuario
+  ;['u-nome', 'u-usuario', 'u-senha'].forEach(id => {
+    document.getElementById(id).value = ''
+    limparFeedback(id)
+  })
+  document.getElementById('u-nome').value = usuario?.nome || ''
+  document.getElementById('u-usuario').value = usuario?.usuario || ''
+  document.getElementById('u-nivel').value = usuario?.nivel || 'admin'
+  configurarFormularioUsuario()
+  mostrarTela('tela-usuario')
+}
 
 const DDDS_VALIDOS = [
 '11','12','13','14','15','16','17','18','19', '21','22','24','27','28','31','32','33','34','35','37','38','41','42',
@@ -42,12 +176,14 @@ const VALIDACOES = {
     return null
   },
   'u-nome': (v) => {
+    if (v.length > 100) return 'Nome deve ter até 100 caracteres.'
     if (v.length < 3) return 'Nome deve ter pelo menos 3 letras.'
     if (v.trim().split(/\s+/).length < 2) return 'Informe nome e sobrenome.'
     if (!/[a-zA-ZÀ-ú]/.test(v)) return 'Nome deve conter apenas letras.'
     return null
   },
   'u-usuario': (v) => {
+    if (v.length > 50) return 'Login deve ter até 50 caracteres.'
     if (v.length < 3) return 'Login deve ter pelo menos 3 caracteres.'
     if (!/^[a-zA-Z0-9_]+$/.test(v)) return 'Use apenas letras, números e _.'
     return null
@@ -150,7 +286,6 @@ function minimizarParaTray() {
 async function alternarFullscreen() {
   if (!window.api || !window.api.toggleFullscreen) return
   await window.api.toggleFullscreen()
-  atualizarIconeFullscreen()
 }
 
 async function atualizarIconeFullscreen() {
@@ -168,6 +303,9 @@ async function atualizarIconeFullscreen() {
 }
 
 function irParaPasso2() {
+  modoGerenciamento = false
+  usuarioEmEdicao = null
+  configurarFormularioUsuario()
   const campos = {
     'b-nome':        document.getElementById('b-nome').value.trim(),
     'b-telefone':    document.getElementById('b-telefone').value.trim(),
@@ -216,6 +354,8 @@ function irParaPasso2() {
 }
 
 function voltarPasso1() {
+  if (salvando) return
+  if (modoGerenciamento) { listarUsuarios(); return }
   document.getElementById('tela-usuario').style.display = 'none'
   document.getElementById('tela-barbearia').style.display = 'block'
   document.getElementById('step1-indicator').className = 'step active'
@@ -225,6 +365,7 @@ function voltarPasso1() {
 }
 
 async function finalizar() {
+  if (salvando) return
   const campos = {
     'u-nome':    document.getElementById('u-nome').value.trim(),
     'u-usuario': document.getElementById('u-usuario').value.trim(),
@@ -233,6 +374,7 @@ async function finalizar() {
 
   let temErro = false
   for (const [id, valor] of Object.entries(campos)) {
+    if (id === 'u-senha' && usuarioEmEdicao && !valor) { limparFeedback(id); continue }
     if (!valor) {
       marcarErro(id, 'Campo obrigatório.')
       temErro = true
@@ -255,27 +397,46 @@ async function finalizar() {
   btn.disabled = true
   btn.textContent = 'Inserindo...'
 
-  const resultado = await window.api.inserirCadastro({
-    barbearia: dadosBarbearia,
-    usuario: {
+  salvando = true
+  document.getElementById('btn-voltar').disabled = true
+  try {
+    const usuario = {
       nome:       campos['u-nome'],
       usuario:    campos['u-usuario'],
       senha_hash: campos['u-senha'],
       nivel:      document.getElementById('u-nivel').value
     }
-  })
+    const resultado = modoGerenciamento
+      ? await window.api.salvarUsuario({ id_barbearia: barbeariaSelecionada.id_barbearia, id_usuario: usuarioEmEdicao?.id_usuario, usuario })
+      : await window.api.inserirCadastro({ barbearia: dadosBarbearia, usuario })
 
-  if (resultado.sucesso) {
-    document.getElementById('tela-usuario').style.display = 'none'
-    document.getElementById('tela-sucesso-card').style.display = 'block'
-  } else {
-    mostrarToast('Erro: ' + resultado.erro)
+    if (resultado.sucesso) {
+      document.getElementById('u-senha').value = ''
+      if (modoGerenciamento) {
+        mostrarToast('Usuário salvo com sucesso.', 'ok')
+        await listarUsuarios()
+        return
+      }
+      mostrarTela('tela-sucesso-card')
+      document.getElementById('step2-indicator').className = 'step done'
+    } else {
+      mostrarToast('Erro: ' + resultado.erro)
+    }
+  } catch (erro) { mostrarToast('Erro: ' + erro.message) }
+  finally {
+    salvando = false
+    document.getElementById('btn-voltar').disabled = false
     btn.disabled = false
-    btn.textContent = 'Finalizar cadastro'
+    btn.textContent = modoGerenciamento ? 'Salvar usuário' : 'Finalizar cadastro'
   }
 }
 
 function novoCadastro() {
+  modoGerenciamento = false
+  usuarioEmEdicao = null
+  barbeariaSelecionada = null
+  mostrarTela('tela-barbearia')
+  configurarFormularioUsuario()
   dadosBarbearia = null
   document.querySelectorAll('input').forEach(i => {
     i.value = ''
@@ -297,13 +458,15 @@ document.addEventListener('DOMContentLoaded', () => {
   ativarValidacaoAoSair(['u-nome','u-usuario','u-senha'])
   atualizarIconeFullscreen()
 
-  document.getElementById('btn-fechar').addEventListener('click', abrirModal)
   document.getElementById('btn-cancelar-modal').addEventListener('click', fecharModal)
   document.getElementById('btn-confirmar-saida').addEventListener('click', confirmarSaida)
-  document.getElementById('btn-tray').addEventListener('click', minimizarParaTray)
-  document.getElementById('btn-fs').addEventListener('click', alternarFullscreen)
   document.getElementById('btn-continuar').addEventListener('click', irParaPasso2)
   document.getElementById('btn-voltar').addEventListener('click', voltarPasso1)
   document.getElementById('btn-finalizar').addEventListener('click', finalizar)
   document.getElementById('btn-novo-cadastro').addEventListener('click', novoCadastro)
+  document.getElementById('btn-ver-barbearias').addEventListener('click', listarBarbearias)
+  document.getElementById('btn-lista-inicio').addEventListener('click', novoCadastro)
+  document.getElementById('btn-atualizar-barbearias').addEventListener('click', listarBarbearias)
+  document.getElementById('btn-usuarios-voltar').addEventListener('click', listarBarbearias)
+  document.getElementById('btn-adicionar-usuario').addEventListener('click', () => abrirFormularioUsuario())
 })

@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8"/>
-  <title>Logika Bots — Novo Cliente</title>
+  <title>Logika Bots — Gerenciador</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;800&family=DM+Sans:wght@400;500&display=swap');
 
@@ -413,6 +413,17 @@
       color: var(--success);
     }
 
+    .lista-cadastros { display: flex; flex-direction: column; gap: 12px; }
+    .registro { padding: 16px; border: 1px solid var(--border2); border-radius: 10px; background: rgba(6,13,26,0.4); }
+    button.registro { width: 100%; text-align: left; color: var(--text); font: inherit; cursor: pointer; transition: border-color .2s; }
+    button.registro:hover { border-color: var(--accent); }
+    .registro-nome { display: block; color: var(--silver); font-weight: 500; overflow-wrap: anywhere; }
+    .registro-detalhes { display: block; color: var(--silver2); font-size: 12px; margin-top: 6px; overflow-wrap: anywhere; }
+    .registro .actions { margin-top: 14px; }
+    .lista-mensagem { color: var(--silver2); line-height: 1.6; }
+    .btn:disabled { cursor: not-allowed; opacity: .6; }
+    @media (max-width: 480px) { .card { padding: 24px 18px; } .actions { flex-wrap: wrap; } .actions .btn { min-width: 140px; } }
+
     #tela-sucesso h2 { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 20px; color: var(--silver); }
     #tela-sucesso p { color: var(--muted); font-size: 13px; }
   </style>
@@ -429,12 +440,6 @@
         <button class="btn btn-danger" id="btn-confirmar-saida">Sair</button>
       </div>
     </div>
-  </div>
-
-  <div class="win-controls">
-    <button class="win-btn" id="btn-tray" title="Minimizar para bandeja">&#8212;</button>
-    <button class="win-btn" id="btn-fs" title="Alternar tela cheia">&#x2922;</button>
-    <button class="win-btn fechar" id="btn-fechar" title="Fechar">&#x2715;</button>
   </div>
 
   <header>
@@ -503,7 +508,28 @@
     </div>
 
     <div class="actions">
+      <button class="btn btn-secondary" id="btn-ver-barbearias">Barbearias cadastradas</button>
       <button class="btn btn-primary" id="btn-continuar">Continuar →</button>
+    </div>
+  </div>
+
+  <div class="card" id="tela-lista-barbearias" style="display:none">
+    <div class="card-title">Barbearias cadastradas</div>
+    <div class="card-subtitle">Selecione uma barbearia para gerenciar seus usuários.</div>
+    <div class="lista-cadastros" id="lista-barbearias" aria-live="polite"></div>
+    <div class="actions">
+      <button class="btn btn-secondary" id="btn-lista-inicio">← Tela principal</button>
+      <button class="btn btn-primary" id="btn-atualizar-barbearias">Atualizar</button>
+    </div>
+  </div>
+
+  <div class="card" id="tela-gerenciar-usuarios" style="display:none">
+    <div class="card-title" id="nome-barbearia-selecionada"></div>
+    <div class="card-subtitle">Gerencie os usuários e os acessos desta barbearia.</div>
+    <div class="lista-cadastros" id="lista-usuarios" aria-live="polite"></div>
+    <div class="actions">
+      <button class="btn btn-secondary" id="btn-usuarios-voltar">← Barbearias</button>
+      <button class="btn btn-primary" id="btn-adicionar-usuario">+ Adicionar usuário</button>
     </div>
   </div>
 
@@ -549,7 +575,7 @@
       <h2>Cadastro realizado!</h2>
       <p>A barbearia e o usuário admin foram inseridos no banco com sucesso.</p>
       <button class="btn btn-primary" id="btn-novo-cadastro" style="margin-top:8px; max-width:200px">
-        + Novo cadastro
+        Voltar à tela principal
       </button>
     </div>
   </div>
