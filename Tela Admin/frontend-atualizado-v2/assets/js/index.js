@@ -43,7 +43,7 @@ async function handleLogin(e) {
             
             // Redireciona para o painel principal
             setTimeout(() => {
-                window.location.href = 'admin.html';
+                window.location.href = String(data.user.role || '').toLowerCase() === 'admin' ? 'admin.html' : 'agendamentos.html';
             }, 800);
         } else {
             throw new Error(data.message || 'Erro ao fazer login');

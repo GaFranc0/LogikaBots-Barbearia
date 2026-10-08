@@ -3,6 +3,14 @@ const { pool } = require('../config/database');
 
 const router = express.Router();
 
+// Comissão do barbeiro (%): número entre 0 e 100, com 2 casas decimais
+function normalizarComissao(valor) {
+    let n = parseFloat(String(valor).replace(',', '.'));
+    if (isNaN(n) || n < 0) n = 0;
+    if (n > 100) n = 100;
+    return Math.round(n * 100) / 100;
+}
+
 router.get('/barbeiros/:id_barbearia', async (req, res) => {
     try {
         const [barbeiros] = await pool.query(
@@ -61,16 +69,17 @@ router.post('/barbeiros', async (req, res) => {
 
         for (const bData of barbeiros_data) {
             let idBarbeiro = bData.id_barbeiro;
+            const comissao = normalizarComissao(bData.comissao_percentual);
 
             if (idBarbeiro) {
                 await connection.query(
-                    'UPDATE barbeiros SET nome = ?, almoco_inicio = ?, almoco_fim = ? WHERE id_barbeiro = ?',
-                    [bData.nome, bData.almoco_inicio || null, bData.almoco_fim || null, idBarbeiro]
+                    'UPDATE barbeiros SET nome = ?, almoco_inicio = ?, almoco_fim = ?, comissao_percentual = ? WHERE id_barbeiro = ?',
+                    [bData.nome, bData.almoco_inicio || null, bData.almoco_fim || null, comissao, idBarbeiro]
                 );
             } else {
                 const [result] = await connection.query(
-                    'INSERT INTO barbeiros (id_barbearia, nome, almoco_inicio, almoco_fim) VALUES (?, ?, ?, ?)',
-                    [id_barbearia, bData.nome, bData.almoco_inicio || null, bData.almoco_fim || null]
+                    'INSERT INTO barbeiros (id_barbearia, nome, almoco_inicio, almoco_fim, comissao_percentual) VALUES (?, ?, ?, ?, ?)',
+                    [id_barbearia, bData.nome, bData.almoco_inicio || null, bData.almoco_fim || null, comissao]
                 );
                 idBarbeiro = result.insertId;
             }

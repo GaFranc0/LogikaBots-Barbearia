@@ -40,7 +40,7 @@ router.post('/login', async (req, res) => {
                 nome: user.nome,
                 usuario: user.usuario,
                 id_barbearia: user.id_barbearia,
-                role: user.role
+                role: user.nivel || user.role
             }
         });
     } catch (err) {

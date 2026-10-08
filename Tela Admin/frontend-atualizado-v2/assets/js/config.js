@@ -1,6 +1,6 @@
 // Ative para testar com o backend rodando em http://localhost:3000.
 // Desative antes de publicar o frontend.
-const USE_LOCAL_API = false;
+const USE_LOCAL_API = true;
 
 const FRONTEND_IS_LOCAL = ['localhost', '127.0.0.1'].includes(window.location.hostname);
 

@@ -609,6 +609,9 @@ function getBarberHTML(id, nome, almocoIni, almocoFim, data) {
     
     let diasHtml = dias.map(d => getDayHTML(id, d, data)).join('');
     
+    const comissaoNum = (data && data.comissao_percentual != null) ? Number(data.comissao_percentual) : 0;
+    const comissao = Number.isFinite(comissaoNum) ? comissaoNum : 0;
+    
     return `
         <div class="absolute left-0 top-0 bottom-0 w-1 bg-purple-500"></div>
         <div class="p-4 sm:p-5 bg-gradient-to-r from-slate-900 to-slate-800 border-b border-slate-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -640,6 +643,17 @@ function getBarberHTML(id, nome, almocoIni, almocoFim, data) {
                         <span class="text-slate-600">-</span>
                         <input type="time" value="${almocoFim}" class="input-dark text-center py-2 px-1 text-sm flex-1 lunch-end">
                     </div>
+                </div>
+                <div class="bg-slate-950/50 rounded-xl border border-slate-800 p-4">
+                    <label class="text-xs font-bold text-purple-500 uppercase mb-3 flex items-center gap-2">
+                        <i data-lucide="percent" class="w-4 h-4"></i> Comissão
+                    </label>
+                    <div class="relative mt-4">
+                        <input type="number" min="0" max="100" step="0.01" inputmode="decimal" value="${comissao}" placeholder="0"
+                               class="input-dark text-center py-2 pl-3 pr-8 text-sm w-full barber-commission">
+                        <span class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm pointer-events-none">%</span>
+                    </div>
+                    <p class="text-[11px] text-slate-500 mt-2">Percentual sobre os cortes realizados</p>
                 </div>
             </div>
         </div>`;
@@ -722,6 +736,17 @@ function setupBarberEvents(div, id) {
     }
     if (lunchEnd) {
         lunchEnd.addEventListener('blur', () => validateTimeInput(lunchEnd, 'end'));
+    }
+    
+    // Comissão: manter entre 0 e 100 ao sair do campo
+    const commission = div.querySelector('.barber-commission');
+    if (commission) {
+        commission.addEventListener('blur', () => {
+            let v = parseFloat(String(commission.value).replace(',', '.'));
+            if (isNaN(v) || v < 0) v = 0;
+            if (v > 100) v = 100;
+            commission.value = Math.round(v * 100) / 100;
+        });
     }
     
     div.querySelector('.btn-remove-barber').addEventListener('click', () => {
@@ -1196,12 +1221,20 @@ function collectBarbersData() {
             validLunchEnd = '13:00';
         }
         
+        // Comissão (%) do barbeiro: número entre 0 e 100
+        const commissionInput = el.querySelector('.barber-commission');
+        let comissao = commissionInput ? parseFloat(String(commissionInput.value).replace(',', '.')) : 0;
+        if (isNaN(comissao) || comissao < 0) comissao = 0;
+        if (comissao > 100) comissao = 100;
+        comissao = Math.round(comissao * 100) / 100;
+        
         barbeirosData.push({
             id_barbeiro: el.dataset.id || null,
             nome: el.querySelector('.barber-name').value.trim(),
             agenda: agenda,
             almoco_inicio: validLunchStart,
-            almoco_fim: validLunchEnd
+            almoco_fim: validLunchEnd,
+            comissao_percentual: comissao
         });
     });
     
