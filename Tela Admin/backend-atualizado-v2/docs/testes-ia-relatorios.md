@@ -1,6 +1,36 @@
+## Diagn?stico de comiss?es ? 08/10/2026
+
+A conex?o de database.js funcionou no MySQL real. A de databaseia.js falhou com ER_ACCESS_DENIED_ERROR (1045). A falha ocorre na leitura dos cat?logos, antes do int?rprete, do Ollama e da consulta de comiss?es. As duas usam host, porta e database compartilhados, mas usu?rios e senhas distintos. ? necess?rio corrigir DB_IA_USER/DB_IA_PASSWORD ou a conta permitida no servidor; depois verificar SELECT nas tabelas de relat?rios. Nenhuma credencial foi exibida ou alterada. A conta da IA n?o foi substitu?da automaticamente pela conta do dashboard.
+
+Schema confirmado: barbeiros.comissao_percentual DECIMAL(5,2), situacao ativo/inativo; agendamentos.data_agendamento DATE e status agendado/concluido/cancelado; servicos.preco DECIMAL(10,2). Um percentual 0.50 representa 0,5%, n?o 50%.
+
+Com a conex?o funcional injetada no servi?o, as consultas reais de Ronaldo e Ciro na barbearia 2 funcionaram: valor a pagar, total, percentual, ranking, continuidade para agosto e troca de barbeiro. Setembro e agosto de 2026 retornaram faturamento e comiss?es zero para esses profissionais; percentuais atuais 15% e 0,5%. Dashboard e IA concordaram. Primeira pergunta cerca de 1,56 s (conex?o e cat?logos); seguintes cerca de 258?260 ms, sem chamada ao Ollama. Esses tempos s?o amostras, n?o benchmark.
+
+Corre??es: rota retorna HTTP 503 e c?digo IA_BANCO_SEM_ACESSO para acesso negado, sem mensagem bruta do MySQL; nomes desconhecidos em pedidos de pagamento s?o recusados; dashboard consulta novamente a API a cada carregamento, pois pre?os e percentuais atuais podem alterar qualquer m?s; troca de barbearia limpa hist?rico e impede exibi??o de resposta de outra barbearia.
+
+Valida??o automatizada: 127 testes passaram, incluindo regress?es de nome desconhecido e contrato HTTP de erro sanitizado. Integra??o completa pela conta da IA permanece bloqueada pela autentica??o. Renderiza??o visual no navegador e desempenho do Ollama n?o foram validados nesta rodada.
+
+---
+
 # IA de relatórios: funcionamento e roteiro de testes
 
 O código usa o Qwen como intérprete de perguntas. As métricas vêm de consultas SQL fixas e parametrizadas. Os valores abaixo pertencem somente à base de testes descrita no contexto; não fazem parte das regras de produção.
+
+## Comissões e otimização
+
+A interpretação por regras e os exemplos do classificador foram ampliados; isso não altera os pesos do Qwen nem requer recriar o modelo no Ollama. Perguntas diretas sobre comissão não chamam o modelo:
+
+- “Quanto preciso pagar ao João?” ou “Quanto o João precisa receber?”: comissão individual.
+- “Qual o total de comissões?”: total e valores por barbeiro.
+- “Qual o percentual de comissão do João?”: percentual atual cadastrado, sem consultar agendamentos.
+- “Quem tem a maior comissão?”: maior valor, incluindo empates.
+- “Como funciona o cálculo da comissão?”: explicação sem consulta de métricas.
+- “Quanto é a comissão do João com Combo na segunda-feira?”: filtros combinados.
+- “E em agosto?” ou “E o Marcos?”: continuidade pelo plano retornado.
+
+As comissões usam somente concluídos, os preços atuais e `barbeiros.comissao_percentual` atual. O SQL arredonda por barbeiro antes da soma em centavos. Zero é um percentual válido; NULL ou valores fora de 0–100 ficam pendentes e não entram no total/ranking. No relatório geral, incluem-se ativos sem atendimentos e inativos com atendimentos no período. Uma consulta individual também pode consultar um inativo sem atendimentos. Não há registro de pagamentos realizados; perguntas sobre valores já pagos são recusadas. Comparações e projeções continuam não suportadas.
+
+Os catálogos de nomes/IDs são carregados em paralelo e reutilizados por até 15 segundos, separados por barbearia, com limite de 100 entradas por processo. Chamadas simultâneas compartilham a leitura em andamento e falhas não ficam em cache. Alterações de nomes ou novos cadastros podem levar esse prazo para aparecer na interpretação. Preços, percentuais e métricas não ficam em cache: cada pergunta financeira executa uma consulta atualizada. Períodos inválidos são recusados antes de acessar o banco. Não foi medido tempo de resposta no MySQL/Ollama real nesta alteração.
 
 ## O que mudou
 

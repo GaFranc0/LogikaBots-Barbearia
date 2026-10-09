@@ -6,7 +6,8 @@ const DIAS = ['domingo', 'segunda-feira', 'terça-feira', 'quarta-feira',
 const INTENTS = ['FATURAMENTO', 'ATENDIMENTOS', 'CLIENTES_ATENDIDOS', 'TICKET_MEDIO',
     'NOVOS_CLIENTES', 'CANCELAMENTOS', 'AGENDADOS', 'BARBEIROS_AGENDADOS',
     'RANKING_SERVICO', 'RANKING_BARBEIRO', 'MELHOR_DIA_SEMANA', 'MELHOR_DATA',
-    'RESUMO', 'AMBIGUA', 'NAO_SUPORTADA', 'FORA_ESCOPO'];
+    'RESUMO', 'COMISSOES', 'PERCENTUAL_COMISSAO', 'RANKING_COMISSAO',
+    'EXPLICAR_COMISSAO', 'AMBIGUA', 'NAO_SUPORTADA', 'FORA_ESCOPO'];
 const METRICAS = ['FATURAMENTO', 'ATENDIMENTOS'];
 const NUMERICOS = ['ano', 'mes', 'ano_fim', 'mes_fim'];
 const NOMES = { servico: ['servicos', 'nome_servico', 'id_servico'],
@@ -66,6 +67,8 @@ const OPERACOES_NAO_SUPORTADAS = [
 ];
 
 function detectarIntent(texto, temServico = false) {
+    const comissao = detectarComissao(texto);
+    if (comissao) return comissao;
     // Receita culinária, pedidos de orientação e causas precisam de interpretação semântica.
     if (/\b(receita de|como|por que|porque|preciso|devo|deveria|sugest\w*)\b/.test(texto)) return null;
     // Um horário marcado ainda não atendido é o status "agendado".
@@ -99,6 +102,16 @@ function detectarIntent(texto, temServico = false) {
     if (dinheiro) return { intent: 'FATURAMENTO' };
     if (/\batendimento\w*\b/.test(texto) || (temServico && quantidade)) return { intent: 'ATENDIMENTOS' };
     return null;
+}
+
+function detectarComissao(texto) {
+    const explicita = /\bcomiss\w*\b/.test(texto);
+    const receber = /\b(?:quanto|valor|total)\b.*\b(?:pagar|receber|repassar)\b/.test(texto);
+    if (!explicita && !receber) return null;
+    if (explicita && /\b(como|calcul\w*|funciona|formula)\b/.test(texto)) return { intent: 'EXPLICAR_COMISSAO' };
+    if (explicita && /\b(percentual|porcentagem|percentagem|taxa)\b/.test(texto)) return { intent: 'PERCENTUAL_COMISSAO' };
+    if (/\b(quem|qual barbeiro)\b.*\b(mais|maior)\b/.test(texto)) return { intent: 'RANKING_COMISSAO' };
+    return { intent: 'COMISSOES' };
 }
 
 function candidatosEntidade(texto, lista, campo) {
@@ -238,7 +251,10 @@ function candidatoDesconhecido(texto, tipo) {
     const re = tipo === 'barbeiro'
         ? new RegExp('\\b(?:barbeiro|quanto(?: o| a)?|e o|e a|por|com(?: o| a)?|do|da)\\s+([a-z][a-z -]*?)' + ate)
         : new RegExp('\\bservico\\s+([a-z][a-z -]*?)' + ate);
-    const match = texto.match(re);
+    const pagamento = tipo === 'barbeiro'
+        ? texto.match(/\b(?:pagar|repassar)\s+(?:ao|a|para o|para a|para)\s+([a-z][a-z -]*?)(?=\s+(?:em|no|na|por|nesse|neste)\b|[?!,]|$)/)
+        : null;
+    const match = pagamento || texto.match(re);
     if (!match) return null;
     const nome = match[1].trim();
     if (/\b(mes|ano|dia|semana|servico|barbeiro|fatur\w*|ticket|atendimento\w*|dinheiro|barbearia|periodo|mais|melhor|maior|ainda|tem|teve|fez|fiz|realiz\w*|deu|trouxe|entrou|foi|foram)\b/.test(nome)) return null;
@@ -275,6 +291,8 @@ FATURAMENTO=receita de concluídos; ATENDIMENTOS=quantidade de concluídos;
 CLIENTES_ATENDIDOS=pessoas distintas atendidas; NOVOS_CLIENTES=cadastros;
 TICKET_MEDIO=receita por atendimento; CANCELAMENTOS=cancelados; AGENDADOS=status agendado;
 BARBEIROS_AGENDADOS=quais barbeiros têm horário marcado; RESUMO=resumo explícito.
+COMISSOES=valor a receber/pagar por atendimentos concluídos; PERCENTUAL_COMISSAO=percentual cadastrado;
+RANKING_COMISSAO=barbeiro com maior comissão; EXPLICAR_COMISSAO=como o cálculo funciona.
 RANKING_SERVICO/RANKING_BARBEIRO=quem liderou por FATURAMENTO ou ATENDIMENTOS.
 MELHOR_DATA=data específica; MELHOR_DIA_SEMANA=agrupamento por dia da semana.
 AMBIGUA=falta critério ou referência; NAO_SUPORTADA=métrica ausente (lucro, retenção, comparações, ranking de clientes);
@@ -287,7 +305,10 @@ Datas serão resolvidas pelo backend. Uma pergunta completa ignora histórico.`;
         ['Quem trouxe mais dinheiro?', 'RANKING_BARBEIRO', 'FATURAMENTO', 'mais dinheiro'],
         ['Qual foi o melhor serviço?', 'AMBIGUA', null, 'melhor serviço'],
         ['Qual a capital da França?', 'FORA_ESCOPO', null, 'capital da França'],
-        ['Qual cliente mais veio?', 'NAO_SUPORTADA', null, 'cliente mais veio']
+        ['Qual cliente mais veio?', 'NAO_SUPORTADA', null, 'cliente mais veio'],
+        ['Quanto preciso pagar ao João?', 'COMISSOES', null, 'preciso pagar'],
+        ['Qual o percentual de comissão do João?', 'PERCENTUAL_COMISSAO', null, 'percentual de comissão'],
+        ['Quem tem a maior comissão?', 'RANKING_COMISSAO', null, 'maior comissão']
     ].flatMap(([q, intent, ranking_por, evidencia]) => [
         { role: 'user', content: JSON.stringify({ pergunta: q, contexto_anterior: null }) },
         { role: 'assistant', content: JSON.stringify({ intent, ranking_por, servico: null,
@@ -329,7 +350,13 @@ async function interpretarPergunta({ pergunta, ano, mes, contexto, historico = [
     }
     const marcados = /\b(agendad\w*|agendamento\w*|marcad\w*)\b/.test(texto);
     const paraRegras = marcados ? texto.replace(/(?:mas )?ainda nao atendeu/g, '') : texto;
-    if (OPERACOES_NAO_SUPORTADAS.some(re => re.test(paraRegras))) return naoSuportada();
+    const comissaoDireta = detectarComissao(texto);
+    // Libera apenas o vocabulário de comissão; comparações, despesas e exclusões continuam bloqueadas.
+    const regrasOperacoes = comissaoDireta ? paraRegras.replace(/\b(comiss\w*|percentual|porcentagem|percentagem|taxa)\b/g, '') : paraRegras;
+    if (OPERACOES_NAO_SUPORTADAS.some(re => re.test(regrasOperacoes))) return naoSuportada();
+    if (comissaoDireta && /\b(cancel\w*|agendad\w*|marcad\w*|pagos?|pagamento\w*)\b/.test(texto)) {
+        return naoSuportada('Comissões consideram apenas atendimentos concluídos. O relatório não registra pagamentos efetuados.');
+    }
     if (/\b(presidente|politica|capital da|capital do|receita de bolo|futebol|previsao do tempo)\b/.test(texto)) {
         return recusar('FORA_ESCOPO', 'Posso responder perguntas sobre os relatórios e o desempenho da barbearia.');
     }
@@ -351,6 +378,11 @@ async function interpretarPergunta({ pergunta, ano, mes, contexto, historico = [
         return ambiguo('Quais pessoas ou serviços você quer comparar? Consulte um filtro por vez ou peça o ranking de todos.');
     }
     const plano = planoVazio();
+    if (comissaoDireta?.intent === 'EXPLICAR_COMISSAO') {
+        plano.intent = 'EXPLICAR_COMISSAO';
+        Object.assign(plano, { ano, mes, id_servico: null, id_barbeiro: null });
+        return { plano, periodo: montarPeriodo(plano) };
+    }
     const encontrados = {};
     for (const [tipo, [lista, campo]] of Object.entries(NOMES)) {
         encontrados[tipo] = candidatosEntidade(texto, contexto[lista], campo);
@@ -409,8 +441,12 @@ async function interpretarPergunta({ pergunta, ano, mes, contexto, historico = [
         if (mencoes) return mencoes;
     }
     plano.intent = classificacao.intent;
+    if (plano.intent === 'PERCENTUAL_COMISSAO' && (plano.servico || /\b(segunda|terca|quarta|quinta|sexta|sabado|domingo)\b/.test(texto))) {
+        return naoSuportada('O percentual é cadastrado por barbeiro, não por serviço ou dia da semana.');
+    }
+    if (plano.intent === 'RANKING_COMISSAO' && encontrados.barbeiro.length) return ambiguo('Peça a comissão desse barbeiro ou o ranking de todos.');
     plano.ranking_por = /^(RANKING_|MELHOR_)/.test(plano.intent) ? classificacao.ranking_por ?? null : null;
-    if (/^(RANKING_|MELHOR_)/.test(plano.intent) && !METRICAS.includes(plano.ranking_por)) return ambiguo();
+    if (plano.intent !== 'RANKING_COMISSAO' && /^(RANKING_|MELHOR_)/.test(plano.intent) && !METRICAS.includes(plano.ranking_por)) return ambiguo();
     if ((plano.intent === 'RANKING_BARBEIRO' && encontrados.barbeiro.length) ||
         (plano.intent === 'RANKING_SERVICO' && encontrados.servico.length)) {
         return ambiguo('Você quer o resultado desse cadastro ou um ranking de todos? Especifique para que o filtro não seja ignorado.');

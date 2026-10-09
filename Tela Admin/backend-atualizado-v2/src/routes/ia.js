@@ -139,6 +139,14 @@ router.post('/perguntar', async (req, res) => {
 
     } catch (error) {
 
+        if (['ER_ACCESS_DENIED_ERROR', 'ER_DBACCESS_DENIED_ERROR', 'ER_TABLEACCESS_DENIED_ERROR', 'ER_COLUMNACCESS_DENIED_ERROR'].includes(error.code)) {
+            console.error('Erro /ia/perguntar:', { codigo: error.code });
+            return res.status(503).json({
+                error: 'A conex?o de relat?rios da IA n?o tem acesso ao banco. Verifique DB_IA_USER, DB_IA_PASSWORD e as permiss?es de leitura.',
+                codigo: 'IA_BANCO_SEM_ACESSO'
+            });
+        }
+
         console.error(
             'Erro /ia/perguntar:',
             error

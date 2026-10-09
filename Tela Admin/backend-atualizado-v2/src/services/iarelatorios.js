@@ -1,6 +1,7 @@
 const { interpretarPergunta, DIAS } = require('./iarelatorios-plano');
 
 const NOTA_PRECOS = 'Valores calculados pelos preços atuais dos serviços; o sistema ainda não registra o preço cobrado em cada atendimento.';
+const NOTA_COMISSOES = 'Estimativa pelos preços e percentuais atuais, sem registro de pagamentos efetuados.';
 const JOIN_AGENDAMENTOS = `
     FROM agendamentos a
     INNER JOIN servicos s ON s.id_servico = a.id_servico
@@ -70,6 +71,24 @@ function montarResposta(resultado, plano, periodo) {
     const escopo = `em ${periodo.label}${filtrosDescricao(plano)}`;
     const n = resultado.atendimentos;
     switch (plano.intent) {
+        case 'EXPLICAR_COMISSAO':
+            return 'A comissão é o faturamento dos atendimentos concluídos de cada barbeiro no período multiplicado pelo percentual cadastrado, dividido por 100. O valor é arredondado para centavos por barbeiro e depois somado. Percentuais não configurados ficam pendentes.';
+        case 'PERCENTUAL_COMISSAO':
+            return resultado.barbeiros.length ? resultado.barbeiros.map(b => `${b.nome}: ${b.comissao_percentual == null ? 'comissão não configurada' : b.comissao_percentual.toLocaleString('pt-BR') + '%'}`).join('; ') + '.' : 'Nenhum barbeiro encontrado.';
+        case 'COMISSOES':
+        case 'RANKING_COMISSAO': {
+            const pendentes = resultado.pendentes ? ` Há ${resultado.pendentes} barbeiro(s) com comissão pendente, excluída do total e do ranking.` : '';
+            if (plano.intent === 'RANKING_COMISSAO') {
+                const validos = resultado.barbeiros.filter(b => b.comissao_percentual !== null && b.atendimentos > 0);
+                const maior = Math.max(...validos.map(b => b.valor_comissao));
+                const lideres = validos.filter(b => b.valor_comissao === maior);
+                return (lideres.length ? `Maior comissão ${escopo}: ${lideres.map(b => b.nome).join(' e ')}, ${moeda(maior)} por barbeiro.` : `Não há comissão calculável de atendimentos concluídos ${escopo}.`) + pendentes;
+            }
+            const lista = resultado.barbeiros.map(b => b.comissao_percentual === null
+                ? `${b.nome}: comissão não configurada (pendente)`
+                : `${b.nome}: ${moeda(b.valor_comissao)} (${b.comissao_percentual.toLocaleString('pt-BR')}% sobre ${moeda(b.faturamento)})`).join('; ');
+            return `Total de comissões ${escopo}: ${moeda(resultado.total_comissoes)}.${lista ? ' ' + lista + '.' : ' Nenhum barbeiro encontrado.'}${pendentes}`;
+        }
         case 'FATURAMENTO':
             return `O faturamento ${escopo} foi de ${moeda(resultado.faturamento)}.`;
         case 'ATENDIMENTOS':
@@ -117,7 +136,26 @@ function montarResposta(resultado, plano, periodo) {
     }
 }
 
-function criarServicoRelatorios({ pool, chat }) {
+function criarServicoRelatorios({ pool, chat, catalogoTtlMs = 15000, agora = Date.now }) {
+    const catalogos = new Map();
+    async function carregarCatalogo(idBarbearia) {
+        const anterior = catalogos.get(idBarbearia);
+        if (anterior && anterior.expira > agora()) return anterior.promise;
+        if (catalogos.size >= 100) catalogos.delete(catalogos.keys().next().value);
+        const entrada = { expira: Infinity, promise: null };
+        entrada.promise = Promise.all([
+            pool.query('SELECT id_servico, nome_servico FROM servicos WHERE id_barbearia = ? ORDER BY nome_servico', [idBarbearia]),
+            pool.query('SELECT id_barbeiro, nome FROM barbeiros WHERE id_barbearia = ? ORDER BY nome', [idBarbearia])
+        ]).then(([[servicos], [barbeiros]]) => {
+            entrada.expira = agora() + catalogoTtlMs;
+            return { servicos, barbeiros };
+        }).catch(error => {
+            if (catalogos.get(idBarbearia) === entrada) catalogos.delete(idBarbearia);
+            throw error;
+        });
+        catalogos.set(idBarbearia, entrada);
+        return entrada.promise;
+    }
     async function novosClientes(idBarbearia, periodo) {
         const [rows] = await pool.query(`SELECT COUNT(*) AS novos_clientes FROM clientes
             WHERE id_barbearia = ? AND data_cadastro >= ? AND data_cadastro < ?`,
@@ -126,6 +164,36 @@ function criarServicoRelatorios({ pool, chat }) {
     }
 
     async function consultarRelatorio(idBarbearia, plano, periodo) {
+        if (plano.intent === 'EXPLICAR_COMISSAO') return {};
+        if (['COMISSOES', 'PERCENTUAL_COMISSAO', 'RANKING_COMISSAO'].includes(plano.intent)) {
+            const percentual = plano.intent === 'PERCENTUAL_COMISSAO';
+            const filtro = filtrosAgendamentos(idBarbearia, plano, periodo);
+            const params = percentual ? [] : filtro.params;
+            params.push(idBarbearia);
+            if (plano.id_barbeiro !== null) params.push(plano.id_barbeiro);
+            const [rows] = await pool.query(`SELECT b.id_barbeiro, b.nome, b.comissao_percentual,
+                ${percentual ? '0 AS atendimentos, 0 AS faturamento, 0 AS valor_comissao' : `COALESCE(t.atendimentos, 0) AS atendimentos,
+                COALESCE(t.faturamento, 0) AS faturamento,
+                CASE WHEN b.comissao_percentual BETWEEN 0 AND 100
+                THEN ROUND(COALESCE(t.faturamento, 0) * b.comissao_percentual / 100, 2)
+                ELSE 0 END AS valor_comissao`}
+                FROM barbeiros b
+                ${percentual ? '' : `LEFT JOIN (SELECT a.id_barbeiro, COUNT(*) AS atendimentos, SUM(s.preco) AS faturamento
+                    ${JOIN_AGENDAMENTOS} WHERE ${filtro.where} GROUP BY a.id_barbeiro
+                ) t ON t.id_barbeiro = b.id_barbeiro`}
+                WHERE b.id_barbearia = ?
+                ${plano.id_barbeiro !== null ? 'AND b.id_barbeiro = ?' : percentual ? '' : "AND (b.situacao = 'ativo' OR COALESCE(t.atendimentos, 0) > 0)"}
+                ORDER BY b.nome, b.id_barbeiro`, params);
+            const barbeiros = rows.map(row => {
+                const p = row.comissao_percentual == null ? null : numero(row.comissao_percentual);
+                const configurada = p !== null && p >= 0 && p <= 100;
+                return { ...row, comissao_percentual: configurada ? p : null,
+                    atendimentos: numero(row.atendimentos), faturamento: numero(row.faturamento),
+                    valor_comissao: configurada ? numero(row.valor_comissao) : 0 };
+            });
+            return { barbeiros, pendentes: barbeiros.filter(b => b.comissao_percentual === null).length,
+                total_comissoes: barbeiros.reduce((soma, b) => soma + Math.round(b.valor_comissao * 100), 0) / 100 };
+        }
         if (plano.intent === 'NOVOS_CLIENTES') return { novos_clientes: await novosClientes(idBarbearia, periodo) };
         const filtro = filtrosAgendamentos(idBarbearia, plano, periodo);
         const grupo = AGRUPAMENTOS[plano.intent];
@@ -156,17 +224,20 @@ function criarServicoRelatorios({ pool, chat }) {
             throw new Error('Barbearia inválida.');
         }
         idBarbearia = Number(idBarbearia);
-        const [[servicos], [barbeiros]] = await Promise.all([
-            pool.query('SELECT id_servico, nome_servico FROM servicos WHERE id_barbearia = ? ORDER BY nome_servico', [idBarbearia]),
-            pool.query('SELECT id_barbeiro, nome FROM barbeiros WHERE id_barbearia = ? ORDER BY nome', [idBarbearia])
-        ]);
+        // Valida o período antes das leituras de cadastros.
+        if (!Number.isInteger(Number(anoSelecionado)) || Number(anoSelecionado) < 2000 || Number(anoSelecionado) > 2100 ||
+            !Number.isInteger(Number(mesSelecionado)) || Number(mesSelecionado) < 1 || Number(mesSelecionado) > 12) {
+            return { resposta: 'O mês ou ano selecionado é inválido.', tipo: 'PERIODO_INVALIDO', plano: null };
+        }
+        const { servicos, barbeiros } = await carregarCatalogo(idBarbearia);
         const interpretacao = await interpretarPergunta({ pergunta: pergunta.trim(), ano: Number(anoSelecionado),
             mes: Number(mesSelecionado), contexto: { servicos, barbeiros }, historico, chat });
         if (!interpretacao.plano) return { ...interpretacao, plano: null };
         const { plano, periodo } = interpretacao;
         const resultado = await consultarRelatorio(idBarbearia, plano, periodo);
         const monetaria = ['FATURAMENTO', 'TICKET_MEDIO', 'RESUMO'].includes(plano.intent) || plano.ranking_por === 'FATURAMENTO';
-        const observacoes = monetaria ? [NOTA_PRECOS] : [];
+        const observacoes = ['COMISSOES', 'RANKING_COMISSAO', 'EXPLICAR_COMISSAO'].includes(plano.intent)
+            ? [NOTA_COMISSOES] : monetaria ? [NOTA_PRECOS] : [];
         const resposta = [montarResposta(resultado, plano, periodo), ...observacoes].join(' ');
         if (process.env.IA_DEBUG === '1') console.log('[IA RELATÓRIOS]', { plano, periodo });
         return { resposta, periodo, tipo: plano.intent, plano, observacoes };

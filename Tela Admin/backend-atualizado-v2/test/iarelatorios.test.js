@@ -14,6 +14,13 @@ const modelo = (extra = {}) => JSON.stringify({ intent: 'FATURAMENTO', ranking_p
     servico: null, barbeiro: null, ambigua: false, evidencia: 'balanço financeiro', ...extra });
 
 const casos = [
+    ['Quanto preciso pagar ao João?', { intent: 'COMISSOES', id_barbeiro: 21 }],
+    ['Quanto o João precisa receber?', { intent: 'COMISSOES', id_barbeiro: 21 }],
+    ['Qual o total de comissões?', { intent: 'COMISSOES' }],
+    ['Qual o percentual de comissão do João?', { intent: 'PERCENTUAL_COMISSAO', id_barbeiro: 21 }],
+    ['Quem tem a maior comissão?', { intent: 'RANKING_COMISSAO' }],
+    ['Como funciona o cálculo da comissão?', { intent: 'EXPLICAR_COMISSAO' }],
+    ['Quanto é a comissão do João com Combo na segunda-feira?', { intent: 'COMISSOES', id_barbeiro: 21, id_servico: 11, dia_semana: 'segunda-feira' }],
     ['Quanto faturei em setembro?', { intent: 'FATURAMENTO', mes: 9 }],
     ['Qual é o valor das receitas da barbearia em setembro?', { intent: 'FATURAMENTO', mes: 9 }],
     ['Quantos atendimentos fiz?', { intent: 'ATENDIMENTOS' }],
@@ -64,6 +71,11 @@ for (const [pergunta, esperado] of casos) {
 }
 
 const recusas = [
+    ['Quanto cresceu a comissão do João?', 'NAO_SUPORTADA'],
+    ['Qual a comissão dos agendamentos cancelados?', 'NAO_SUPORTADA'],
+    ['Quanto já foi pago de comissão?', 'NAO_SUPORTADA'],
+    ['Qual o percentual de comissão do Combo?', 'NAO_SUPORTADA'],
+    ['Quanto preciso pagar ao Pedro?', 'BARBEIRO_NAO_ENCONTRADO'],
     ['Qual foi o melhor serviço?', 'AMBIGUA'],
     ['Qual foi o melhor barbeiro?', 'AMBIGUA'],
     ['Quanto cresceu meu faturamento em relação a agosto?', 'NAO_SUPORTADA'],
@@ -219,6 +231,73 @@ function criarMock(linhas = [{ atendimentos: 10, faturamento: '500.00', ticket_m
     } };
     return { ...criarServicoRelatorios({ pool, chat }), chamadas };
 }
+
+test('comissões preservam filtros e somam centavos sem incluir pendências', async () => {
+    const svc = criarMock([
+        { nome: 'João', comissao_percentual: '50', atendimentos: 2, faturamento: '100.10', valor_comissao: '50.05' },
+        { nome: 'Marcos', comissao_percentual: null, atendimentos: 1, faturamento: '50', valor_comissao: 0 }
+    ]);
+    const r = await svc.perguntarIA('Qual o total de comissões com Combo na segunda-feira?', 7, 2026, 9);
+    assert.equal(r.tipo, 'COMISSOES');
+    assert.match(r.resposta, /50,05/);
+    assert.match(r.resposta, /Marcos: comissão não configurada/);
+    const q = svc.chamadas.at(-1);
+    assert.deepEqual(q.params, [7, 'concluido', '2026-09-01', '2026-10-01', 11, 2, 7]);
+    assert.match(q.sql, /ROUND\(/);
+});
+
+test('catálogo é reutilizado mas comissões são consultadas a cada pergunta', async () => {
+    const svc = criarMock([{ nome: 'João', comissao_percentual: 50, valor_comissao: 25 }]);
+    const r = await svc.perguntarIA('Quanto o João precisa receber?', 1, 2026, 9);
+    await svc.perguntarIA('E em agosto?', 1, 2026, 9, [{ plano: r.plano }]);
+    assert.equal(svc.chamadas.filter(c => c.sql.startsWith('SELECT id_')).length, 2);
+    assert.equal(svc.chamadas.length, 4);
+    assert.equal(svc.chamadas.at(-1).params[2], '2026-08-01');
+});
+
+test('percentual não lê agendamentos e explicação não consulta métricas', async () => {
+    const svc = criarMock([{ nome: 'João', comissao_percentual: '0' }]);
+    const r = await svc.perguntarIA('Qual o percentual de comissão do João?', 1, 2026, 9);
+    assert.match(r.resposta, /João: 0%/);
+    assert.doesNotMatch(svc.chamadas.at(-1).sql, /FROM agendamentos/);
+    const antes = svc.chamadas.length;
+    const explicacao = await svc.perguntarIA('Como funciona a comissão?', 1, 2026, 9);
+    assert.equal(explicacao.tipo, 'EXPLICAR_COMISSAO');
+    assert.equal(svc.chamadas.length, antes);
+});
+
+test('cache de catálogos isola barbearias, compartilha leituras e expira', async () => {
+    let tempo = 0;
+    const chamadas = [];
+    const pool = { query: async (sql, params) => {
+        chamadas.push({ sql, params });
+        if (sql.startsWith('SELECT id_servico')) return [contexto.servicos];
+        if (sql.startsWith('SELECT id_barbeiro')) return [contexto.barbeiros];
+        return [[{ atendimentos: 1, faturamento: 50 }]];
+    } };
+    const svc = criarServicoRelatorios({ pool, chat: semModelo, agora: () => tempo });
+    await Promise.all([svc.perguntarIA('Quanto faturei?', 1, 2026, 9), svc.perguntarIA('Quanto faturei?', 1, 2026, 9)]);
+    assert.equal(chamadas.filter(c => c.sql.startsWith('SELECT id_')).length, 2);
+    await svc.perguntarIA('Quanto faturei?', 2, 2026, 9);
+    assert.equal(chamadas.filter(c => c.sql.startsWith('SELECT id_')).length, 4);
+    tempo = 15000;
+    await svc.perguntarIA('Quanto faturei?', 1, 2026, 9);
+    assert.equal(chamadas.filter(c => c.sql.startsWith('SELECT id_')).length, 6);
+});
+
+test('ranking de comissões inclui empates e exclui pendências', async () => {
+    const svc = criarMock([
+        { nome: 'João', comissao_percentual: 50, atendimentos: 2, valor_comissao: '50.05' },
+        { nome: 'Marcos', comissao_percentual: 25, atendimentos: 4, valor_comissao: '50.05' },
+        { nome: 'Pedro', comissao_percentual: null, atendimentos: 10, valor_comissao: 500 }
+    ]);
+    const r = await svc.perguntarIA('Quem tem a maior comissão?', 1, 2026, 9);
+    assert.equal(r.tipo, 'RANKING_COMISSAO');
+    assert.match(r.resposta, /João e Marcos/);
+    assert.match(r.resposta, /50,05 por barbeiro/);
+    assert.doesNotMatch(r.resposta, /Pedro/);
+    assert.match(r.resposta, /1 barbeiro\(s\) com comissão pendente/);
+});
 
 for (const pergunta of ['Quanto o João faturou com Combo na segunda-feira?', 'Quantos combos João fez na segunda-feira?',
     'Ticket médio do João com Combo na segunda-feira?', 'Quantos clientes diferentes João atendeu com Combo na segunda-feira?',

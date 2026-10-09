@@ -5,6 +5,7 @@ const API_URL = window.API_BASE_URL;
 
 let userSession = {};
 let periodoAtual = null;
+let dashboardRequestId = 0;
 
 // Memória temporária da IA: existe somente enquanto esta página estiver aberta.
 // Ao recarregar a página, o array é criado vazio novamente.
@@ -113,6 +114,17 @@ function initRelatoriosEvents() {
         // O diálogo do navegador permite "Salvar como PDF".
         window.print();
     });
+
+    window.addEventListener('storage', async (event) => {
+        if (event.key !== 'user_data' || !event.newValue) return;
+        const idAnterior = getIdBarbearia();
+        if (checkAuth() && getIdBarbearia() !== idAnterior) {
+            historicoIA = [];
+            document.getElementById('ia-resposta')?.classList.add('hidden');
+            initUI();
+            await carregarDashboard();
+        }
+    });
 }
 
 function getPeriodoSelecionado() {
@@ -131,13 +143,39 @@ function getPeriodoSelecionado() {
 // ==========================================
 // DASHBOARD PADRÃO (SEM IA)
 // ==========================================
+function chaveCacheRelatorio(idBarbearia, ano, mes) {
+    return `relatorios:v2:${API_URL}:${idBarbearia}:${ano}-${String(mes).padStart(2, '0')}`;
+}
+
+function lerCacheRelatorio(idBarbearia, ano, mes) {
+    try {
+        const dados = JSON.parse(sessionStorage.getItem(chaveCacheRelatorio(idBarbearia, ano, mes)));
+        if (dados?.metricas && Array.isArray(dados.comissoes?.barbeiros)) return dados;
+    } catch {
+        // Armazenamento indisponível ou dados inválidos: consultar a API.
+    }
+    return null;
+}
+
+function salvarCacheRelatorio(idBarbearia, ano, mes, dados) {
+    if (!dados?.metricas || !Array.isArray(dados.comissoes?.barbeiros)) return;
+    try {
+        sessionStorage.setItem(chaveCacheRelatorio(idBarbearia, ano, mes), JSON.stringify(dados));
+    } catch {
+        // Falha no cache não impede exibir o relatório recebido.
+    }
+}
+
 async function carregarDashboard() {
+    const requestId = ++dashboardRequestId;
     const idBarbearia = getIdBarbearia();
 
     const { ano, mes } =
         getPeriodoSelecionado();
 
     if (!idBarbearia) {
+        setDashboardLoading(false);
+        setComissoesEstado('Não foi possível identificar a barbearia.', true);
         showToast(
             'Não foi possível identificar a barbearia do usuário.',
             'error'
@@ -147,34 +185,12 @@ async function carregarDashboard() {
     }
 
 
-    // ==========================================
-    // 1. TENTAR CACHE PRIMEIRO
-    // ==========================================
-
-    const dadosCache =
-        buscarRelatorioCache(
-            idBarbearia,
-            ano,
-            mes
-        );
-
-
-    if (dadosCache) {
-
-        console.log(
-            `Relatório ${mes}/${ano} carregado do cache.`
-        );
-
-        renderDashboard(dadosCache);
-
+    const cache = lerCacheRelatorio(idBarbearia, ano, mes);
+    if (cache) {
+        setDashboardLoading(false);
+        renderDashboard(cache);
         return;
     }
-
-
-    // ==========================================
-    // 2. NÃO TEM CACHE → CONSULTAR BACKEND
-    // ==========================================
-
     setDashboardLoading(true);
 
 
@@ -190,7 +206,7 @@ async function carregarDashboard() {
 
         const response =
             await fetch(
-                `${API_URL}/relatorios/dashboard?${params}`
+                `${API_URL}/relatorios/dashboard?${params}`, { cache: 'no-store' }
             );
 
 
@@ -212,13 +228,9 @@ async function carregarDashboard() {
         // ==========================================
         // 3. SALVAR RESULTADO
         // ==========================================
+        salvarCacheRelatorio(idBarbearia, ano, mes, data);
 
-        salvarRelatorioCache(
-            idBarbearia,
-            ano,
-            mes,
-            data
-        );
+        if (requestId !== dashboardRequestId) return;
 
 
         // ==========================================
@@ -229,6 +241,8 @@ async function carregarDashboard() {
 
 
     } catch (error) {
+        if (requestId !== dashboardRequestId) return;
+        setComissoesEstado('Não foi possível carregar as comissões. Tente carregar o período novamente.', true);
 
         console.error(
             'Erro ao carregar dashboard:',
@@ -244,12 +258,14 @@ async function carregarDashboard() {
 
     } finally {
 
-        setDashboardLoading(false);
+        if (requestId === dashboardRequestId) setDashboardLoading(false);
 
     }
 }
 
 function setDashboardLoading(isLoading) {
+    document.getElementById('comissoes-secao')?.setAttribute('aria-busy', String(isLoading));
+    if (isLoading) setComissoesEstado('Carregando comissões...');
     const ids = [
         'metrica-faturamento',
         'metrica-atendimentos',
@@ -286,8 +302,58 @@ function renderDashboard(data) {
     renderGrafico(data.faturamento_por_dia_semana || []);
     renderTopServicos(data.top_servicos || []);
     renderInsight(data.insight);
+    renderComissoes(data.comissoes, metricas.faturamento);
 
     lucide.createIcons();
+}
+
+function setComissoesEstado(mensagem, erro = false) {
+    setText('comissoes-faturamento', '—');
+    setText('comissoes-total', '—');
+    const aviso = document.getElementById('comissoes-pendentes');
+    if (aviso) aviso.hidden = true;
+    const container = document.getElementById('comissoes-conteudo');
+    if (container) {
+        container.innerHTML = `<p role="${erro ? 'alert' : 'status'}" class="text-sm ${erro ? 'comissoes-erro' : 'text-slate-400'}">${escapeHtml(mensagem)}</p>`;
+    }
+}
+
+function renderComissoes(comissoes, faturamento) {
+    if (!comissoes || typeof comissoes !== 'object') {
+        setComissoesEstado(`A API ${API_URL} não retornou os dados de pagamento dos barbeiros. Verifique se o backend atualizado está rodando nesse endereço e recarregue a página.`, true);
+        setText('comissoes-faturamento', formatarMoeda(faturamento));
+        return;
+    }
+
+    setText('comissoes-faturamento', formatarMoeda(comissoes.total_faturamento ?? faturamento));
+    setText('comissoes-total', formatarMoeda(comissoes.total_comissoes));
+    const aviso = document.getElementById('comissoes-pendentes');
+    if (aviso) aviso.hidden = !(Number(comissoes.barbeiros_sem_comissao) > 0);
+    const container = document.getElementById('comissoes-conteudo');
+    if (!container) return;
+    const barbeiros = Array.isArray(comissoes.barbeiros) ? comissoes.barbeiros : [];
+    if (!barbeiros.length) {
+        container.innerHTML = '<p role="status" class="text-sm text-slate-400">Nenhum barbeiro com dados de comissões neste período.</p>';
+        return;
+    }
+
+    container.innerHTML = `<table class="comissoes-tabela" aria-label="Comissões dos barbeiros">
+        <thead><tr><th scope="col">Barbeiro</th><th scope="col">Situação</th><th scope="col">Atendimentos concluídos</th><th scope="col">Faturamento do barbeiro</th><th scope="col">Percentual de comissão</th><th scope="col">Valor a pagar</th></tr></thead>
+        <tbody>${barbeiros.map((barbeiro) => {
+            const configurada = barbeiro.comissao_configurada === true;
+            const percentual = configurada
+                ? `${new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 2 }).format(Number(barbeiro.comissao_percentual) || 0)}%`
+                : 'Comissão não configurada';
+            return `<tr>
+                <th scope="row" data-label="Barbeiro">${escapeHtml(barbeiro.nome_barbeiro || 'Barbeiro sem nome')}</th>
+                <td data-label="Situação">${escapeHtml(barbeiro.situacao || 'Não informada')}</td>
+                <td data-label="Atendimentos concluídos">${formatarNumero(barbeiro.atendimentos)}</td>
+                <td data-label="Faturamento do barbeiro">${formatarMoeda(barbeiro.faturamento)}</td>
+                <td data-label="Percentual de comissão" class="${configurada ? '' : 'comissoes-pendente'}">${percentual}</td>
+                <td data-label="Valor a pagar" class="${configurada ? 'comissoes-valor' : 'comissoes-pendente'}">${configurada ? formatarMoeda(barbeiro.valor_comissao) : 'Pendente'}</td>
+            </tr>`;
+        }).join('')}</tbody>
+    </table>`;
 }
 
 function renderGrafico(dias) {
@@ -527,6 +593,7 @@ async function perguntarIA() {
             );
         }
 
+        if (idBarbearia !== getIdBarbearia()) return;
         respostaTexto.textContent = data.resposta;
 
         respostaBox?.classList.remove('hidden');
@@ -815,117 +882,6 @@ function showToast(msg, type = 'info') {
         div.style.transition = 'all 0.3s ease';
         setTimeout(() => div.remove(), 300);
     }, 4000);
-}
-
-// ==========================================
-// CACHE DO DASHBOARD
-// ==========================================
-
-const CACHE_RELATORIO_PREFIX = 'relatorio_dashboard_';
-
-// 5 minutos
-function cacheExpirou(ano, mes, criadoEm) {
-    const agora = new Date();
-
-    const ehMesAtual =
-        agora.getFullYear() === Number(ano) &&
-        (agora.getMonth() + 1) === Number(mes);
-
-
-    // Mês atual:
-    // atualizar a cada 2 minutos
-    if (ehMesAtual) {
-        return (
-            Date.now() - Number(criadoEm)
-        ) > (2 * 60 * 1000);
-    }
-
-
-    // Meses anteriores:
-    // mantém enquanto a aba estiver aberta
-    return false;
-}
-
-
-function getCacheKeyRelatorio(idBarbearia, ano, mes) {
-    return `${CACHE_RELATORIO_PREFIX}${idBarbearia}_${ano}_${String(mes).padStart(2, '0')}`;
-}
-
-
-function salvarRelatorioCache(idBarbearia, ano, mes, dados) {
-    const chave = getCacheKeyRelatorio(
-        idBarbearia,
-        ano,
-        mes
-    );
-
-    const cache = {
-        criadoEm: Date.now(),
-        dados
-    };
-
-    try {
-        sessionStorage.setItem(
-            chave,
-            JSON.stringify(cache)
-        );
-    } catch (error) {
-        console.warn(
-            'Não foi possível salvar cache do relatório:',
-            error
-        );
-    }
-}
-
-
-function buscarRelatorioCache(idBarbearia, ano, mes) {
-    const chave = getCacheKeyRelatorio(
-        idBarbearia,
-        ano,
-        mes
-    );
-
-    try {
-        const bruto = sessionStorage.getItem(chave);
-
-        if (!bruto) {
-            return null;
-        }
-
-        const cache = JSON.parse(bruto);
-
-        if (
-            !cache.criadoEm ||
-            !cache.dados
-        ) {
-            sessionStorage.removeItem(chave);
-            return null;
-        }
-
-        if (
-            cacheExpirou(
-                ano,
-                mes,
-                cache.criadoEm
-            )
-        ) {
-            sessionStorage.removeItem(chave);
-            return null;
-        }
-
-        return cache.dados;
-
-    } catch (error) {
-
-        console.warn(
-            'Erro ao ler cache do relatório:',
-            error
-        );
-
-        sessionStorage.removeItem(chave);
-
-        return null;
-    }
 }
 
 // ==========================================

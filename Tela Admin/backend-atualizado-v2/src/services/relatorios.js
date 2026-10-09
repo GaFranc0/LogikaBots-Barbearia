@@ -476,6 +476,65 @@ async function buscarDashboard({ idBarbearia, ano, mes }) {
           AND situacao = 'ativo'
     `, [idBarbearia]);
 
+    // Agrega antes do LEFT JOIN para preservar barbeiros sem atendimentos.
+    // Usa os valores atuais de preco e comissao, como o faturamento do dashboard.
+    const [comissoesRows] = await pool.query(`
+        SELECT
+            b.id_barbeiro,
+            b.nome AS nome_barbeiro,
+            b.situacao,
+            b.comissao_percentual,
+            COALESCE(t.atendimentos, 0) AS atendimentos,
+            COALESCE(t.faturamento, 0) AS faturamento,
+            CASE
+                WHEN b.comissao_percentual BETWEEN 0 AND 100
+                THEN ROUND(COALESCE(t.faturamento, 0) * b.comissao_percentual / 100, 2)
+                ELSE 0
+            END AS valor_comissao
+        FROM barbeiros b
+        LEFT JOIN (
+            SELECT
+                a.id_barbeiro,
+                COUNT(a.id_agendamento) AS atendimentos,
+                SUM(s.preco) AS faturamento
+            FROM agendamentos a
+            INNER JOIN servicos s
+                ON s.id_servico = a.id_servico
+               AND s.id_barbearia = a.id_barbearia
+            WHERE a.id_barbearia = ?
+              AND a.status_agendamento = 'concluido'
+              AND a.data_agendamento >= ?
+              AND a.data_agendamento < ?
+            GROUP BY a.id_barbeiro
+        ) t ON t.id_barbeiro = b.id_barbeiro
+        WHERE b.id_barbearia = ?
+          AND (b.situacao = 'ativo' OR COALESCE(t.atendimentos, 0) > 0)
+        ORDER BY valor_comissao DESC, b.nome ASC, b.id_barbeiro ASC
+    `, [idBarbearia, inicio, fim, idBarbearia]);
+
+    const comissoesBarbeiros = comissoesRows.map((item) => {
+        const comissao = item.comissao_percentual == null
+            ? null : Number(item.comissao_percentual);
+        const configurada = comissao !== null && Number.isFinite(comissao)
+            && comissao >= 0 && comissao <= 100;
+
+        return {
+            id_barbeiro: Number(item.id_barbeiro),
+            nome_barbeiro: item.nome_barbeiro,
+            situacao: item.situacao,
+            atendimentos: Number(item.atendimentos || 0),
+            faturamento: Number(item.faturamento || 0),
+            comissao_percentual: configurada ? comissao : null,
+            comissao_configurada: configurada,
+            valor_comissao: configurada ? Number(item.valor_comissao || 0) : 0
+        };
+    });
+
+    // Soma os valores arredondados por barbeiro em centavos.
+    const totalComissoesCentavos = comissoesBarbeiros.reduce(
+        (total, item) => total + Math.round(item.valor_comissao * 100), 0
+    );
+
     const [horariosRows] = await pool.query(`
         SELECT horario
         FROM horarios_atendimento
@@ -595,6 +654,15 @@ async function buscarDashboard({ idBarbearia, ano, mes }) {
 
         top_servicos:
             topServicos,
+
+        comissoes: {
+            total_faturamento: faturamento,
+            total_comissoes: totalComissoesCentavos / 100,
+            barbeiros_sem_comissao: comissoesBarbeiros.filter(
+                (item) => !item.comissao_configurada
+            ).length,
+            barbeiros: comissoesBarbeiros
+        },
 
         insight
     };

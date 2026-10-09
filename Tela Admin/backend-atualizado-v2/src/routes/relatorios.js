@@ -22,6 +22,7 @@ router.get('/dashboard', async (req, res) => {
         }
 
         const dados = await buscarDashboard({ idBarbearia, ano, mes });
+        res.set('Cache-Control', 'no-store');
         return res.json(dados);
     } catch (error) {
         console.error('Erro GET /relatorios/dashboard:', error);
