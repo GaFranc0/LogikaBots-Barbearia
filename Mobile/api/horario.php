@@ -87,6 +87,10 @@ if ($metodo === 'POST') {
         respond(['erro' => 'Intervalo entre agendamentos inválido'], 400);
     }
 
+    if ($inicioMinutos + $intervaloMinutos > $fimMinutos) {
+        respond(['erro' => 'O intervalo é maior que o período de funcionamento'], 400);
+    }
+
     try {
         $pdo->beginTransaction();
 
@@ -99,11 +103,12 @@ if ($metodo === 'POST') {
             'dia_fim' => diaNomeParaInt($dados['ultimoDia'] ?? 'Sexta-feira'),
         ]);
 
-        $pdo->exec('DELETE FROM horarios_atendimento');
+        $stmtLimpar = $pdo->prepare('DELETE FROM horarios_atendimento WHERE id_barbearia = :id_barbearia');
+        $stmtLimpar->execute(['id_barbearia' => $idBarbearia]);
 
         $insert = $pdo->prepare('INSERT INTO horarios_atendimento (id_barbearia, horario) VALUES (:id_barbearia, :horario)');
         $horarios = [];
-        for ($minutos = $inicioMinutos; $minutos < $fimMinutos; $minutos += $intervaloMinutos) {
+        for ($minutos = $inicioMinutos; $minutos + $intervaloMinutos <= $fimMinutos; $minutos += $intervaloMinutos) {
             $horario = minutosParaHorario($minutos);
             $insert->execute([
                 'id_barbearia' => $idBarbearia,
@@ -111,6 +116,12 @@ if ($metodo === 'POST') {
             ]);
             $horarios[] = substr($horario, 0, 5);
         }
+
+        $stmtServicos = $pdo->prepare('UPDATE servicos SET tempo = :tempo WHERE id_barbearia = :id_barbearia');
+        $stmtServicos->execute([
+            'tempo' => minutosParaTime($intervaloMinutos),
+            'id_barbearia' => $idBarbearia,
+        ]);
 
         $pdo->commit();
     } catch (Throwable $e) {

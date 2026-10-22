@@ -28,7 +28,7 @@ if ($metodo === 'POST') {
     $stmt = $pdo->prepare('UPDATE barbearias SET localizacao = :mensagem WHERE id_barbearia = :id_barbearia');
     $stmt->execute([
         'id_barbearia' => $idBarbearia,
-        'mensagem' => substr($dados['mensagem'] ?? '', 0, 150),
+        'mensagem' => mb_substr(trim((string)($dados['mensagem'] ?? '')), 0, 150),
     ]);
 
     respond(['mensagem' => 'Localização salva com sucesso']);

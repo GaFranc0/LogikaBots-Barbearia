@@ -206,20 +206,6 @@ class _GerenciarbotState extends State<Gerenciarbot>
             ],
           ),
         ),
-        Container(
-          width: 40,
-          height: 40,
-          decoration: BoxDecoration(
-            color: _corFundoCard2,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: _borderColor),
-          ),
-          child: const Icon(
-            Icons.notifications_none_rounded,
-            color: _textSecondary,
-            size: 20,
-          ),
-        ),
       ],
     );
   }

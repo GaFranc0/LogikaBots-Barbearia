@@ -4,6 +4,26 @@ require_once __DIR__ . '/config/database.php';
 $pdo = getConnection();
 $metodo = $_SERVER['REQUEST_METHOD'];
 
+function lerPeriodoBloqueio($dados) {
+    $inicio = date_create((string)($dados['dataInicio'] ?? ''));
+    $fim = date_create((string)($dados['dataFim'] ?? ''));
+    if (!$inicio || !$fim) {
+        respond(['erro' => 'Informe a data e o horário de início e de fim'], 422);
+    }
+    if ($fim <= $inicio) {
+        respond(['erro' => 'O fim do bloqueio deve ser posterior ao início'], 422);
+    }
+    return [$inicio->format('Y-m-d H:i:s'), $fim->format('Y-m-d H:i:s')];
+}
+
+function validarBarbeiro($pdo, $idBarbeiro, $idBarbearia) {
+    $stmt = $pdo->prepare('SELECT 1 FROM barbeiros WHERE id_barbeiro = :id_barbeiro AND id_barbearia = :id_barbearia');
+    $stmt->execute(['id_barbeiro' => $idBarbeiro, 'id_barbearia' => $idBarbearia]);
+    if (!$stmt->fetchColumn()) {
+        respond(['erro' => 'Profissional não pertence a esta barbearia'], 422);
+    }
+}
+
 if ($metodo === 'GET') {
     $idBarbearia = $_GET['id_barbearia'] ?? '';
     if ($idBarbearia === '') {
@@ -43,6 +63,8 @@ if ($metodo === 'POST') {
         respond(['erro' => 'barbeiro_id é obrigatório'], 400);
     }
 
+    $periodo = lerPeriodoBloqueio($dados);
+
     $insert = $pdo->prepare('INSERT INTO bloqueios_agenda (id_barbearia, id_barbeiro, motivo, data_inicio, data_fim) VALUES (:id_barbearia, :id_barbeiro, :motivo, :data_inicio, :data_fim)');
 
     if ($barbeiroId === 'todos') {
@@ -60,8 +82,8 @@ if ($metodo === 'POST') {
                 'id_barbearia' => $idBarbearia,
                 'id_barbeiro' => $b['id_barbeiro'],
                 'motivo' => $dados['motivo'] ?? '',
-                'data_inicio' => $dados['dataInicio'] ?? null,
-                'data_fim' => $dados['dataFim'] ?? null,
+                'data_inicio' => $periodo[0],
+                'data_fim' => $periodo[1],
             ]);
             $ids[] = (string)$pdo->lastInsertId();
         }
@@ -69,12 +91,14 @@ if ($metodo === 'POST') {
         respond(['ids' => $ids], 201);
     }
 
+    validarBarbeiro($pdo, $barbeiroId, $idBarbearia);
+
     $insert->execute([
         'id_barbearia' => $idBarbearia,
         'id_barbeiro' => $barbeiroId,
         'motivo' => $dados['motivo'] ?? '',
-        'data_inicio' => $dados['dataInicio'] ?? null,
-        'data_fim' => $dados['dataFim'] ?? null,
+        'data_inicio' => $periodo[0],
+        'data_fim' => $periodo[1],
     ]);
 
     respond(['id' => (string)$pdo->lastInsertId()], 201);
@@ -92,13 +116,23 @@ if ($metodo === 'PUT') {
         respond(['erro' => 'Não é possível editar um bloqueio existente para "todos". Remova e crie novamente.'], 400);
     }
 
+    $periodo = lerPeriodoBloqueio($dados);
+
+    $stmtDono = $pdo->prepare('SELECT id_barbearia FROM bloqueios_agenda WHERE id_bloqueio = :id');
+    $stmtDono->execute(['id' => $id]);
+    $idBarbearia = $stmtDono->fetchColumn();
+    if ($idBarbearia === false) {
+        respond(['erro' => 'Bloqueio não encontrado'], 404);
+    }
+    validarBarbeiro($pdo, $barbeiroId, $idBarbearia);
+
     $stmt = $pdo->prepare('UPDATE bloqueios_agenda SET motivo = :motivo, id_barbeiro = :id_barbeiro, data_inicio = :data_inicio, data_fim = :data_fim WHERE id_bloqueio = :id');
     $stmt->execute([
         'id' => $id,
         'motivo' => $dados['motivo'] ?? '',
         'id_barbeiro' => $barbeiroId,
-        'data_inicio' => $dados['dataInicio'] ?? null,
-        'data_fim' => $dados['dataFim'] ?? null,
+        'data_inicio' => $periodo[0],
+        'data_fim' => $periodo[1],
     ]);
 
     respond(['mensagem' => 'Bloqueio atualizado com sucesso']);

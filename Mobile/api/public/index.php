@@ -10,7 +10,6 @@ ini_set('display_errors', '0');
 header('X-Content-Type-Options: nosniff');
 try {
     $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
-    // Funciona com rewrite e também com index.php?route=/ia/perguntar.
     $path = $_GET['route'] ?? parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
     if (!is_string($path)) throw new ApiError(400, 'Rota inválida.');
     $path = '/' . trim($path, '/');
@@ -22,15 +21,10 @@ try {
     if ($path === '/auth/login') reply(login(db(), $input));
     $user = authenticatedUser(db());
     $id = tenant($user, $input['id_barbearia'] ?? null);
-    if ($path === '/auth/logout') {
-        $token = substr($_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'], 7);
-        $stmt = db()->prepare('DELETE FROM api_tokens WHERE token_hash = ?'); $stmt->execute([hash('sha256', $token)]);
-        reply(['sucesso' => true]);
-    }
+    if ($path === '/auth/logout') reply(['sucesso' => true]);
     requireAdmin($user);
     if ($path === '/clientes') reply(clientDirectory(db(true), $id));
     if ($path === '/ia/status') {
-        // Não expõe catálogo dos modelos, URL interna ou credenciais.
         ollama([['role' => 'user', 'content' => 'Responda {"ok":true}']], null, 15);
         reply(['sucesso' => true]);
     }

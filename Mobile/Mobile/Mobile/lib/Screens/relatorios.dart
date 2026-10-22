@@ -61,6 +61,7 @@ class _RelatoriosScreenState extends State<RelatoriosScreen> {
       final data = await ApiService.getRelatorio(_period.year, _period.month);
       if (mounted && request == _request) setState(() => _data = data);
     } catch (e) {
+      if (_sessaoExpirou(e)) return;
       if (mounted && request == _request) setState(() => _error = e.toString());
     } finally {
       if (mounted && request == _request) setState(() => _loading = false);
@@ -89,12 +90,23 @@ class _RelatoriosScreenState extends State<RelatoriosScreen> {
         );
       }
     } catch (e) {
+      if (_sessaoExpirou(e)) return;
       if (mounted && request == _request) {
         setState(() => _answer = e.toString());
       }
     } finally {
       if (mounted) setState(() => _asking = false);
     }
+  }
+
+  bool _sessaoExpirou(Object e) {
+    if (e is! ApiException || !e.sessaoExpirada || !mounted) return false;
+    Session.encerrar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Sua sessão expirou. Entre novamente.')),
+    );
+    Navigator.of(context).pushNamedAndRemoveUntil('/', (_) => false);
+    return true;
   }
 
   static double _number(dynamic value) =>
@@ -359,7 +371,7 @@ class _RelatoriosScreenState extends State<RelatoriosScreen> {
             _heading(Icons.auto_awesome, 'Pergunte aos seus dados'),
             const SizedBox(height: 6),
             const Text(
-              'Consulte atendimentos, faturamento, clientes, barbeiros e serviços.',
+              'Pergunte sobre faturamento, agendamentos, clientes, barbeiros, serviços, horários e ideias para a barbearia.',
               style: TextStyle(color: _muted, fontSize: 12),
             ),
             const SizedBox(height: 18),
@@ -370,7 +382,7 @@ class _RelatoriosScreenState extends State<RelatoriosScreen> {
               maxLines: 3,
               enabled: !_asking,
               decoration: InputDecoration(
-                hintText: 'Ex.: Qual barbeiro faturou mais neste mês?',
+                hintText: 'Ex.: Como posso aumentar meu faturamento?',
                 filled: true,
                 fillColor: const Color(0xFF1C2436),
                 border: OutlineInputBorder(

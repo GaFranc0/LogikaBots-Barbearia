@@ -298,20 +298,6 @@ class _TelaPrincipalState extends State<TelaPrincipal>
             ],
           ),
         ),
-        Container(
-          width: 40,
-          height: 40,
-          decoration: BoxDecoration(
-            color: _corFundoCard2,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: _borderColor),
-          ),
-          child: Icon(
-            Icons.notifications_none_rounded,
-            color: _textSecondary,
-            size: 20,
-          ),
-        ),
       ],
     );
   }

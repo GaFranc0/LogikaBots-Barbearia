@@ -35,8 +35,8 @@ if ($metodo === 'POST') {
     $stmt = $pdo->prepare('INSERT INTO duvidas_frequentes (id_barbearia, duvida_titulo, duvida_resposta) VALUES (:id_barbearia, :pergunta, :resposta)');
     $stmt->execute([
         'id_barbearia' => $idBarbearia,
-        'pergunta' => substr($dados['pergunta'] ?? '', 0, 150),
-        'resposta' => substr($dados['resposta'] ?? '', 0, 500),
+        'pergunta' => mb_substr(trim((string)($dados['pergunta'] ?? '')), 0, 150),
+        'resposta' => mb_substr(trim((string)($dados['resposta'] ?? '')), 0, 500),
     ]);
 
     respond(['id' => (string)$pdo->lastInsertId()], 201);
@@ -53,8 +53,8 @@ if ($metodo === 'PUT') {
     $stmt = $pdo->prepare('UPDATE duvidas_frequentes SET duvida_titulo = :pergunta, duvida_resposta = :resposta WHERE id_duvida = :id');
     $stmt->execute([
         'id' => $id,
-        'pergunta' => substr($dados['pergunta'] ?? '', 0, 150),
-        'resposta' => substr($dados['resposta'] ?? '', 0, 500),
+        'pergunta' => mb_substr(trim((string)($dados['pergunta'] ?? '')), 0, 150),
+        'resposta' => mb_substr(trim((string)($dados['resposta'] ?? '')), 0, 500),
     ]);
 
     respond(['mensagem' => 'Dúvida atualizada com sucesso']);

@@ -16,7 +16,7 @@ Verificação, na raiz do projeto, com API local na porta 8000:
 php api/tests/client_access.php
 ```
 
-O teste compara a resposta com o banco para cada barbearia com administrador ativo, testa acesso sem token, token inválido/expirado e tentativa de consultar outra loja. Apenas tokens temporários são criados e removidos ao finalizar.
+O teste compara a resposta com o banco para cada barbearia com administrador ativo, testa acesso sem token, token inválido/expirado e tentativa de consultar outra loja. Os tokens de teste são assinados e não ficam gravados no banco.
 
 Na pasta `Mobile/Mobile`:
 

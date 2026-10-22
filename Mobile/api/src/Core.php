@@ -29,7 +29,6 @@ function bodyJson(): array {
     try { $obj = json_decode($raw, false, 32, JSON_THROW_ON_ERROR); }
     catch (JsonException) { throw new ApiError(400, 'JSON inválido.'); }
     if (!$obj instanceof stdClass) throw new ApiError(400, 'Envie um objeto JSON.');
-    // Preserve objetos do histórico (plano) para não transformar {} em [].
     return (array)$obj;
 }
 function integerField(mixed $value, string $name, int $min, int $max): int {
@@ -44,7 +43,6 @@ function db(bool $reports = false): PDO {
     static $connections = [];
     $key = $reports ? 'reports' : 'auth';
     if (isset($connections[$key])) return $connections[$key];
-    // Compatibilidade com a configuração já utilizada pelos endpoints do Mobile.
     if (envValue('DB_HOST') === '' && function_exists('getConnection')) {
         $pdo = getConnection();
         $pdo->exec("SET time_zone = '-03:00'");
@@ -67,15 +65,43 @@ function db(bool $reports = false): PDO {
 function rows(PDO $db, string $sql, array $params = []): array {
     $stmt = $db->prepare($sql); $stmt->execute($params); return $stmt->fetchAll();
 }
+function base64UrlEncode(string $value): string {
+    return rtrim(strtr(base64_encode($value), '+/', '-_'), '=');
+}
+function base64UrlDecode(string $value): string|false {
+    return base64_decode(strtr($value, '-_', '+/'), true);
+}
+function tokenSecret(): string {
+    $secret = envValue('API_SECRET');
+    if ($secret !== '') return $secret;
+    if (defined('DB_PASS')) return hash('sha256', 'api-token|' . DB_PASS);
+    throw new RuntimeException('Configuração ausente: API_SECRET');
+}
+function passwordFingerprint(string $passwordHash): string {
+    return substr(hash_hmac('sha256', $passwordHash, tokenSecret()), 0, 16);
+}
 function authenticatedUser(PDO $pdo): array {
     $authorization = $_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '';
-    if (!preg_match('/^Bearer ([a-f0-9]{64})$/D', $authorization, $m)) {
+    if (!preg_match('/^Bearer ([A-Za-z0-9_-]{1,512})\.([A-Za-z0-9_-]{43})$/D', $authorization, $m)) {
         throw new ApiError(401, 'Faça login para continuar.');
     }
-    $user = rows($pdo, 'SELECT u.id_usuario, u.nome, u.usuario, u.id_barbearia, u.nivel AS role
-        FROM api_tokens t INNER JOIN usuarios_admin u ON u.id_usuario = t.id_usuario
-        WHERE t.token_hash = ? AND t.expires_at > UTC_TIMESTAMP() AND u.ativo = 1', [hash('sha256', $m[1])])[0] ?? null;
-    if (!$user || (int)$user['id_barbearia'] <= 0) throw new ApiError(401, 'Sessão inválida ou expirada.');
+    $signature = base64UrlDecode($m[2]);
+    $expected = hash_hmac('sha256', $m[1], tokenSecret(), true);
+    if ($signature === false || !hash_equals($expected, $signature)) {
+        throw new ApiError(401, 'Sessão inválida ou expirada.');
+    }
+    $payload = json_decode((string)base64UrlDecode($m[1]), true);
+    if (!is_array($payload) || !is_int($payload['u'] ?? null) || !is_int($payload['e'] ?? null) ||
+        !is_string($payload['f'] ?? null) || $payload['e'] <= time()) {
+        throw new ApiError(401, 'Sessão inválida ou expirada.');
+    }
+    $user = rows($pdo, 'SELECT id_usuario, nome, usuario, id_barbearia, nivel AS role, senha_hash
+        FROM usuarios_admin WHERE id_usuario = ? AND ativo = 1 LIMIT 1', [$payload['u']])[0] ?? null;
+    if (!$user || (int)$user['id_barbearia'] <= 0 ||
+        !hash_equals(passwordFingerprint((string)$user['senha_hash']), $payload['f'])) {
+        throw new ApiError(401, 'Sessão inválida ou expirada.');
+    }
+    unset($user['senha_hash']);
     return $user;
 }
 function tenant(array $user, mixed $requested = null): int {
@@ -90,12 +116,16 @@ function requireAdmin(array $user): void {
         throw new ApiError(403, 'Acesso disponível somente para administradores.');
     }
 }
-function issueToken(PDO $pdo, int $userId): array {
-    $token = bin2hex(random_bytes(32));
-    $ttl = integerField(envValue('TOKEN_TTL_SECONDS', '28800'), 'TOKEN_TTL_SECONDS', 300, 604800);
-    $stmt = $pdo->prepare('INSERT INTO api_tokens (token_hash, id_usuario, expires_at) VALUES (?, ?, ?)');
-    $stmt->execute([hash('sha256', $token), $userId, gmdate('Y-m-d H:i:s', time() + $ttl)]);
-    return ['token' => $token, 'token_type' => 'Bearer', 'expires_in' => $ttl];
+function issueToken(PDO $pdo, int $userId, ?int $ttl = null): array {
+    $ttl ??= integerField(envValue('TOKEN_TTL_SECONDS', '28800'), 'TOKEN_TTL_SECONDS', 300, 604800);
+    $stmt = $pdo->prepare('SELECT senha_hash FROM usuarios_admin WHERE id_usuario = ? AND ativo = 1 LIMIT 1');
+    $stmt->execute([$userId]);
+    $passwordHash = $stmt->fetchColumn();
+    if (!is_string($passwordHash)) throw new ApiError(401, 'Usuário ou senha inválidos.');
+    $payload = base64UrlEncode(json_encode(['u' => $userId, 'e' => time() + $ttl, 'f' => passwordFingerprint($passwordHash)],
+        JSON_THROW_ON_ERROR));
+    $signature = base64UrlEncode(hash_hmac('sha256', $payload, tokenSecret(), true));
+    return ['token' => "$payload.$signature", 'token_type' => 'Bearer', 'expires_in' => $ttl];
 }
 function login(PDO $pdo, array $input): array {
     $login = $input['usuario'] ?? $input['email'] ?? null;
@@ -105,9 +135,7 @@ function login(PDO $pdo, array $input): array {
     }
     $user = rows($pdo, 'SELECT id_usuario, nome, usuario, senha_hash, id_barbearia, nivel AS role
         FROM usuarios_admin WHERE usuario = ? AND ativo = 1 LIMIT 1', [trim($login)])[0] ?? null;
-    // Hash fictício evita pular password_verify quando o usuário não existe.
     $hash = $user['senha_hash'] ?? '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi';
-    // bcrypt do Node ($2a$/$2b$) utiliza o mesmo formato de hash do PHP ($2y$).
     if (str_starts_with($hash, '$2a$') || str_starts_with($hash, '$2b$')) $hash = '$2y$' . substr($hash, 4);
     $valid = password_verify($password, $hash);
     if (!$user || !$valid || (int)$user['id_barbearia'] <= 0) throw new ApiError(401, 'Usuário ou senha inválidos.');
@@ -117,7 +145,7 @@ function login(PDO $pdo, array $input): array {
     $user['id_usuario'] = (int)$user['id_usuario'];
     return [...$credentials, 'user' => $user];
 }
-function ollama(array $messages, ?array $schema = null, int $timeout = 45): string {
+function ollama(array $messages, ?array $schema = null, int $timeout = 45, int $maxTokens = 512): string {
     $base = rtrim(envValue('OLLAMA_URL', 'http://127.0.0.1:11434'), '/');
     $url = parse_url($base);
     if (!$url || !in_array($url['scheme'] ?? '', ['http','https'], true) || empty($url['host']) ||
@@ -125,7 +153,7 @@ function ollama(array $messages, ?array $schema = null, int $timeout = 45): stri
         throw new RuntimeException('OLLAMA_URL inválida.');
     }
     $body = ['model' => envValue('OLLAMA_MODEL', 'qwen2.5:1.5b'), 'messages' => $messages,
-        'stream' => false, 'keep_alive' => '2m', 'options' => ['temperature' => 0, 'num_predict' => 512],
+        'stream' => false, 'keep_alive' => '2m', 'options' => ['temperature' => 0.1, 'num_predict' => $maxTokens, 'num_ctx' => 4096],
         'format' => $schema ?? 'json'];
     $curl = curl_init($base . '/api/chat');
     curl_setopt_array($curl, [CURLOPT_POST => true, CURLOPT_RETURNTRANSFER => true,

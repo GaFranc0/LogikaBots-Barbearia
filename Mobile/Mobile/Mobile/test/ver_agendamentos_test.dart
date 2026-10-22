@@ -19,6 +19,11 @@ void main() {
       await tester.tap(amanha);
       await tester.pumpAndSettle();
       expect(find.text('TOTAL CORTES'), findsOneWidget);
+      final todos = find.text('Todos');
+      await tester.ensureVisible(todos);
+      await tester.tap(todos);
+      await tester.pumpAndSettle();
+      expect(find.text('TOTAL CORTES'), findsOneWidget);
       final horarios = find.text('Ver Todos Horários');
       await tester.ensureVisible(horarios);
       await tester.tap(horarios);

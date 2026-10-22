@@ -51,6 +51,9 @@ if ($metodo === 'PUT') {
     if ($id === '' || $status === '') {
         respond(['erro' => 'id e status são obrigatórios'], 400);
     }
+    if (!in_array($status, ['Agendado', 'Concluído', 'Cancelado'], true)) {
+        respond(['erro' => 'Status inválido'], 422);
+    }
 
     $stmt = $pdo->prepare('UPDATE agendamentos SET status_agendamento = :status WHERE id_agendamento = :id');
     $stmt->execute(['id' => $id, 'status' => statusAppParaEnum($status)]);

@@ -69,9 +69,9 @@ if ($metodo === 'PUT' && $acao === 'perfil') {
     $campos = [];
     $params = ['id' => $id];
 
-    if (isset($dados['nome'])) {
+    if (isset($dados['nome']) && trim($dados['nome']) !== '') {
         $campos[] = 'nome = :nome';
-        $params['nome'] = $dados['nome'];
+        $params['nome'] = trim($dados['nome']);
     }
     if (isset($dados['user']) && trim($dados['user']) !== '') {
         $campos[] = 'usuario = :usuario';
@@ -87,10 +87,22 @@ if ($metodo === 'PUT' && $acao === 'perfil') {
     }
 
     $sql = 'UPDATE usuarios_admin SET ' . implode(', ', $campos) . ' WHERE id_usuario = :id';
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute($params);
+    try {
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params);
+    } catch (PDOException $e) {
+        if ($e->getCode() === '23000') {
+            respond(['erro' => 'Este nome de usuário já está em uso'], 409);
+        }
+        throw $e;
+    }
 
-    respond(['mensagem' => 'Perfil atualizado com sucesso']);
+    $resposta = ['mensagem' => 'Perfil atualizado com sucesso'];
+    if (isset($params['senha_hash'])) {
+        $resposta += issueToken($pdo, (int)$id);
+    }
+
+    respond($resposta);
 }
 
 respond(['erro' => 'Rota não encontrada'], 404);

@@ -16,6 +16,7 @@ class _CatalogoState extends State<Catalogo> {
   final List<Servico> _servicos = [];
   final Set<Servico> _alterados = {};
   final Set<int> _idsRemovidos = {};
+  int _intervalo = 40;
   bool _carregando = true;
   bool _salvando = false;
   String? _erroCarregamento;
@@ -45,6 +46,11 @@ class _CatalogoState extends State<Catalogo> {
 
     try {
       final lista = await ApiService.getServicos(barbeariaId);
+      final horario = await ApiService.getHorario(
+        barbeariaId,
+      ).catchError((_) => <String, dynamic>{});
+      final intervalo = horario['intervaloMinutos'];
+      if (intervalo is num && intervalo > 0) _intervalo = intervalo.toInt();
       if (!mounted) return;
       for (final servico in _servicos) {
         servico.dispose();
@@ -62,20 +68,27 @@ class _CatalogoState extends State<Catalogo> {
       if (!mounted) return;
       setState(() {
         _carregando = false;
-        _erroCarregamento = e.toString();
+        _erroCarregamento = _mensagem(e);
       });
-      _mostrarErro(e.toString());
+      _mostrarErro(_mensagem(e));
     }
   }
 
+  String _mensagem(Object e) =>
+      e is ApiException ? e.mensagem : 'Não foi possível conectar ao servidor.';
+
   void _adicionarListeners(Servico s) {
+    var nome = s.nomeCtrl.text;
+    var valor = s.valorCtrl.text;
     void escutar() {
+      if (s.nomeCtrl.text == nome && s.valorCtrl.text == valor) return;
+      nome = s.nomeCtrl.text;
+      valor = s.valorCtrl.text;
       if (mounted) setState(() => _alterados.add(s));
     }
 
     s.nomeCtrl.addListener(escutar);
     s.valorCtrl.addListener(escutar);
-    s.minutosCtrl.addListener(escutar);
   }
 
   Future<void> _persistirServico(Servico s) async {
@@ -84,46 +97,68 @@ class _CatalogoState extends State<Catalogo> {
     if (s.nome.trim().isEmpty)
       throw ApiException('Informe o nome de todos os serviços');
     if (s.valor <= 0) throw ApiException('Informe um preço maior que zero');
-    if (s.minutos <= 0)
-      throw ApiException('Informe uma duração maior que zero');
 
     if (s.id == null) {
       s.id = await ApiService.criarServico(
         barbeariaId,
-        s.nome,
+        s.nome.trim(),
         s.valor,
-        s.minutos,
+        _intervalo,
       );
     } else {
-      await ApiService.atualizarServico(s.id!, s.nome, s.valor, s.minutos);
+      await ApiService.atualizarServico(
+        s.id!,
+        s.nome.trim(),
+        s.valor,
+        _intervalo,
+      );
     }
   }
 
   Future<void> _confirmarAlteracoes() async {
     if (_salvando) return;
     setState(() => _salvando = true);
+    final falhas = <String>[];
+    var remocaoFalhou = false;
     try {
-      for (final id in _idsRemovidos) {
-        await ApiService.removerServico(id);
+      for (final id in _idsRemovidos.toList()) {
+        try {
+          await ApiService.removerServico(id);
+        } catch (e) {
+          remocaoFalhou = true;
+          falhas.add(_mensagem(e));
+        }
+        _idsRemovidos.remove(id);
       }
       for (final servico in _alterados.toList()) {
-        await _persistirServico(servico);
+        try {
+          await _persistirServico(servico);
+          _alterados.remove(servico);
+        } catch (e) {
+          falhas.add(_mensagem(e));
+        }
       }
       if (!mounted) return;
-      setState(() {
-        _idsRemovidos.clear();
-        _alterados.clear();
-      });
-      await _carregarServicos();
+      if (falhas.isEmpty || remocaoFalhou) {
+        setState(() {
+          _idsRemovidos.clear();
+          _alterados.clear();
+        });
+        await _carregarServicos();
+      } else {
+        setState(() {});
+      }
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Catálogo salvo com sucesso'),
-          backgroundColor: Color(0xFF10B981),
-        ),
-      );
-    } catch (e) {
-      _mostrarErro(e.toString());
+      if (falhas.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Catálogo salvo com sucesso'),
+            backgroundColor: Color(0xFF10B981),
+          ),
+        );
+      } else {
+        _mostrarErro(falhas.toSet().join('\n'));
+      }
     } finally {
       if (mounted) setState(() => _salvando = false);
     }
@@ -137,7 +172,7 @@ class _CatalogoState extends State<Catalogo> {
   }
 
   void _adicionarServico() {
-    final novo = Servico();
+    final novo = Servico(minutos: '$_intervalo');
     _adicionarListeners(novo);
     setState(() {
       _servicos.add(novo);
@@ -480,6 +515,7 @@ class _ServicoCard extends StatelessWidget {
   InputDecoration _inputDec(
     String label, {
     String? prefixText,
+    String? suffixText,
     Widget? prefixIcon,
   }) {
     return InputDecoration(
@@ -494,6 +530,8 @@ class _ServicoCard extends StatelessWidget {
         fontWeight: FontWeight.w500,
       ),
       prefixText: prefixText,
+      suffixText: suffixText,
+      suffixStyle: const TextStyle(color: Colors.white54, fontSize: 13),
       prefixIcon: prefixIcon,
       prefixStyle: const TextStyle(color: Colors.white70, fontSize: 14),
       filled: true,
@@ -559,11 +597,12 @@ class _ServicoCard extends StatelessWidget {
                 flex: 4,
                 child: TextField(
                   controller: servico.minutosCtrl,
-                  style: const TextStyle(color: Colors.white, fontSize: 14),
-                  keyboardType: TextInputType.number,
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  style: const TextStyle(color: Colors.white70, fontSize: 14),
+                  readOnly: true,
+                  enableInteractiveSelection: false,
                   decoration: _inputDec(
                     'Duração',
+                    suffixText: 'min',
                     prefixIcon: Icon(
                       Icons.access_time_rounded,
                       color: Colors.white.withValues(alpha: 0.3),

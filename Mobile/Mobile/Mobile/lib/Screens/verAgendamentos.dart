@@ -287,31 +287,49 @@ class _VerAgendamentosState extends State<VerAgendamentos> {
   int get _totalCortes =>
       _agendamentosFiltrados.where((a) => a.status != 'Cancelado').length;
 
-  double get _faturamentoTotal {
-    return _agendamentosFiltrados
-        .where((a) => a.status != 'Cancelado')
-        .fold(0.0, (sum, item) => sum + item.valor);
-  }
+  Iterable<Agendamento> get _concluidos =>
+      _agendamentosFiltrados.where((a) => a.status == 'Concluído');
+
+  double get _faturamentoTotal =>
+      _concluidos.fold(0.0, (sum, item) => sum + item.valor);
 
   double get _ticketMedio =>
-      _totalCortes > 0 ? _faturamentoTotal / _totalCortes : 0.0;
+      _concluidos.isEmpty ? 0.0 : _faturamentoTotal / _concluidos.length;
 
-  Color _corStatus(String status) {
-    if (status == 'Concluído') return Colors.green;
-    if (status == 'Cancelado') return Colors.red;
-    return Colors.orange;
+  String _normalizarHora(String hora) {
+    final t = hora.trim();
+    final partes = t.split(':');
+    if (partes.length < 2) return t;
+    return '${partes[0].padLeft(2, '0')}:${partes[1].padLeft(2, '0')}';
   }
 
-  List<Agendamento> _agendamentosDoHorario(String horario) =>
-      _agendamentosFiltrados.where((ag) => ag.horario == horario).toList();
+  List<Agendamento> _agendamentosDoHorario(String horario) {
+    final alvo = _normalizarHora(horario);
+    final lista = _agendamentosFiltrados
+        .where((a) => _normalizarHora(a.horario) == alvo)
+        .toList();
+    lista.sort((a, b) => a.data.compareTo(b.data));
+    return lista;
+  }
 
-  void _exibirAgendamentosDoHorario(String horario) {
-    final itens = _agendamentosDoHorario(horario);
-    final periodo = _filtroFiltroData == 0
-        ? 'Hoje'
-        : _filtroFiltroData == 1
-        ? 'Amanhã'
-        : 'Próximos 7 dias';
+  String get _rotuloPeriodo {
+    switch (_filtroFiltroData) {
+      case 0:
+        return 'Hoje';
+      case 1:
+        return 'Amanhã';
+      case 2:
+        return 'Esta semana';
+      default:
+        return 'Todos os períodos';
+    }
+  }
+
+  String _formatarData(DateTime d) =>
+      '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}';
+
+  void _exibirCortesDoHorario(String horario) {
+    final cortes = _agendamentosDoHorario(horario);
     showModalBottomSheet(
       context: context,
       backgroundColor: _cardBg,
@@ -322,12 +340,14 @@ class _VerAgendamentosState extends State<VerAgendamentos> {
       builder: (sheetContext) {
         return Container(
           padding: const EdgeInsets.all(20),
-          height: MediaQuery.of(sheetContext).size.height * 0.65,
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(sheetContext).size.height * 0.7,
+          ),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(
                     child: Column(
@@ -343,7 +363,7 @@ class _VerAgendamentosState extends State<VerAgendamentos> {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          '$periodo • ${itens.length} ${itens.length == 1 ? 'agendamento' : 'agendamentos'}',
+                          '$_rotuloPeriodo • $_barbeiroSelecionado',
                           style: const TextStyle(
                             color: Color(0xFF94A3B8),
                             fontSize: 12,
@@ -359,96 +379,101 @@ class _VerAgendamentosState extends State<VerAgendamentos> {
                 ],
               ),
               const Divider(color: Color(0xFF1E293B)),
-              Expanded(
-                child: itens.isEmpty
-                    ? const Center(
-                        child: Text(
-                          'Nenhum corte agendado neste horário.',
-                          style: TextStyle(color: Colors.grey),
-                        ),
-                      )
-                    : ListView.separated(
-                        itemCount: itens.length,
-                        separatorBuilder: (_, _) => const SizedBox(height: 10),
-                        itemBuilder: (context, index) {
-                          final item = itens[index];
-                          final corStatus = _corStatus(item.status);
-                          return Material(
-                            color: _innerCardBg,
-                            borderRadius: BorderRadius.circular(10),
-                            clipBehavior: Clip.antiAlias,
-                            child: InkWell(
-                              onTap: () => _verInformacoesCliente(item),
-                              child: Container(
-                                width: double.infinity,
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(10),
-                                  border: Border.all(color: _borderColor),
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Expanded(
-                                          child: Text(
-                                            item.cliente,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                        ),
-                                        Text(
-                                          item.status,
-                                          style: TextStyle(
-                                            color: corStatus,
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      '${item.data.day.toString().padLeft(2, '0')}/${item.data.month.toString().padLeft(2, '0')}/${item.data.year} • ${item.profissional}',
-                                      style: const TextStyle(
-                                        color: Color(0xFF94A3B8),
-                                        fontSize: 12,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Row(
-                                      children: [
-                                        Expanded(
-                                          child: Text(
-                                            item.servico,
-                                            style: const TextStyle(
-                                              color: Color(0xFF94A3B8),
-                                              fontSize: 12,
-                                            ),
-                                          ),
-                                        ),
-                                        Text(
-                                          'R\$ ${item.valor.toStringAsFixed(2)}',
-                                          style: const TextStyle(
-                                            color: Color(0xFF34D399),
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
+              if (cortes.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 32),
+                  child: Center(
+                    child: Text(
+                      'Nenhum corte agendado neste horário.',
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                  ),
+                )
+              else
+                Flexible(
+                  child: ListView.separated(
+                    shrinkWrap: true,
+                    itemCount: cortes.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 10),
+                    itemBuilder: (_, i) {
+                      final c = cortes[i];
+                      final corStatus = c.status == 'Concluído'
+                          ? const Color(0xFF10B981)
+                          : c.status == 'Cancelado'
+                          ? const Color(0xFFEF4444)
+                          : const Color(0xFF3B82F6);
+                      return Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(12),
+                          onTap: () => _verInformacoesCliente(c),
+                          child: Container(
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              color: _innerCardBg,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: _borderColor),
                             ),
-                          );
-                        },
-                      ),
-              ),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        c.cliente,
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        '${c.servico} • ${c.profissional}',
+                                        style: const TextStyle(
+                                          color: Color(0xFF94A3B8),
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        '${_formatarData(c.data)} • R\$ ${c.valor.toStringAsFixed(2)}',
+                                        style: const TextStyle(
+                                          color: Color(0xFF64748B),
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: corStatus.withValues(alpha: 0.15),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Text(
+                                    c.status,
+                                    style: TextStyle(
+                                      color: corStatus,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
             ],
           ),
         );
@@ -517,24 +542,21 @@ class _VerAgendamentosState extends State<VerAgendamentos> {
                             itemCount: _horariosAtendimento.length,
                             itemBuilder: (context, index) {
                               final horario = _horariosAtendimento[index];
-                              final quantidade = _agendamentosDoHorario(
-                                horario,
-                              ).length;
-                              final ocupado = quantidade > 0;
+                              final qtd = _agendamentosDoHorario(horario).length;
+                              final ocupado = qtd > 0;
                               return Material(
-                                color: ocupado
-                                    ? const Color(
-                                        0xFF10B981,
-                                      ).withValues(alpha: 0.1)
-                                    : _innerCardBg,
-                                borderRadius: BorderRadius.circular(10),
-                                clipBehavior: Clip.antiAlias,
+                                color: Colors.transparent,
                                 child: InkWell(
-                                  onTap: () =>
-                                      _exibirAgendamentosDoHorario(horario),
+                                  borderRadius: BorderRadius.circular(10),
+                                  onTap: () => _exibirCortesDoHorario(horario),
                                   child: Container(
                                     alignment: Alignment.center,
                                     decoration: BoxDecoration(
+                                      color: ocupado
+                                          ? const Color(
+                                              0xFF10B981,
+                                            ).withValues(alpha: 0.12)
+                                          : _innerCardBg,
                                       borderRadius: BorderRadius.circular(10),
                                       border: Border.all(
                                         color: ocupado
@@ -544,7 +566,7 @@ class _VerAgendamentosState extends State<VerAgendamentos> {
                                             : _borderColor,
                                       ),
                                     ),
-                                    child: Column(
+                                    child: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
                                         Text(
@@ -554,17 +576,28 @@ class _VerAgendamentosState extends State<VerAgendamentos> {
                                             fontWeight: FontWeight.bold,
                                           ),
                                         ),
-                                        if (ocupado)
-                                          Text(
-                                            quantidade == 1
-                                                ? '1 corte'
-                                                : '$quantidade cortes',
-                                            style: const TextStyle(
-                                              color: Color(0xFF34D399),
-                                              fontSize: 10,
-                                              fontWeight: FontWeight.w600,
+                                        if (ocupado) ...[
+                                          const SizedBox(width: 6),
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 6,
+                                              vertical: 1,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: const Color(0xFF10B981),
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                            ),
+                                            child: Text(
+                                              '$qtd',
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 11,
+                                                fontWeight: FontWeight.bold,
+                                              ),
                                             ),
                                           ),
+                                        ],
                                       ],
                                     ),
                                   ),
@@ -1035,6 +1068,7 @@ class _VerAgendamentosState extends State<VerAgendamentos> {
                               _buildTabItem(0, 'Hoje'),
                               _buildTabItem(1, 'Amanhã'),
                               _buildTabItem(2, 'Semana'),
+                              _buildTabItem(3, 'Todos'),
                             ],
                           ),
                         ),

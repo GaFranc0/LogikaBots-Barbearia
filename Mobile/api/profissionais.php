@@ -131,21 +131,33 @@ if ($metodo === 'POST') {
         respond(['erro' => 'id_barbearia é obrigatório'], 400);
     }
 
+    $nome = trim((string)($dados['nome'] ?? ''));
+    if ($nome === '') {
+        respond(['erro' => 'Informe o nome do profissional'], 422);
+    }
+
     $inicioAlmoco = sprintf('%02d:%02d:00', $dados['inicioAlmocoHour'] ?? 12, $dados['inicioAlmocoMinute'] ?? 0);
     $fimAlmoco = sprintf('%02d:%02d:00', $dados['fimAlmocoHour'] ?? 13, $dados['fimAlmocoMinute'] ?? 0);
     $periodos = montarPeriodosJornada($dados['jornada'] ?? [], $inicioAlmoco, $fimAlmoco);
 
     $stmt = $pdo->prepare("INSERT INTO barbeiros (id_barbearia, nome, situacao, almoco_inicio, almoco_fim, comissao_percentual) VALUES (:id_barbearia, :nome, 'ativo', :inicio_almoco, :fim_almoco, :comissao)");
-    $stmt->execute([
-        'id_barbearia' => $idBarbearia,
-        'nome' => $dados['nome'] ?? '',
-        'comissao' => $comissao,
-        'inicio_almoco' => $inicioAlmoco,
-        'fim_almoco' => $fimAlmoco,
-    ]);
-
-    $idBarbeiro = (int)$pdo->lastInsertId();
-    salvarJornada($pdo, $idBarbeiro, $idBarbearia, $periodos);
+    try {
+        $pdo->beginTransaction();
+        $stmt->execute([
+            'id_barbearia' => $idBarbearia,
+            'nome' => $nome,
+            'comissao' => $comissao,
+            'inicio_almoco' => $inicioAlmoco,
+            'fim_almoco' => $fimAlmoco,
+        ]);
+        $idBarbeiro = (int)$pdo->lastInsertId();
+        salvarJornada($pdo, $idBarbeiro, $idBarbearia, $periodos);
+        $pdo->commit();
+    } catch (Throwable $e) {
+        if ($pdo->inTransaction()) $pdo->rollBack();
+        error_log('profissionais.php: ' . $e->getMessage());
+        respond(['erro' => 'Não foi possível salvar o profissional'], 500);
+    }
 
     respond(['id' => (string)$idBarbeiro], 201);
 }
@@ -166,6 +178,11 @@ if ($metodo === 'PUT') {
         respond(['erro' => 'Profissional não encontrado'], 404);
     }
 
+    $nome = trim((string)($dados['nome'] ?? ''));
+    if ($nome === '') {
+        respond(['erro' => 'Informe o nome do profissional'], 422);
+    }
+
     $comissao = lerComissao($dados, $barbeiro['comissao_percentual']);
 
     $inicioAlmoco = sprintf('%02d:%02d:00', $dados['inicioAlmocoHour'] ?? 12, $dados['inicioAlmocoMinute'] ?? 0);
@@ -173,15 +190,22 @@ if ($metodo === 'PUT') {
     $periodos = montarPeriodosJornada($dados['jornada'] ?? [], $inicioAlmoco, $fimAlmoco);
 
     $stmt = $pdo->prepare('UPDATE barbeiros SET nome = :nome, almoco_inicio = :inicio_almoco, almoco_fim = :fim_almoco, comissao_percentual = :comissao WHERE id_barbeiro = :id');
-    $stmt->execute([
-        'id' => $id,
-        'nome' => $dados['nome'] ?? '',
-        'comissao' => $comissao,
-        'inicio_almoco' => $inicioAlmoco,
-        'fim_almoco' => $fimAlmoco,
-    ]);
-
-    salvarJornada($pdo, $id, $barbeiro['id_barbearia'], $periodos);
+    try {
+        $pdo->beginTransaction();
+        $stmt->execute([
+            'id' => $id,
+            'nome' => $nome,
+            'comissao' => $comissao,
+            'inicio_almoco' => $inicioAlmoco,
+            'fim_almoco' => $fimAlmoco,
+        ]);
+        salvarJornada($pdo, $id, $barbeiro['id_barbearia'], $periodos);
+        $pdo->commit();
+    } catch (Throwable $e) {
+        if ($pdo->inTransaction()) $pdo->rollBack();
+        error_log('profissionais.php: ' . $e->getMessage());
+        respond(['erro' => 'Não foi possível salvar o profissional'], 500);
+    }
 
     respond(['mensagem' => 'Profissional atualizado com sucesso']);
 }

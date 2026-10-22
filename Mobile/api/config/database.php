@@ -38,7 +38,7 @@ function jsonInput() {
 
 function respond($data, $status = 200) {
     http_response_code($status);
-    echo json_encode($data);
+    echo json_encode($data, JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
     exit();
 }
 
@@ -127,3 +127,13 @@ function statusEnumParaApp($status) {
     return $mapa[$status] ?? 'Agendado';
 }
 
+function intervaloBarbearia(PDO $pdo, $idBarbearia) {
+    $stmt = $pdo->prepare('SELECT horario FROM horarios_atendimento WHERE id_barbearia = :id_barbearia ORDER BY horario LIMIT 2');
+    $stmt->execute(['id_barbearia' => $idBarbearia]);
+    $horarios = $stmt->fetchAll(PDO::FETCH_COLUMN);
+    if (count($horarios) >= 2) {
+        $diferenca = timeParaMinutos($horarios[1]) - timeParaMinutos($horarios[0]);
+        if ($diferenca > 0) return $diferenca;
+    }
+    return 40;
+}

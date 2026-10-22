@@ -4,7 +4,8 @@ import 'session.dart';
 
 class ApiException implements Exception {
   final String mensagem;
-  ApiException(this.mensagem);
+  final bool sessaoExpirada;
+  ApiException(this.mensagem, {this.sessaoExpirada = false});
 
   @override
   String toString() => mensagem;
@@ -53,23 +54,37 @@ class ApiService {
     }
   }
 
+  static dynamic _corpo(http.Response resposta) {
+    if (resposta.body.isEmpty) return null;
+    try {
+      return jsonDecode(resposta.body);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  static ApiException _erro(http.Response resposta, dynamic corpo) {
+    final mensagem = corpo is Map
+        ? (corpo['erro'] ?? corpo['error'] ?? 'Erro inesperado (${resposta.statusCode})').toString()
+        : 'Erro inesperado (${resposta.statusCode})';
+    final autenticada = resposta.request?.url.queryParameters.containsKey('route') ?? false;
+    return ApiException(mensagem, sessaoExpirada: autenticada && resposta.statusCode == 401);
+  }
+
   static Map<String, dynamic> _decode(http.Response resposta) {
-    final corpo = resposta.body.isEmpty ? '{}' : jsonDecode(resposta.body);
+    final corpo = _corpo(resposta);
     if (resposta.statusCode >= 200 && resposta.statusCode < 300) {
       return corpo is Map<String, dynamic> ? corpo : {'dados': corpo};
     }
-    final erro = corpo is Map ? (corpo['erro'] ?? corpo['error'] ?? 'Erro inesperado (${resposta.statusCode})') : 'Erro inesperado (${resposta.statusCode})';
-    throw ApiException(erro);
+    throw _erro(resposta, corpo);
   }
 
   static List<dynamic> _decodeList(http.Response resposta) {
+    final corpo = _corpo(resposta);
     if (resposta.statusCode >= 200 && resposta.statusCode < 300) {
-      final corpo = resposta.body.isEmpty ? '[]' : jsonDecode(resposta.body);
       return corpo is List ? corpo : [];
     }
-    final corpo = resposta.body.isEmpty ? '{}' : jsonDecode(resposta.body);
-    final erro = corpo is Map && corpo['erro'] != null ? corpo['erro'] : 'Erro inesperado (${resposta.statusCode})';
-    throw ApiException(erro);
+    throw _erro(resposta, corpo);
   }
 
   static Future<Map<String, dynamic>> login(String user, String password) async {
@@ -97,11 +112,14 @@ class ApiService {
         if (password != null) 'password': password,
       }),
     );
-    _decode(resposta);
+    final token = _decode(resposta)['token'];
+    if (token is String) Session.token = token;
   }
 
   static Future<List<dynamic>> getServicos(int barbeariaId) async {
-    final resposta = await http.get(Uri.parse('$baseUrl/servicos.php?id_barbearia=$barbeariaId'));
+    final resposta = await http
+        .get(Uri.parse('$baseUrl/servicos.php?id_barbearia=$barbeariaId'))
+        .timeout(const Duration(seconds: 20));
     return _decodeList(resposta);
   }
 
@@ -110,9 +128,10 @@ class ApiService {
       Uri.parse('$baseUrl/servicos.php'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'id_barbearia': barbeariaId, 'nome': nome, 'valor': valor, 'minutos': minutos}),
-    );
-    final dados = _decode(resposta);
-    return dados['id'];
+    ).timeout(const Duration(seconds: 20));
+    final id = _decode(resposta)['id'];
+    if (id is! num) throw ApiException('Resposta inválida do servidor.');
+    return id.toInt();
   }
 
   static Future<void> atualizarServico(int id, String nome, double valor, int minutos) async {
@@ -120,12 +139,14 @@ class ApiService {
       Uri.parse('$baseUrl/servicos.php'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'id': id, 'nome': nome, 'valor': valor, 'minutos': minutos}),
-    );
+    ).timeout(const Duration(seconds: 20));
     _decode(resposta);
   }
 
   static Future<void> removerServico(int id) async {
-    final resposta = await http.delete(Uri.parse('$baseUrl/servicos.php?id=$id'));
+    final resposta = await http
+        .delete(Uri.parse('$baseUrl/servicos.php?id=$id'))
+        .timeout(const Duration(seconds: 20));
     _decode(resposta);
   }
 

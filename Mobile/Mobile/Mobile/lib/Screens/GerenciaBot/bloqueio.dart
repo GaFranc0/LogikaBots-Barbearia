@@ -139,6 +139,7 @@ class BloqueioController extends ChangeNotifier {
         bloqueio.motivoCtrl.addListener(() => marcarAlterado(bloqueio));
         bloqueios.add(bloqueio);
       }
+      erro = null;
       carregado = true;
       notifyListeners();
     } catch (e) {
@@ -192,11 +193,13 @@ class BloqueioController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      for (final id in idsRemovidos) {
+      for (final id in idsRemovidos.toList()) {
         await ApiService.removerBloqueio(id);
+        idsRemovidos.remove(id);
       }
       for (final bloqueio in alterados.toList()) {
         await _persistirBloqueio(barbeariaId, bloqueio);
+        alterados.remove(bloqueio);
       }
       erro = null;
       await carregarBloqueios();

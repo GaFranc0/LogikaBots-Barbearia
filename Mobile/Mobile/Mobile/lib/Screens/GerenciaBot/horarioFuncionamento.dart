@@ -61,6 +61,7 @@ class _HorarioFuncionamentoScreenState
         primeiroDia = dados['primeiroDia'] ?? primeiroDia;
         ultimoDia = dados['ultimoDia'] ?? ultimoDia;
         intervalo = dados['intervalo'] ?? intervalo;
+        if (!opcoesIntervalo.contains(intervalo)) opcoesIntervalo.add(intervalo);
         _carregando = false;
       });
     } catch (e) {

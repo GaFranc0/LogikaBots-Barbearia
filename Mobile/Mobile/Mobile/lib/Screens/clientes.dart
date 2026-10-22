@@ -12,7 +12,9 @@ class ClientesScreen extends StatefulWidget {
 
 class _ClientesScreenState extends State<ClientesScreen> {
   static const _green = Color(0xFF42D6A1);
-  static const _muted = Color(0xFF94A3B8);
+  static const _muted = Color(0xFFCBD5E1); 
+  static const _text = Color(0xFFF8FAFC); 
+  static const _label = Color(0xFFA7F3D0);
   static const _border = Color(0xFF242C40);
   final _search = TextEditingController();
   Map<String, dynamic>? _data;
@@ -95,7 +97,10 @@ class _ClientesScreenState extends State<ClientesScreen> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: const Color(0xFF0F1425),
-        title: Text(_name(client)),
+        title: Text(
+          _name(client),
+          style: const TextStyle(color: _text, fontWeight: FontWeight.bold),
+        ),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -116,10 +121,17 @@ class _ClientesScreenState extends State<ClientesScreen> {
                     children: [
                       Text(
                         entry.key,
-                        style: const TextStyle(color: _muted, fontSize: 12),
+                        style: const TextStyle(
+                          color: _label,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                       const SizedBox(height: 4),
-                      SelectableText(entry.value),
+                      SelectableText(
+                        entry.value,
+                        style: const TextStyle(color: _text, fontSize: 15),
+                      ),
                     ],
                   ),
                 ),
@@ -129,6 +141,7 @@ class _ClientesScreenState extends State<ClientesScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
+            style: TextButton.styleFrom(foregroundColor: _green),
             child: const Text('Fechar'),
           ),
         ],
@@ -185,6 +198,7 @@ class _ClientesScreenState extends State<ClientesScreen> {
                               'Clientes',
                               style: TextStyle(
                                 fontSize: 28,
+                                color: _text,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -343,6 +357,7 @@ class _ClientesScreenState extends State<ClientesScreen> {
       onChanged: (_) => setState(() {}),
       decoration: InputDecoration(
         hintText: 'Buscar por nome ou telefone…',
+        hintStyle: const TextStyle(color: _muted),
         prefixIcon: const Icon(Icons.search, color: _muted),
         suffixIcon: query.isEmpty
             ? null
@@ -460,7 +475,10 @@ class _ClientesScreenState extends State<ClientesScreen> {
                   Expanded(
                     child: Text(
                       _name(client),
-                      style: const TextStyle(fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                        color: _text,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                   const Icon(Icons.chevron_right, size: 20, color: _muted),
@@ -474,7 +492,7 @@ class _ClientesScreenState extends State<ClientesScreen> {
               const SizedBox(height: 6),
               Text(
                 'Cadastro: ${_date(client['data_cadastro'])}',
-                style: const TextStyle(color: _muted, fontSize: 12),
+                style: const TextStyle(color: _muted, fontSize: 13),
               ),
               const SizedBox(height: 12),
               Wrap(
@@ -539,7 +557,10 @@ class _ClientesScreenState extends State<ClientesScreen> {
                         child: Text(
                           _name(client),
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontWeight: FontWeight.w600),
+                          style: const TextStyle(
+                            color: _text,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                     ],
